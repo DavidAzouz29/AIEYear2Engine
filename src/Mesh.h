@@ -14,9 +14,12 @@ class Mesh
 public:
 	bool isValid() { return m_indexCount > 0 && m_VAO != (GLuint)-1; }
 
-	GLuint GetVAO() const { return m_VAO; }
-	GLuint GetVBO() const { return m_VBO; }
-	GLuint GetIBO() const { return m_IBO; } //TOOD: needed?
+	GLuint& GetVAO() { return m_VAO; }
+	GLuint& GetVBO() { return m_VBO; }
+	GLuint& GetIBO() { return m_IBO; }
+	GLuint& GetFBO() { return m_FBO; }
+	GLuint& GetFboTexture() { return m_fboTexture; }
+	GLuint& GetFboDepth() { return m_fboDepth; }
 	GLuint GetIndexCount() const { return m_indexCount; }
 
 	void SetIndexCount(unsigned int a_iIndexCount) { m_indexCount = a_iIndexCount; }
@@ -24,6 +27,8 @@ public:
 	// Setup OpenGL buffers and vertex attributes to be able to render these vertices.
 	template<typename T>
 	bool create(T* pVertices, unsigned int vertexCount, unsigned int* pInidices, unsigned int indexCount);
+
+	bool createFrame();
 
 	void destroy();
 
@@ -90,6 +95,10 @@ private:
 	GLuint m_VAO = (GLuint)-1;
 	GLuint m_VBO = (GLuint)-1;
 	GLuint m_IBO = (GLuint)-1;
+
+	GLuint m_FBO = (GLuint)-1;
+	GLuint m_fboTexture = (GLuint)-1;
+	GLuint m_fboDepth	= (GLuint)-1;
 };
 
 /// ----------------------------------------------------------

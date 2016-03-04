@@ -154,6 +154,68 @@ publish/
 *.nuget.props
 *.nuget.targets
 
+# Dep FBXLoader
+dep/FBXLoader/FBXLoader.lib
+dep/FBXLoader/FBXLoader_d.lib
+imgui.ini
+
+# FBX Models
+data/models/stanford/Buddha.fbx
+data/models/stanford/Dragon.fbx
+data/models/stanford/Lucy.fbx
+
+# Textures
+data/models/soulspear/soulspear_diffuse.tga
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# CMake
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+*.cmake
+# ^ May need to add future .cmake files as exceptions
+
+# Test logs
+Testing/*
+
+# Test input
+test/gtc/*.dds
+
+# Project Files
+*.cbp
+*.user
+
+
 # Microsoft Azure Build Output
 csx/
 *.build.csdef

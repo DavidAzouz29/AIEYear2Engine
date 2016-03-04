@@ -29,7 +29,7 @@
 #include "gl_core_4_4.h"
 //#include "VertexData.h"
 
-#define STB_IMAGE_IMPLEMENTATION //TODO: delete me
+//#define STB_IMAGE_IMPLEMENTATION //TODO: delete me
 #include <stb_image.h>
 #include <glm\glm.hpp>
 #include <glm\ext.hpp>
@@ -486,10 +486,10 @@ void Render::RenderTexture()
 		0, 1, 2,
 		0, 2, 3,
 	};
-	/*
+	
 	// Add the following line to generate a VertexArrayObject
-	glGenVertexArrays(1, m_pMesh->GetVAO());
-	glBindVertexArray(m_VAO);
+	glGenVertexArrays(1, &m_pMesh->GetVAO());
+	glBindVertexArray(m_pMesh->GetVAO());
 
 	// ----------------------------------------------------------
 	// Generate our GL Buffers
@@ -498,14 +498,14 @@ void Render::RenderTexture()
 	glGenBuffers(1, &m_pMesh->GetVBO());
 	//... Code Segment here to bind and fill VBO + IBO
 	//
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_pMesh->GetVBO());
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, vertexData, GL_STATIC_DRAW);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * 4, vertexData, GL_STATIC_DRAW);
 
-	glGenBuffers(1, &m_pMesh->GetIBO);
+	glGenBuffers(1, &m_pMesh->GetIBO());
 	// 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, indexData, GL_STATIC_DRAW); */
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_pMesh->GetIBO());
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, indexData, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
@@ -575,4 +575,148 @@ unsigned int Render::GetTextureByName(const char* name)
 {
 	//std::vector<std::string>::iterator iter = m_textures.begin();
 	return m_textures[name];
+}
+
+void Render::RenderTargetLoader()
+{
+	/// ----------------------------------------------------------
+	/// Create shaders
+	/// ----------------------------------------------------------
+	/// Storing writing out our shader code into char arrays for processign by OpenGL.
+	/// ----------------------------------------------------------
+	const char* vsSource = "#version 410\n \
+							layout(location=0) in vec4 Position; \
+							layout(location=1) in vec2 TexCoord; \
+							out vec2 vTexCoord; \
+							uniform mat4 ProjectionView; \
+							void main() { \
+							vTexCoord = TexCoord; \
+							gl_Position = ProjectionView * Position; \
+							}";
+
+	// RGB x 2 - 1 to move it from RGB to XYZ, or 
+	// XYZ x 0.5 + 0.5 to move it from XYZ to RGB.
+	const char* fsSource = "#version 410\n \
+							in vec2 vTexCoord; \
+							out vec4 FragColor; \
+							uniform sampler2D diffuse; \
+							void main() { \
+							FragColor = texture(diffuse, vTexCoord);}";
+
+	/// ----------------------------------------------------------
+	/// Compile shaders
+	/// ----------------------------------------------------------
+	//if (!m_program.create(vsSource, fsSource)) return false; //TODO:
+	//int success = GL_FALSE;
+	unsigned int iVertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(iVertexShader, 1, (const char**)&vsSource, 0);
+	glCompileShader(iVertexShader);
+
+	unsigned int iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(iFragmentShader, 1, (const char**)&fsSource, 0);
+	glCompileShader(iFragmentShader);
+
+	m_programID = glCreateProgram();
+	glAttachShader(m_programID, iVertexShader);
+	glAttachShader(m_programID, iFragmentShader);
+	glLinkProgram(m_programID);
+
+	/*glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
+	if (success == GL_FALSE)
+	{
+	int infoLogLength = 0;
+	glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &infoLogLength);
+	char* infoLog = new char[infoLogLength];
+
+	glGetProgramInfoLog(m_programID, infoLogLength, 0, infoLog);
+	printf("Error: Failed to link shader program!\n");
+	printf("%s\n", infoLog);
+	delete[] infoLog;
+	}*/
+
+	glDeleteShader(iVertexShader);
+	glDeleteShader(iFragmentShader);
+
+	m_pMesh.get()->createFrame();
+}
+
+void Render::RenderRenderTarget()
+{
+	float vertexData[] = {
+		-5,0, -5,1,0,0,
+		5,0,-5,1,1,0,
+		5,10,-5,1,1,1,
+		-5,10,-5,1,0,1, };
+
+	// Recreates the textured quad, except that they now contain normal that point up (0,1,0)
+	// and tangents to point in the direction of the texture's S axis (or U axis) which is position X (1,0,0).
+/*	Vertex vertexData[] =
+	{
+		{ -5, 0,  5, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1 },
+		{ 5, 0,  5, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1 },
+		{ 5, 0, -5, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0 },
+		{ -5, 0, -5, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0 }
+	}; */
+	unsigned int indexData[] = {
+		0, 1, 2,
+		0, 2, 3,
+	};
+
+	// Add the following line to generate a VertexArrayObject
+	glGenVertexArrays(1, &m_pMesh->GetVAO());
+	glBindVertexArray(m_pMesh->GetVAO());
+
+	// ----------------------------------------------------------
+	// Generate our GL Buffers
+	// Let's move these so that they are all generated together
+	// ----------------------------------------------------------
+	glGenBuffers(1, &m_pMesh->GetVBO());
+	//... Code Segment here to bind and fill VBO + IBO
+	//
+	glBindBuffer(GL_ARRAY_BUFFER, m_pMesh->GetVBO());
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, vertexData, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &m_pMesh->GetIBO());
+	// 
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_pMesh->GetIBO());
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, indexData, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, ((char*)0) + 16);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Render::DrawRenderTarget(Camera* cam)
+{
+	// Render to an FBO
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); //m_FBO
+	glViewport(0, 0, 1280, 720);
+
+	// ----------------------------------------------------------
+	glClearColor(0.25f, 0.25f, 0.25f, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// ----------------------------------------------------------
+
+	// use our texture program
+	glUseProgram(m_programID);
+
+	// bind the camera
+	int loc = glGetUniformLocation(m_programID, "ProjectionView");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, &(cam->getProjectionView()[0][0]));
+
+	// Set texture slots
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_pMesh->GetFboTexture());
+
+	// tell the shader where it is
+	glUniform1i(glGetUniformLocation(m_programID, "diffuse"), 0);
+	
+	// draw
+	glBindVertexArray(m_pMesh->GetVAO());
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }

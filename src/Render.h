@@ -1,4 +1,5 @@
 #pragma once
+
 #include "FBXFile.h"
 #include "Camera.h"
 #include "VertexData.h"
@@ -25,7 +26,7 @@ public:
 	void InitGeometry();
 	void DrawGeometry(Camera* cam);
 
-	//void FBXLoader();
+	///void FBXLoader();
 	//void RenderFBX(Camera* cam);
 
 	unsigned int TextureInit(const char* name);
@@ -35,6 +36,10 @@ public:
 	void AddTexture(const char* name, const unsigned int id);
 
 	unsigned int GetTextureByName(const char* name);
+
+	void RenderTargetLoader();
+	void RenderRenderTarget();
+	void DrawRenderTarget(Camera* cam);
 
 private:
 	//our vertex and index buffers
@@ -51,6 +56,9 @@ private:
 	// Store the OpenGL texture.
 	std::map<const std::string, const unsigned int> m_textures, m_normalmap;
 	/// ----------------------------------------------------------
+	/// RenderTarget
+	/// ----------------------------------------------------------
+	//GLuint m_fboTexture;
 
 	float fHeightScale;
 	float fTime;

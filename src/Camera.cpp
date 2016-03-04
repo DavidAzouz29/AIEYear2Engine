@@ -22,7 +22,7 @@ Camera::~Camera()
 
 void Camera::setPerspective(float fovY, float aspectRatio, float near, float far)
 {
-	m_projection = glm::perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.0f);
+	m_projection = glm::perspective(fovY, aspectRatio, near, far);
 	m_projectionView = m_projection * m_view;
 }
 
@@ -37,18 +37,29 @@ void Camera::update(float deltaTime)
 {
 	GLFWwindow* window = glfwGetCurrentContext();
 
-	float frameSpeed = glfwGetKey(window,GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? deltaTime * m_speed * 2 : deltaTime * m_speed;	
+	float frameSpeed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? deltaTime * m_speed * 2 : deltaTime * m_speed;	
+
+	if (glfwGetKey(window, GLFW_KEY_KP_ADD))
+	{
+		m_speed += m_speed * 0.1f;
+		printf("Speed: %f.\n", m_speed);
+	}
+	if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT))
+	{
+		m_speed -= m_speed * 0.1f;
+		printf("Speed: %f.\n", m_speed);
+	}
 
 	// translate Old: if (glfwGetKey(window, 'A') == GLFW_PRESS)
 	// ---------------------------------------------------------------------------------------
-	// Movement
+#pragma region Movement
 	// ---------------------------------------------------------------------------------------
 	if (glfwGetKey(window, GLFW_KEY_W) || glfwGetKey(window, GLFW_KEY_UP) || glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT))
 	{
 		m_transform[3].x += m_transform[1].x * frameSpeed;
 		m_transform[3].z += m_transform[1].z * frameSpeed;
 	}
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) || 
+	if ((glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)) || 
 		glfwGetKey(window, GLFW_KEY_S) || glfwGetKey(window, GLFW_KEY_DOWN))
 	{
 		m_transform[3].x -= m_transform[1].x * frameSpeed;
@@ -80,6 +91,8 @@ void Camera::update(float deltaTime)
 	{
 		m_transform[3] += m_transform[2] * frameSpeed;
 	}
+#pragma endregion
+
 #pragma region Orbit
 
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(window, GLFW_KEY_A) || glfwGetKey(window, GLFW_KEY_Z))
@@ -94,8 +107,13 @@ void Camera::update(float deltaTime)
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(window, GLFW_KEY_Q))
 	{
+		if (m_transform[3].x != 0 || m_transform[3].z != 0)//glm::vec3(0))
+		{
+			m_transform[3].xz = 0;// = glm::vec3(0, 5, 0);
+			m_transform[3].y = 5;// = glm::vec3(0, 5, 0);
+		}
 		m_transform[3] -= m_transform[0] * frameSpeed;
-		setLookAtFrom(glm::vec3(0, 5, 0), m_transform[3].xyz);
+		//setLookAtFrom(glm::vec3(0, 5, 0), m_transform[3].xyz);
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(window, GLFW_KEY_E))
 	{
@@ -276,10 +294,37 @@ void Camera::update(float deltaTime)
 	}
 #pragma endregion
 
+#pragma region Perspective
+
+	if (glfwGetKey(window, GLFW_KEY_1))
+	{
+		//setPerspective(fovY, aspectRatio, near, far);
+		m_projection = glm::perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
+		m_projectionView = m_projection * m_view;
+	}
+	if (glfwGetKey(window, GLFW_KEY_2))
+	{
+		//setPerspective(fovY, aspectRatio, near, far);
+		m_projection = glm::perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 10.f, 15.f);
+		m_projectionView = m_projection * m_view;
+	}
+	if (glfwGetKey(window, GLFW_KEY_3))
+	{
+		//setPerspective(fovY, aspectRatio, near, far);
+		m_projection = glm::perspective(glm::pi<float>() * 0.75f, 16 / 9.f, 0.1f, 1000.f);
+		m_projectionView = m_projection * m_view;
+	}
+	if (glfwGetKey(window, GLFW_KEY_4))
+	{
+		//setPerspective(fovY, aspectRatio, near, far);
+		m_projection = glm::ortho(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
+		m_projectionView = m_projection * m_view;
+	}
+#pragma endregion
 
 	// check for rotation
 	static bool sbMouseButtonDown = false;
-	if (glfwGetMouseButton(window,GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) || glfwGetKey(window, GLFW_KEY_M))
 	{
 		static double siPrevMouseX = 0;
 		static double siPrevMouseY = 0;
