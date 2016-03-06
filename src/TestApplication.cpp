@@ -81,7 +81,7 @@ bool TestApplication::startup() {
 	m_pFbx = std::make_shared<FBXFile>();
 	//m_pFbx->load("./data/models/stanford/Bunny.fbx");
 	//m_pFbx->load("./data/models/soulspear/soulspear.fbx");
-	m_pFbx->load("./data/models/characters/Pyro/pyro.fbx");// , FBXFile::UNITS_METER);
+	m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", FBXFile::UNITS_METER);
 	//m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", m_pFbx->UNITS_METER);
 	FBXLoader();
 	//FBXSkeletonLoader();
@@ -118,7 +118,7 @@ bool TestApplication::startup() {
 	//m_pMesh->createFrame(); // Like init
 	//===============================================================================
 	m_pRender->RenderTargetLoader();
-	m_pMesh->RenderRenderTarget();
+//	m_pMesh->RenderRenderTarget();
 	//===============================================================================
 
 	///----------------------------------------------------------
@@ -372,7 +372,7 @@ void TestApplication::draw()
 	// TODO: V\/ Restore this one - causes crash (access violation) \/V
 	//===============================================================================
 	//m_pMesh->RenderRenderTarget();
-	m_pRender->DrawRenderTarget(pCamState);
+	//m_pRender->DrawRenderTarget(pCamState);
 	//m_pMesh->RenderRenderTarget();
 	//===============================================================================
 //	}
