@@ -18,7 +18,7 @@ ParticleEmitter::~ParticleEmitter()
 {
 }
 
-bool ParticleEmitter::create(ParticleEmitterConfig config)
+int ParticleEmitter::create(ParticleEmitterConfig config)
 {
 	assert(!isValid());
 

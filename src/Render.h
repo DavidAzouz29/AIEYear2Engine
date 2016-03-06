@@ -33,12 +33,13 @@ public:
 	void TextureLoader();
 	void RenderTexture();
 	void DrawTexture(Camera* cam);
+	void DrawTextureP(Camera* cam);
 	void AddTexture(const char* name, const unsigned int id);
 
 	unsigned int GetTextureByName(const char* name);
 
 	void RenderTargetLoader();
-	void RenderRenderTarget();
+	//void RenderRenderTarget();
 	void DrawRenderTarget(Camera* cam);
 
 private:

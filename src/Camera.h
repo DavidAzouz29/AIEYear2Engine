@@ -1,15 +1,24 @@
 #pragma once
 
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 
-class Camera {
+class CameraStateMachine;
+struct GLFWwindow;
+
+class Camera 
+{
 public:
 
+	Camera() {};
 	Camera(float fovY, float aspectRatio, float near, float far);
-	virtual ~Camera();
+	Camera(glm::vec4 a_v4Perspective);
+	virtual ~Camera() {};
 
-	void	update(float deltaTime);
+	virtual void Enter();
+	virtual void Update(float deltaTime) {};
+	virtual void Exit() {}; //= 0;?
 
 	void	setSpeed(float speed)		{ m_speed = speed; }
 	void	setRotation(float a_fRotation)	{ m_fRotation = a_fRotation; }
@@ -30,8 +39,10 @@ public:
 	// the plane has a normal of XYZ and is offset from (0,0,0) by -W in the direction of the normal
 	glm::vec3			pickAgainstPlane(float x, float y, const glm::vec4& plane) const;
 
-private:
+protected:
 	
+	GLFWwindow* m_window;
+
 	float		m_speed;
 	float		m_fRotation;
 	glm::vec3	m_up;
@@ -40,4 +51,5 @@ private:
 	glm::mat4	m_view;
 	glm::mat4	m_projectionView;
 	glm::vec3	m_v3Movement;
+	glm::vec4	m_v4Perspective;
 };

@@ -164,6 +164,14 @@ data/models/stanford/Buddha.fbx
 data/models/stanford/Dragon.fbx
 data/models/stanford/Lucy.fbx
 
+# Characters
+data/models/characters/Demolition
+data/models/characters/Enemyelite
+data/models/characters/enemynormal
+data/models/characters/Enemytank
+data/models/characters/Marksman
+data/models/characters/Medic
+
 # Textures
 data/models/soulspear/soulspear_diffuse.tga
 

@@ -547,7 +547,8 @@ void Render::DrawTexture(Camera* cam)
 	glBindTexture(GL_TEXTURE_2D, m_textures["soulspear_d"]);
 
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_normalmap["soulspear_n"]);
+	glBindTexture(GL_TEXTURE_2D, m_textures["soulspear_n"]);
+	//glBindTexture(GL_TEXTURE_2D, m_normalmap["soulspear_n"]);
 
 	// tell the shader where it is
 	loc = glGetUniformLocation(m_programID, "diffuse");
@@ -563,6 +564,44 @@ void Render::DrawTexture(Camera* cam)
 	// draw
 	glBindVertexArray(m_pMesh->GetVAO()); //TODO: replace m_VAO with VAO
 	//glBindVertexArray(m_pMesh->GetVAO()); //TODO: replace m_VAO with VAO
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+}
+
+void Render::DrawTextureP(Camera* cam)
+{
+	// use our texture program
+	glUseProgram(m_programID);
+
+	// bind the camera
+	int loc = glGetUniformLocation(m_programID, "ProjectionView");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, &(cam->getProjectionView()[0][0]));
+
+	//glBindTexture(GL_TEXTURE_2D, m_textures["crate"]);
+
+	// Set texture slots
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_textures["Pyro_D"]);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_textures["Pyro_N"]);
+
+	//glActiveTexture(GL_TEXTURE2); //TODO: Pyro
+	//glBindTexture(GL_TEXTURE_2D, m_textures["Pyro_S"]);
+
+	// tell the shader where it is
+	loc = glGetUniformLocation(m_programID, "diffuse");
+	glUniform1i(loc, 0);
+	loc = glGetUniformLocation(m_programID, "normal");
+	glUniform1i(loc, 1);
+
+	// bind the light
+	glm::vec3 light(sin(glfwGetTime()), 1, cos(glfwGetTime()));
+	loc = glGetUniformLocation(m_programID, "LightDir");
+	glUniform3f(loc, light.x, light.y, light.z);
+
+	// draw
+	glBindVertexArray(m_pMesh->GetVAO()); //TODO: replace m_VAO with VAO
+										  //glBindVertexArray(m_pMesh->GetVAO()); //TODO: replace m_VAO with VAO
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
@@ -607,7 +646,7 @@ void Render::RenderTargetLoader()
 	/// Compile shaders
 	/// ----------------------------------------------------------
 	//if (!m_program.create(vsSource, fsSource)) return false; //TODO:
-	//int success = GL_FALSE;
+	int success = GL_FALSE;
 	unsigned int iVertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(iVertexShader, 1, (const char**)&vsSource, 0);
 	glCompileShader(iVertexShader);
@@ -621,7 +660,7 @@ void Render::RenderTargetLoader()
 	glAttachShader(m_programID, iFragmentShader);
 	glLinkProgram(m_programID);
 
-	/*glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
+	glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
 	if (success == GL_FALSE)
 	{
 	int infoLogLength = 0;
@@ -632,63 +671,12 @@ void Render::RenderTargetLoader()
 	printf("Error: Failed to link shader program!\n");
 	printf("%s\n", infoLog);
 	delete[] infoLog;
-	}*/
+	} //*/
 
 	glDeleteShader(iVertexShader);
 	glDeleteShader(iFragmentShader);
 
 	m_pMesh.get()->createFrame();
-}
-
-void Render::RenderRenderTarget()
-{
-	float vertexData[] = {
-		-5,0, -5,1,0,0,
-		5,0,-5,1,1,0,
-		5,10,-5,1,1,1,
-		-5,10,-5,1,0,1, };
-
-	// Recreates the textured quad, except that they now contain normal that point up (0,1,0)
-	// and tangents to point in the direction of the texture's S axis (or U axis) which is position X (1,0,0).
-/*	Vertex vertexData[] =
-	{
-		{ -5, 0,  5, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1 },
-		{ 5, 0,  5, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1 },
-		{ 5, 0, -5, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0 },
-		{ -5, 0, -5, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0 }
-	}; */
-	unsigned int indexData[] = {
-		0, 1, 2,
-		0, 2, 3,
-	};
-
-	// Add the following line to generate a VertexArrayObject
-	glGenVertexArrays(1, &m_pMesh->GetVAO());
-	glBindVertexArray(m_pMesh->GetVAO());
-
-	// ----------------------------------------------------------
-	// Generate our GL Buffers
-	// Let's move these so that they are all generated together
-	// ----------------------------------------------------------
-	glGenBuffers(1, &m_pMesh->GetVBO());
-	//... Code Segment here to bind and fill VBO + IBO
-	//
-	glBindBuffer(GL_ARRAY_BUFFER, m_pMesh->GetVBO());
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, vertexData, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &m_pMesh->GetIBO());
-	// 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_pMesh->GetIBO());
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, indexData, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, ((char*)0) + 16);
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Render::DrawRenderTarget(Camera* cam)

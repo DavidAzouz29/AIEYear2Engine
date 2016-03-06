@@ -24,6 +24,8 @@ public:
 
 	void SetIndexCount(unsigned int a_iIndexCount) { m_indexCount = a_iIndexCount; }
 
+	void RenderRenderTarget();
+
 	// Setup OpenGL buffers and vertex attributes to be able to render these vertices.
 	template<typename T>
 	bool create(T* pVertices, unsigned int vertexCount, unsigned int* pInidices, unsigned int indexCount);

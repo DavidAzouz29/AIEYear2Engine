@@ -42,7 +42,7 @@ public:
 	~ParticleEmitter();
 
 	bool isValid() { return m_config.particleCount != -1; }
-	bool create(ParticleEmitterConfig config);
+	int create(ParticleEmitterConfig config);
 	void destroy();
 
 	void update(float a_deltaTime, const glm::mat4 a_m4camMatrix);
