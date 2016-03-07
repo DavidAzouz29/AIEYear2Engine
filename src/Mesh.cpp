@@ -4,6 +4,23 @@
 
 #include <assert.h>
 
+Mesh::Mesh()
+{
+	m_indexCount = 10;
+	m_VAO = UINT_MAX;
+	m_VBO = UINT_MAX;
+	m_IBO = UINT_MAX;
+
+	m_FBO = UINT_MAX;
+	m_fboTexture = UINT_MAX;
+	m_fboDepth = UINT_MAX;
+}
+
+Mesh::~Mesh()
+{
+
+}
+
 void Mesh::destroy()
 {
 	glDeleteVertexArrays(1, &m_VAO);
@@ -54,15 +71,15 @@ bool Mesh::createFrame()
 	}
 
 	// Render Geometry to the FBO.
-	RenderRenderTarget(); //TODO: this saves things from breaking?
+	//CreateRenderTargetQuad(); //TODO: this saves things from breaking?
 
 	// unbind the FBO so that we can render to the back buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return true;
 }
 
-void Mesh::RenderRenderTarget()
+void Mesh::CreateRenderTargetQuad()
 {
 	float vertexData[] = {
 		-5,0, -5,1,0,0,

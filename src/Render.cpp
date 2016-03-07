@@ -678,33 +678,3 @@ void Render::RenderTargetLoader()
 
 	m_pMesh.get()->createFrame();
 }
-
-void Render::DrawRenderTarget(Camera* cam)
-{
-	// Render to an FBO
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); //m_FBO
-	glViewport(0, 0, 1280, 720);
-
-	// ----------------------------------------------------------
-	glClearColor(0.25f, 0.25f, 0.25f, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// ----------------------------------------------------------
-
-	// use our texture program
-	glUseProgram(m_programID);
-
-	// bind the camera
-	int loc = glGetUniformLocation(m_programID, "ProjectionView");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, &(cam->getProjectionView()[0][0]));
-
-	// Set texture slots
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_pMesh->GetFboTexture());
-
-	// tell the shader where it is
-	glUniform1i(glGetUniformLocation(m_programID, "diffuse"), 0);
-	
-	// draw
-	glBindVertexArray(m_pMesh->GetVAO());
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-}

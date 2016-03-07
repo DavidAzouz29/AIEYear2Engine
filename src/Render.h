@@ -39,8 +39,9 @@ public:
 	unsigned int GetTextureByName(const char* name);
 
 	void RenderTargetLoader();
-	//void RenderRenderTarget();
-	void DrawRenderTarget(Camera* cam);
+
+	Mesh* GetSharedPointer() const { return m_pMesh.get(); }
+	GLuint GetProgramID() const { return m_programID; }
 
 private:
 	//our vertex and index buffers

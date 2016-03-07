@@ -13,5 +13,7 @@ public:
 
 private:
 	bool m_isClockwise;
+
+	bool m_hasSpaceBeenPressed;
 };
 

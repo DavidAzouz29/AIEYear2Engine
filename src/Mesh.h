@@ -12,6 +12,9 @@
 class Mesh
 {
 public:
+	Mesh();
+	~Mesh();
+
 	bool isValid() { return m_indexCount > 0 && m_VAO != (GLuint)-1; }
 
 	GLuint& GetVAO() { return m_VAO; }
@@ -24,7 +27,7 @@ public:
 
 	void SetIndexCount(unsigned int a_iIndexCount) { m_indexCount = a_iIndexCount; }
 
-	void RenderRenderTarget();
+	void CreateRenderTargetQuad();
 
 	// Setup OpenGL buffers and vertex attributes to be able to render these vertices.
 	template<typename T>
@@ -93,14 +96,14 @@ private:
 		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)(offsetof(FBXVertex, indices)));
 	}
 
-	unsigned int m_indexCount = 0;
-	GLuint m_VAO = (GLuint)-1;
-	GLuint m_VBO = (GLuint)-1;
-	GLuint m_IBO = (GLuint)-1;
+	unsigned int m_indexCount;
+	GLuint m_VAO;
+	GLuint m_VBO;
+	GLuint m_IBO;
 
-	GLuint m_FBO = (GLuint)-1;
-	GLuint m_fboTexture = (GLuint)-1;
-	GLuint m_fboDepth	= (GLuint)-1;
+	GLuint m_FBO;
+	GLuint m_fboTexture;
+	GLuint m_fboDepth;
 };
 
 /// ----------------------------------------------------------

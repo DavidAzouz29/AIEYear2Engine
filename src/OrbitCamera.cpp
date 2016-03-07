@@ -5,7 +5,7 @@
 #include <glm/ext.hpp>
 
 
-OrbitCamera::OrbitCamera(glm::vec4 a_v4Perspective) : m_isClockwise(true)
+OrbitCamera::OrbitCamera(glm::vec4 a_v4Perspective) : m_isClockwise(true), m_hasSpaceBeenPressed(false)
 	/*, m_speed(10),
 	m_fRotation(0.01f),
 	m_up(0, 1, 0),
@@ -28,17 +28,20 @@ void OrbitCamera::Update(float fDeltaTime)
 	/// If Any key: Rotates in the opposite direction.
 	/// <para> If was rotating Clockwise, it will now rotate Counter-Clockwise. </para>
 	/// </summary> 
-	if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
+	if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS && !m_hasSpaceBeenPressed )
 	{
-		if (m_isClockwise == true)
-		{
-			m_isClockwise = false;
-		}
-		else if (m_isClockwise == false)
-		{
-			m_isClockwise = true;
-		}
+		m_isClockwise = !m_isClockwise;
 	}
+
+	if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS && !m_hasSpaceBeenPressed)
+	{
+		m_hasSpaceBeenPressed = true;
+	}
+	else if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_RELEASE && m_hasSpaceBeenPressed)
+	{
+		m_hasSpaceBeenPressed = false;
+	}
+
 	// Rotate Clockwise if true...
 	if (m_isClockwise)
 	{

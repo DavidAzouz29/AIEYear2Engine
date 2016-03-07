@@ -32,7 +32,8 @@ TestApplication::TestApplication()
 }
 
 TestApplication::~TestApplication() {
-
+	glDeleteProgram(m_program_ID);
+	glDeleteProgram(m_FBX_program_ID);
 }
 
 bool TestApplication::startup() {
@@ -54,7 +55,7 @@ bool TestApplication::startup() {
 	/// <para>P3: Near: nearest clipping plane to render to.</para>
 	/// <para>P4: Far: furthest clipping plane to render to.</para>
 	/// </summary>
-	vec4 v4Perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 100000.f);
+	vec4 v4Perspective(glm::pi<float>() * 0.25f, 16 / 9.0f, 0.1f, 10000.f);
 	m_pCameraStateMachine = std::make_shared<CameraStateMachine>(v4Perspective);
 
 	// Repeating code: TODO: change
@@ -65,8 +66,7 @@ bool TestApplication::startup() {
 	//////////////////////////////////////////////////////////////////////////
 	// YOUR STARTUP CODE HERE
 	// -----------------------
-	m_pRender	= std::make_shared<Render>();
-	m_pMesh		= std::make_shared<Mesh>();
+	m_pRender = std::make_shared<Render>();
 	// -----------------------
 	// Creates Grid
 	// -----------------------
@@ -81,11 +81,10 @@ bool TestApplication::startup() {
 	m_pFbx = std::make_shared<FBXFile>();
 	//m_pFbx->load("./data/models/stanford/Bunny.fbx");
 	//m_pFbx->load("./data/models/soulspear/soulspear.fbx");
-	m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", FBXFile::UNITS_METER);
+	m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", FBXFile::UNITS_METER);..0
 	//m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", m_pFbx->UNITS_METER);
-	FBXLoader();
-	//FBXSkeletonLoader();
-	//FBXSkeletonRender();
+	FBXLoader(); // Needed if FBX without Animation
+	FBXSkeletonLoader();
 
 	CreateOpenGLBuffers(m_pFbx.get());
 
@@ -112,16 +111,12 @@ bool TestApplication::startup() {
 	id = m_pRender->TextureInit("./data/models/characters/Pyro/Pyro_S.tga");
 	m_pRender->AddTexture("Pyro_S", id);
 
-	m_pRender->RenderTexture(); 
+	//m_pRender->RenderTexture(); //For the Render Target?
 
-	// -----------------------
-	//m_pMesh->createFrame(); // Like init
-	//===============================================================================
-	m_pRender->RenderTargetLoader();
-//	m_pMesh->RenderRenderTarget();
-	//===============================================================================
-
-	///----------------------------------------------------------
+	//=======================================================
+	m_pRender.get()->RenderTargetLoader();
+	m_pRender->GetSharedPointer()->CreateRenderTargetQuad();
+	//=======================================================
  	m_pMath = std::make_shared<MathCollision>();
 	///----------------------------------------------------------
 #pragma region Particles
@@ -194,6 +189,7 @@ bool TestApplication::update(float deltaTime) {
 		return false;
 	}
 
+	//Camera Mode: Static, FlyCamera, Orbit
 #pragma region Camera Mode
 
 	if (glfwGetKey(m_window, GLFW_KEY_GRAVE_ACCENT) || glfwGetKey(m_window, GLFW_KEY_KP_0))
@@ -220,7 +216,7 @@ bool TestApplication::update(float deltaTime) {
 	// YOUR UPDATE CODE HERE
 
 	// FBX Skeleton and Animation
-	//FBXUpdate();
+	FBXUpdate();
 
 	//m_pMath->Update(m_pCamera.get());
 	m_pMath->Update(m_pCameraStateMachine->GetCurrentCamera());
@@ -229,7 +225,6 @@ bool TestApplication::update(float deltaTime) {
 	//m_pParticleEmitterA->update(deltaTime, m_pCamera->getTransform());
 	m_pParticleEmitterA->update(deltaTime, m_pCameraStateMachine->GetCurrentCamera()->getTransform());
 	m_pParticleEmitterB->update(deltaTime, m_pCameraStateMachine->GetCurrentCamera()->getTransform());
-
 	//////////////////////////////////////////////////////////////////////////
 
 	// an example of mouse picking
@@ -244,15 +239,7 @@ bool TestApplication::update(float deltaTime) {
 	}
 	Gizmos::addTransform(glm::translate(m_pickPosition));
 
-	// ...for now let's add a grid to the gizmos
-	for (int i = 0; i < 21; ++i) {
-		Gizmos::addLine(vec3(-10 + i, 0, 10), vec3(-10 + i, 0, -10),
-			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
-
-		Gizmos::addLine(vec3(10, 0, -10 + i), vec3(-10, 0, -10 + i),
-			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
-	}
-
+	// Draw Mode: Filled, Poly, Dot
 #pragma region Choose Draw state
 	if (glfwGetKey(m_window, GLFW_KEY_0))
 	{
@@ -293,67 +280,107 @@ bool TestApplication::update(float deltaTime) {
 
 void TestApplication::draw() 
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_pMesh->GetFBO());
+	//
+	glBindFramebuffer(GL_FRAMEBUFFER, m_pRender->GetSharedPointer()->GetFBO());
+	//printf("%d\n", m_pRender->GetSharedPointer());
 	glViewport(0, 0, 512, 512); // 265 lower quarter of the texture
-	
-	//m_pMesh->createFrame(); //TODO: <- this breaks things?
 
+	// ----------------------------------------------------------
+	glClearColor(0.25f, 0.25f, 0.25f, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// ----------------------------------------------------------
+	glBindVertexArray(m_pRender->GetSharedPointer()->GetVAO());
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+	// Draw Captured Objects Here
+	// ...for now let's add a grid to the gizmos
+	for (int i = 0; i < 21; ++i) {
+		Gizmos::addLine(vec3(-10 + i, 0, 10), vec3(-10 + i, 0, -10),
+			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+
+		Gizmos::addLine(vec3(10, 0, -10 + i), vec3(-10, 0, -10 + i),
+			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+	}
+
+	Gizmos::draw(m_pCameraStateMachine->GetCurrentCamera()->getProjectionView());
+	// draw
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(m_pRender->GetProgramID());
+	DrawApp();
+}
+
+void TestApplication::DrawApp()
+{
 	// Change background colour based off Camera mode
 	switch (m_pCameraStateMachine->GetCurrentCameraMode())
 	{
 	case E_CAMERA_MODE_STATE_STATIC:
 	{
-		glClearColor(0.25f, 0.55f, 0.75f, 1);
-		break;
+	glClearColor(0.25f, 0.55f, 0.75f, 1);
+	break;
 	}
 	case E_CAMERA_MODE_STATE_FLYCAMERA:
 	{
-		glClearColor(0.55f, 0.75f, 0.25f, 1);
-		break;
+	glClearColor(0.55f, 0.75f, 0.25f, 1);
+	break;
 	}
 	case E_CAMERA_MODE_STATE_ORBIT:
 	{
-		glClearColor(0.75f, 0.25f, 0.55f, 1);
-		break;
+	glClearColor(0.75f, 0.25f, 0.55f, 1);
+	break;
 	}
 	default:
 	{
-		glClearColor(0.25f, 0.25f, 0.25f, 1);
-		//glClearColor(0.75f, 0.75f, 0.75f, 1);
-		break;
+	glClearColor(0.25f, 0.25f, 0.25f, 1);
+	//glClearColor(0.75f, 0.75f, 0.75f, 1);
+	break;
 	}
 	}
 
 	// clear the screen for this frame
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, 1280, 720);
+	// use our texture program
+
+	glm::mat4 projView = m_pCameraStateMachine->GetCurrentCamera()->getProjectionView();
+
+	// Render Target
+	// bind the camera
+	int loc = glGetUniformLocation(m_pRender->GetProgramID(), "ProjectionView"); //m_program_ID
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projView));
+
+	// Set texture slots
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_pRender->GetSharedPointer()->GetFboTexture());
+
+	// tell the shader where it is
+	int diffLoc = glGetUniformLocation(m_pRender->GetProgramID(), "diffuse"); // m_program_ID
+	glUniform1i(diffLoc, 0);
 
 	// Rendering mode
 	switch (m_eCurrentDrawState)
 	{
 	case E_DRAW_STATE_FILL:
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
-		break;
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
+	break;
 	}
 	case E_DRAW_STATE_POLY:
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Poly
-		break;
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Poly
+	break;
 	}
 	case E_DRAW_STATE_DOT:
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); // Dot
-		break;
+	glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); // Dot
+	break;
 	}
 	default:
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
-		break;
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
+	break;
 	}
 	}
-
-	//glm::mat4 projView = m_pCamera->getProjectionView();
-	glm::mat4 projView = m_pCameraStateMachine->GetCurrentCamera()->getProjectionView();
 
 	//////////////////////////////////////////////////////////////////////////
 	// DRAW YOUR THINGS HERE
@@ -362,27 +389,30 @@ void TestApplication::draw()
 
 	//m_pRender->DrawTexture(m_pCamera.get());
 	//m_pRender->DrawTexture(pCamState); //TODO: needed for Soulspear
-	m_pRender->DrawTextureP(pCamState);
-	Gizmos::addSphere(glm::vec3(0, 5, 0), 0.5f, 8, 8, glm::vec4(1, 1, 0, 1));
-//	for (GLushort s = 0; s < 2; ++s)
-//	{
-	//m_pMesh->RenderRenderTarget();
-	//m_pRender->DrawRenderTarget(m_pCamera.get());
+	/*// ...for now let's add a grid to the gizmos
+	for (int i = 0; i < 21; ++i) {
+		Gizmos::addLine(vec3(-10 + i, 0, 10), vec3(-10 + i, 0, -10),
+			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
 
-	// TODO: V\/ Restore this one - causes crash (access violation) \/V
-	//===============================================================================
-	//m_pMesh->RenderRenderTarget();
-	//m_pRender->DrawRenderTarget(pCamState);
-	//m_pMesh->RenderRenderTarget();
-	//===============================================================================
-//	}
+		Gizmos::addLine(vec3(10, 0, -10 + i), vec3(-10, 0, -10 + i),
+			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+	}*/
+
+	glBindVertexArray(m_pRender->GetSharedPointer()->GetVAO());
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+	m_pRender->DrawTextureP(pCamState); // TODO: FBX Texture - Needed for Render Target
+	
+	Gizmos::addSphere(glm::vec3(0, 5, 0), 0.5f, 8, 8, glm::vec4(1, 1, 0, 1));
+	//
 	//m_pVertexColoredGrid->draw(projView);
 	//m_pSpriteSheetQuad->draw(projView);
 	//m_pFBXMesh->draw(projView);
-	RenderFBX(pCamState);
+
+	// FBX
+	//RenderFBX(pCamState); // Need this for FBX
+	FBXDraw();
 	//FBXSkeletonRender();
-	// FBX Skeleton and Animation
-	//FBXUpdate();
 
 	// Particles
 	m_pParticleEmitterA->draw(projView);
@@ -399,9 +429,10 @@ void TestApplication::draw()
 	glfwGetWindowSize(m_window, &width, &height);
 	mat4 guiMatrix = glm::ortho<float>(0, 0, (float)width, (float)height);
 
-	Gizmos::draw2D(projView);
+	Gizmos::draw2D(projView);	
 }
 
+#pragma region FBX
 /// ----------------------------------------------------------
 /// FBXLoader
 ///-----------------------------------------------------------------------------------------------------------
@@ -437,7 +468,7 @@ void TestApplication::CreateOpenGLBuffers(FBXFile* fbx)
 			mesh->m_indices.size() * sizeof(unsigned int),
 			mesh->m_indices.data(), GL_STATIC_DRAW);
 
-		glEnableVertexAttribArray(0); // position
+		/*glEnableVertexAttribArray(0); // position
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), 0);
 
 		glEnableVertexAttribArray(1); // normal
@@ -445,6 +476,22 @@ void TestApplication::CreateOpenGLBuffers(FBXFile* fbx)
 
 		glEnableVertexAttribArray(2); // Texture on FBX model via coordinates
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::TexCoord1Offset);
+		*/
+		//FBXSkeletonRender();
+		glEnableVertexAttribArray(0); //position
+		glEnableVertexAttribArray(1); //normals
+		glEnableVertexAttribArray(2); //tangents
+		glEnableVertexAttribArray(3); //textcoords
+		glEnableVertexAttribArray(4); //weights
+		glEnableVertexAttribArray(5); //indices
+
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)FBXVertex::PositionOffset);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), (void*)FBXVertex::NormalOffset);
+		glVertexAttribPointer(2, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), (void*)FBXVertex::TangentOffset);
+		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)FBXVertex::TexCoord1Offset);
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)FBXVertex::WeightsOffset);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)FBXVertex::IndicesOffset);
+
 
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -552,19 +599,10 @@ void TestApplication::RenderFBX(Camera* cam)
 	loc = glGetUniformLocation(m_program_ID, "diffuse");
 	glUniform1i(loc, 0);
 
-	/*unsigned int uiHeightScale = glGetUniformLocation(m_programID, "heightScale");
-	unsigned int uiTime = glGetUniformLocation(m_programID, "time");
-
-	glUniform1f(uiHeightScale, fHeightScale);
-	glUniform1f(uiTime, fTime); */
-
 	// bind our vertex array object and draw the mesh
 	for (unsigned int i = 0; i < m_pFbx->getMeshCount(); ++i)
 	{
 		FBXMeshNode* mesh = m_pFbx->getMeshByIndex(i);
-		//TODO: FBX texture
-		//FBXTexture* textureC = m_fbx->getTextureByName("./data/textures/crate.png");// , &imageWidth, &imageHeight, &imageFormat, STBI_default);
-
 		unsigned int* glData = (unsigned int*)mesh->m_userData;
 
 		glBindVertexArray(glData[0]); //TODO: replace m_VAO with VAO
@@ -574,7 +612,7 @@ void TestApplication::RenderFBX(Camera* cam)
 	}
 }
 
-// Skeletion/ bones vertex shader
+// skeleton/ bones vertex shader
 void TestApplication::FBXSkeletonLoader()
 {
 	/// ----------------------------------------------------------
@@ -582,6 +620,7 @@ void TestApplication::FBXSkeletonLoader()
 	/// ----------------------------------------------------------
 	/// Storing writing out our shader code into char arrays for processign by OpenGL.
 	/// ----------------------------------------------------------
+
 	const char* vsSource = "#version 410\n \
 							layout(location=0) in vec4 Position; \
 							layout(location=1) in vec4 Normal; \
@@ -589,13 +628,13 @@ void TestApplication::FBXSkeletonLoader()
 							layout(location=3) in vec2 TexCoord; \
 							layout(location=4) in vec4 Weights; \
 							layout(location=5) in vec4 Indices; \
-							\
+							/* fghfgh */\
 							out vec3 frag_normal; \
 							out vec3 frag_position; \
 							out vec3 frag_tangent; \
 							out vec3 frag_bitangent; \
 							out vec2 frag_texcoord; \
-							\
+							//\
 							uniform mat4 ProjectionView; \
 							uniform mat4 Global; \
 							// We need to give our bone array a limit \
@@ -606,7 +645,7 @@ void TestApplication::FBXSkeletonLoader()
 							frag_tangent = Tangent.xyz; \
 							frag_bitangent = cross(Normal.xyz, Tangent.xyz); \
 							frag_texcoord = TexCoord; \
-							\
+							//\
 							// Cast the indices to integer's so they can index an array \
 							ivec4 index = ivec4(Indices); \
 							// Sample bones and blend up to 4 \
@@ -616,6 +655,34 @@ void TestApplication::FBXSkeletonLoader()
 							P += bones[Index.w] * Position * Weights.w; \
 							gl_Position = ProjectionView * Global * P; }";
 
+	const char* fsSource = "#version 410\n \
+							in vec3 vNormal; \
+							in vec3 vPosition; \
+							in vec2 vTexCoord; \
+							in vec3 vTangent; \
+							in vec3 vBiTangent; \
+							out vec4 FragColor; \
+							uniform vec3 LightDir; \
+							uniform vec3 LightColour; \
+							uniform vec3 CameraPos; \
+							uniform sampler2D diffuse; \
+							uniform sampler2D normal; \
+							uniform float SpecPow; \
+							void main() { \
+							mat3 TBN = mat3( \
+							normalize( vTangent ), \
+							normalize( vBiTangent ), \
+							normalize( vNormal )); \
+							vec3 N = texture( normal, \
+							vTexCoord).xyz * 2 - 1; \
+							float d = max(0, dot( normalize(TBN * N), normalize(LightDir) ) ); \
+							vec3 E = normalize( CameraPos - vPosition ); \
+							vec3 R = reflect( -LightDir, vNormal ); \
+							float s = max( 0, dot( E, R ) ); \
+							s = pow( s, SpecPow ); \
+							FragColor = texture(diffuse, vTexCoord); \
+							FragColor.rgb = FragColor.rgb * LightColour * d + LightColour * s * 0.1; }";
+
 	/// ----------------------------------------------------------
 	/// Compile shaders
 	/// ----------------------------------------------------------
@@ -624,24 +691,30 @@ void TestApplication::FBXSkeletonLoader()
 	glShaderSource(iVertexShader, 1, (const char**)&vsSource, 0);
 	glCompileShader(iVertexShader);
 
-	m_program_ID = glCreateProgram();
-	glAttachShader(m_program_ID, iVertexShader);
-	glLinkProgram(m_program_ID);
+	unsigned int iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(iFragmentShader, 1, (const char**)&fsSource, 0);
+	glCompileShader(iFragmentShader);
 
-	glGetProgramiv(m_program_ID, GL_LINK_STATUS, &success);
+	m_FBX_program_ID = glCreateProgram();
+	glAttachShader(m_FBX_program_ID, iVertexShader);
+	glAttachShader(m_FBX_program_ID, iFragmentShader);
+	glLinkProgram(m_FBX_program_ID);
+
+	glGetProgramiv(m_FBX_program_ID, GL_LINK_STATUS, &success);
 	if (success == GL_FALSE)
 	{
-	int infoLogLength = 0;
-	glGetProgramiv(m_program_ID, GL_INFO_LOG_LENGTH, &infoLogLength);
-	char* infoLog = new char[infoLogLength];
+		int infoLogLength = 0;
+		glGetProgramiv(m_FBX_program_ID, GL_INFO_LOG_LENGTH, &infoLogLength);
+		char* infoLog = new char[infoLogLength];
 
-	glGetProgramInfoLog(m_program_ID, infoLogLength, 0, infoLog);
-	printf("Error: Failed to link shader program!\n");
-	printf("%s\n", infoLog);
-	delete[] infoLog;
+		glGetProgramInfoLog(m_FBX_program_ID, infoLogLength, 0, infoLog);
+		printf("Error: Failed to link shader program!\n");
+		printf("%s\n", infoLog);
+		delete[] infoLog;
 	}
 
 	glDeleteShader(iVertexShader);
+	glDeleteShader(iFragmentShader);
 }
 
 // Render
@@ -666,23 +739,123 @@ void TestApplication::FBXSkeletonRender()
 void TestApplication::FBXUpdate()
 {
 	// Grab the skeleton and animation we want to use
-	FBXSkeleton* skeletion = m_pFbx->getSkeletonByIndex(0);
-	skeletion->updateBones();
-
-	GLint bones_location = glGetUniformLocation(m_program_ID, "bones");
-	glUniformMatrix4fv(bones_location, skeletion->m_boneCount, GL_FALSE, (GLfloat*)skeletion->m_bones);
-
+	FBXSkeleton* skeleton = m_pFbx->getSkeletonByIndex(0);
 	FBXAnimation* animation = m_pFbx->getAnimationByIndex(0);
 
-	m_timer = 2.0f;
+	m_timer = (GLfloat)glfwGetTime(); //currentTime 
 
 	// Evaluate the animation to update bones
-	skeletion->evaluate(animation, m_timer);
+	skeleton->evaluate(animation, m_timer);
 
 	for (GLuint uiBone_index = 0;
-	uiBone_index < skeletion->m_boneCount;
+	uiBone_index < skeleton->m_boneCount;
 		++uiBone_index)
 	{
-		skeletion->m_nodes[uiBone_index]->updateGlobalTransform();
+		skeleton->m_nodes[uiBone_index]->updateGlobalTransform();
 	}
 }
+
+/* void TestApplication::FBXRender()
+{
+	glUseProgram(m_FBX_program_ID);
+
+	int loc = glGetUniformLocation(m_FBX_program_ID, "ProjectionView");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m_pCameraStateMachine->GetCurrentCamera()->getProjectionView()));
+
+	/*int light_dir_uniform = glGetUniformLocation(m_programID, "LightDir");
+	glUniform3f(light_dir_uniform, 0, 1, 0); //* /
+
+	vec3 light(sin(glfwGetTime()), 1, cos(glfwGetTime()));
+	loc = glGetUniformLocation(m_FBX_program_ID, "LightDir");
+	glUniform3f(loc, light.x, light.y, light.z);
+
+	int light_colour_uniform = glGetUniformLocation(m_FBX_program_ID, "LightColour");
+	glUniform3f(light_colour_uniform, 1, 1, 1);
+
+	mat4 camera_matrix = m_pCameraStateMachine->GetCurrentCamera()->getTransform();
+	int camera_pos_uniform = glGetUniformLocation(m_FBX_program_ID, "CameraPos");
+	glUniform3f(camera_pos_uniform, camera_matrix[3][0], camera_matrix[3][1], camera_matrix[3][2]);
+
+	int specular_uniform = glGetUniformLocation(m_FBX_program_ID, "SpecPow");
+	glUniform1f(specular_uniform, 12);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_pRender->GetTextureByName("Pyro_D")); // m_texture);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_pRender->GetTextureByName("Pyro_N")); // m_normal);
+
+	loc = glGetUniformLocation(m_FBX_program_ID, "diffuse");
+	glUniform1i(loc, 0);
+
+	loc = glGetUniformLocation(m_FBX_program_ID, "normal");
+	glUniform1i(loc, 1);
+
+	FBXSkeleton* skeleton = m_pFbx->getSkeletonByIndex(0);
+	skeleton->updateBones();
+
+	int bones_location = glGetUniformLocation(m_FBX_program_ID, "bones");
+	glUniformMatrix4fv(bones_location, skeleton->m_boneCount, GL_FALSE, (float*)skeleton->m_bones);
+
+	// bind our vertex array object and draw the mesh
+	for (unsigned int i = 0; i < m_pFbx->getMeshCount(); ++i) {
+		FBXMeshNode* mesh = m_pFbx->getMeshByIndex(i);
+		unsigned int* glData = (unsigned int*)mesh->m_userData;
+		glBindVertexArray(glData[0]);
+		glDrawElements(GL_TRIANGLES,
+			(unsigned int)mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
+	}
+} */
+
+void TestApplication::FBXDraw()
+{
+	glUseProgram(m_program_ID);
+
+	int loc = glGetUniformLocation(m_program_ID, "ProjectionView");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m_pCameraStateMachine->GetCurrentCamera()->getProjectionView()));
+
+	/*int light_dir_uniform = glGetUniformLocation(m_programID, "LightDir");
+	glUniform3f(light_dir_uniform, 0, 1, 0);*/
+
+	vec3 light(sin(glfwGetTime()), 1, cos(glfwGetTime()));
+	loc = glGetUniformLocation(m_program_ID, "LightDir");
+	glUniform3f(loc, light.x, light.y, light.z);
+
+	int light_colour_uniform = glGetUniformLocation(m_program_ID, "LightColour");
+	glUniform3f(light_colour_uniform, 1, 1, 1);
+
+	mat4 camera_matrix = m_pCameraStateMachine->GetCurrentCamera()->getTransform();
+	int camera_pos_uniform = glGetUniformLocation(m_program_ID, "CameraPos");
+	glUniform3f(camera_pos_uniform, camera_matrix[3][0], camera_matrix[3][1], camera_matrix[3][2]);
+
+	int specular_uniform = glGetUniformLocation(m_program_ID, "SpecPow");
+	glUniform1f(specular_uniform, 12);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_pRender->GetTextureByName("Pyro_D")); // m_texture);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_pRender->GetTextureByName("Pyro_N")); // m_normal);
+
+	loc = glGetUniformLocation(m_program_ID, "diffuse");
+	glUniform1i(loc, 0);
+
+	loc = glGetUniformLocation(m_program_ID, "normal");
+	glUniform1i(loc, 1);
+
+	FBXSkeleton* skeleton = m_pFbx->getSkeletonByIndex(0);
+	skeleton->updateBones();
+
+	int bones_location = glGetUniformLocation(m_program_ID, "bones");
+	glUniformMatrix4fv(bones_location, skeleton->m_boneCount, GL_FALSE, (float*)skeleton->m_bones);
+
+	// bind our vertex array object and draw the mesh
+	for (unsigned int i = 0; i < m_pFbx->getMeshCount(); ++i) {
+		FBXMeshNode* mesh = m_pFbx->getMeshByIndex(i);
+		unsigned int* glData = (unsigned int*)mesh->m_userData;
+		glBindVertexArray(glData[0]);
+		glDrawElements(GL_TRIANGLES,
+			(unsigned int)mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
+	}
+}
+#pragma endregion

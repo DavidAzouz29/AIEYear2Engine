@@ -40,6 +40,7 @@ public:
 
 	virtual bool update(float deltaTime);
 	virtual void draw();
+	virtual void DrawApp();
 
 	/// ----------------------------------------------------------
 	void PlanetCreation();
@@ -50,6 +51,7 @@ public:
 	void FBXSkeletonLoader();
 	void FBXSkeletonRender();
 	void FBXUpdate();
+	void FBXDraw();
 	/// ----------------------------------------------------------
 
 private:
@@ -57,7 +59,6 @@ private:
 	std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<CameraStateMachine> m_pCameraStateMachine;
 	std::shared_ptr<FBXFile> m_pFbx;
-	std::shared_ptr<Mesh> m_pMesh;
 	std::shared_ptr<ParticleEmitter> m_pParticleEmitterA;
 	std::shared_ptr<ParticleEmitter> m_pParticleEmitterB;
 	std::shared_ptr<Render> m_pRender;
@@ -71,6 +72,7 @@ private:
 	GLfloat m_timer;
 
 	unsigned int m_program_ID;
+	unsigned int m_FBX_program_ID;
 	/// ----------------------------------------------------------
 	E_DRAW_STATE m_eCurrentDrawState;
 	/// ----------------------------------------------------------
