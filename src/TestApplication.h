@@ -71,8 +71,8 @@ private:
 	void CleanupOpenGLBuffers(FBXFile* fbx);
 	GLfloat m_timer;
 
-	unsigned int m_program_ID;
-	unsigned int m_FBX_program_ID;
+	GLuint m_program_ID;
+	GLuint m_FBX_program_ID;
 	/// ----------------------------------------------------------
 	E_DRAW_STATE m_eCurrentDrawState;
 	/// ----------------------------------------------------------

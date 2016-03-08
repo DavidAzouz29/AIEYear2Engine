@@ -34,6 +34,7 @@ CameraStateMachine::CameraStateMachine(glm::vec4 a_v4Perspective) :
 	m_cameraStatesArray[E_CAMERA_MODE_STATE_STATIC] = std::make_shared<Camera>(a_v4Perspective);
 	m_cameraStatesArray[E_CAMERA_MODE_STATE_FLYCAMERA] = std::make_shared<FlyCamera>(a_v4Perspective);
 	m_cameraStatesArray[E_CAMERA_MODE_STATE_ORBIT] = std::make_shared<OrbitCamera>(a_v4Perspective);
+	//m_cameraStatesArray[E_CAMERA_MODE_STATE_TRAVEL] = std::make_shared<TravelCamera>(a_v4Perspective);
 
 	m_cameraStatesArray[m_eCurrentState]->Enter();
 }
@@ -57,3 +58,8 @@ void CameraStateMachine::ChangeState(E_CAMERA_MODE_STATE eState)
 	m_eCurrentState = eState;
 	m_cameraStatesArray[m_eCurrentState]->Enter();
 }
+
+/* Camera CameraStateMachine::CycleCamera()
+{
+
+} */

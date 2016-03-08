@@ -100,6 +100,7 @@ void Render::generateGrid(const unsigned int a_iRows, const unsigned int a_iCols
 
 	m_pMesh->SetIndexCount((a_iRows - 1) * (a_iCols - 1) * 6);
 
+#pragma region Big Old
 #pragma region Old
 	/// ----------------------------------------------------------
 	/// create and bind buffers to a vertex array object
@@ -160,6 +161,7 @@ void Render::generateGrid(const unsigned int a_iRows, const unsigned int a_iCols
 
 	//
 	//Render::VAO = m_VAO */
+#pragma endregion
 
 	delete[] aoVertices;
 }

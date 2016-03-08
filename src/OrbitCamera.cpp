@@ -31,10 +31,6 @@ void OrbitCamera::Update(float fDeltaTime)
 	if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS && !m_hasSpaceBeenPressed )
 	{
 		m_isClockwise = !m_isClockwise;
-	}
-
-	if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS && !m_hasSpaceBeenPressed)
-	{
 		m_hasSpaceBeenPressed = true;
 	}
 	else if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_RELEASE && m_hasSpaceBeenPressed)
@@ -42,8 +38,13 @@ void OrbitCamera::Update(float fDeltaTime)
 		m_hasSpaceBeenPressed = false;
 	}
 
+	// Pause/ Freezes the position
+	if (glfwGetKey(m_window, GLFW_KEY_P) && !m_hasSpaceBeenPressed)
+	{
+		m_transform[3] = m_transform[3];
+	}
 	// Rotate Clockwise if true...
-	if (m_isClockwise)
+	else if (m_isClockwise)
 	{
 		m_transform[3] -= m_transform[0] * frameSpeed;
 		setLookAtFrom(m_transform[3].xyz, glm::vec3(0));
