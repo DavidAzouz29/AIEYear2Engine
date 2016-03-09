@@ -21,5 +21,5 @@ protected:
 	virtual bool createWindow(const char* title, int width, int height);
 	virtual void destroyWindow();
 
-	GLFWwindow*	m_window;
+	GLFWwindow*	m_pWindow;
 };

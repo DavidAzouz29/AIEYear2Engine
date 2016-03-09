@@ -9,11 +9,11 @@ public:
 
 	//void Enter() {};
 	void Update(float fDeltaTime) override;
+	void RenderUI() override;
 	void Exit() {};
 
 private:
 	bool m_isClockwise;
-
 	bool m_hasSpaceBeenPressed;
 };
 

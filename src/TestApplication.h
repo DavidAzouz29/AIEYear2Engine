@@ -56,7 +56,7 @@ public:
 
 private:
 
-	std::shared_ptr<Camera> m_pCamera;
+	//std::shared_ptr<Camera> m_pCamera;
 	std::shared_ptr<CameraStateMachine> m_pCameraStateMachine;
 	std::shared_ptr<FBXFile> m_pFbx;
 	std::shared_ptr<ParticleEmitter> m_pParticleEmitterA;
@@ -76,6 +76,8 @@ private:
 	/// ----------------------------------------------------------
 	E_DRAW_STATE m_eCurrentDrawState;
 	/// ----------------------------------------------------------
+	glm::vec3 m_clearColour;
+	bool m_bDrawGizmoGrid;
 
 	// this is an example position for camera picking
 	glm::vec3	m_pickPosition;

@@ -5,16 +5,9 @@
 
 
 FlyCamera::FlyCamera(glm::vec4 a_v4Perspective)
-	/*: m_speed(10),
-	m_fRotation(0.01f),
-	m_up(0,1,0),
-	m_transform(1),
-	m_view(1),
-	m_v3Movement(0) */
 {
 	setPerspective(m_v4Perspective.x, m_v4Perspective.y, m_v4Perspective.z, m_v4Perspective.w);
 } 
-
 
 FlyCamera::~FlyCamera()
 {
@@ -22,16 +15,14 @@ FlyCamera::~FlyCamera()
 
 void FlyCamera::Update(float fDeltaTime)
 {
-	//GLFWwindow* m_window = glfwGetCurrentContext();
-
-	float frameSpeed = glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;
+	float frameSpeed = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;
 	
-	if (glfwGetKey(m_window, GLFW_KEY_KP_ADD))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_KP_ADD))
 	{
 		m_speed += m_speed * 0.1f;
 		printf("Speed: %f.\n", m_speed);
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_KP_SUBTRACT))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_KP_SUBTRACT))
 	{
 		m_speed -= m_speed * 0.1f;
 		printf("Speed: %f.\n", m_speed);
@@ -41,40 +32,41 @@ void FlyCamera::Update(float fDeltaTime)
 	// ---------------------------------------------------------------------------------------
 #pragma region Movement
 	// ---------------------------------------------------------------------------------------
-	if (glfwGetKey(m_window, GLFW_KEY_W) || glfwGetKey(m_window, GLFW_KEY_UP) || glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_LEFT))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_W) || glfwGetKey(m_pWindow, GLFW_KEY_UP) 
+		|| (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetMouseButton(m_pWindow, GLFW_MOUSE_BUTTON_LEFT)))
 	{
 		m_transform[3].x += m_transform[1].x * frameSpeed;
 		m_transform[3].z += m_transform[1].z * frameSpeed;
 	}
-	if ((glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) && glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_LEFT)) ||
-		glfwGetKey(m_window, GLFW_KEY_S) || glfwGetKey(m_window, GLFW_KEY_DOWN))
+	if ((glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetMouseButton(m_pWindow, GLFW_MOUSE_BUTTON_RIGHT)) ||
+		glfwGetKey(m_pWindow, GLFW_KEY_S) || glfwGetKey(m_pWindow, GLFW_KEY_DOWN))
 	{
 		m_transform[3].x -= m_transform[1].x * frameSpeed;
 		m_transform[3].z -= m_transform[1].z * frameSpeed;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_A) || glfwGetKey(m_window, GLFW_KEY_LEFT))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_A) || glfwGetKey(m_pWindow, GLFW_KEY_LEFT))
 	{
 		m_transform[3] -= m_transform[0] * frameSpeed;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_D) || glfwGetKey(m_window, GLFW_KEY_RIGHT))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_D) || glfwGetKey(m_pWindow, GLFW_KEY_RIGHT))
 	{
 		m_transform[3] += m_transform[0] * frameSpeed;
 	}
 	// Rise & Fall
-	if (glfwGetKey(m_window, GLFW_KEY_R))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_R))
 	{
 		m_transform[3] += m_transform[1] * frameSpeed;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_F))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_F))
 	{
 		m_transform[3] -= m_transform[1] * frameSpeed;
 	}
 	// Zoom
-	if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_window, GLFW_KEY_W))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_pWindow, GLFW_KEY_W))
 	{
 		m_transform[3] -= m_transform[2] * frameSpeed;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_window, GLFW_KEY_S))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_pWindow, GLFW_KEY_S))
 	{
 		m_transform[3] += m_transform[2] * frameSpeed;
 	}
@@ -82,47 +74,47 @@ void FlyCamera::Update(float fDeltaTime)
 
 #pragma region Orbit
 
-	if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_window, GLFW_KEY_A) || glfwGetKey(m_window, GLFW_KEY_Z)) // == GLFW_REPEAT)
+	if (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_pWindow, GLFW_KEY_A) || glfwGetKey(m_pWindow, GLFW_KEY_Z)) // == GLFW_REPEAT)
 	{
 		m_transform[3] -= m_transform[0] * frameSpeed;
 		setLookAtFrom(m_transform[3].xyz, glm::vec3(0));
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_window, GLFW_KEY_D) || glfwGetKey(m_window, GLFW_KEY_C))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_pWindow, GLFW_KEY_D) || glfwGetKey(m_pWindow, GLFW_KEY_C))
 	{
 		m_transform[3] += m_transform[0] * frameSpeed;
 		setLookAtFrom(m_transform[3].xyz, glm::vec3(0));
 	}
 	//TODO: Fix this up
-	if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_window, GLFW_KEY_Q))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_pWindow, GLFW_KEY_Q))
 	{
 		if (m_transform[3].x != 0 || m_transform[3].z != 0) //m_transform[3].xz != glm::vec2(0,0)
 		{
 			m_transform[3].x = 0; // = glm::vec3(0, 1, 0);
 			m_transform[3].z = 0;
 		}
-		glfwGetKey(m_window, GLFW_KEY_Q);
+		glfwGetKey(m_pWindow, GLFW_KEY_Q);
 		//m_transform = glm::rotate(m_transform, m_fRotation, glm::vec3(0, 1, 0));
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_window, GLFW_KEY_E))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_pWindow, GLFW_KEY_E))
 	{
 		if (m_transform[3].x != 0 || m_transform[3].z != 0) //m_transform[3].xz != glm::vec2(0,0)
 		{
 			m_transform[3].x = 0; // = glm::vec4(0, 5, 0, 0);
 			m_transform[3].z = 0;
 		}
-		glfwGetKey(m_window, GLFW_KEY_E);
+		glfwGetKey(m_pWindow, GLFW_KEY_E);
 	}
 #pragma endregion
 
-	if (glfwGetKey(m_window, GLFW_KEY_X))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_X))
 	{
 		m_transform = glm::rotate(m_transform, m_fRotation, glm::vec3(1, 0, 1));
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_V))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_V))
 	{
 		m_transform = glm::rotate(m_transform, m_fRotation, glm::vec3(-1, 0, -1));
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_SPACE))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_SPACE))
 	{
 		setLookAtFrom(glm::vec3(10, 10, 10), glm::vec3(0));
 		setSpeed(10);
@@ -132,11 +124,11 @@ void FlyCamera::Update(float fDeltaTime)
 	/// This is essentially where that camera is looking at. 
 	/// E.g. World[2] = lookAt vector combine that vector with your camera matrix to zoom in/out </summary> 
 	// ---------------------------------------------------------------------------------------
-	if (glfwGetKey(m_window, GLFW_KEY_COMMA))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_COMMA))
 	{
 		m_transform -= glm::rotate(m_fRotation, glm::vec3(1.0f, 0.0f, 1.0f));
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_PERIOD))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_PERIOD))
 	{
 		m_transform += glm::rotate(m_fRotation, glm::vec3(1.0f, 0.0f, 1.0f));
 	}
@@ -144,27 +136,27 @@ void FlyCamera::Update(float fDeltaTime)
 	// ---------------------------------------------------------------------------------------
 	// Rotation
 	// ---------------------------------------------------------------------------------------
-	if (glfwGetKey(m_window, GLFW_KEY_Q))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_Q))
 	{
 		m_transform = glm::rotate(m_transform, m_fRotation, glm::vec3(0, 1, 0));
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_E))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_E))
 	{
 		m_transform = glm::rotate(m_transform, m_fRotation, glm::vec3(0, -1, 0));
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_window, GLFW_KEY_Y))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_pWindow, GLFW_KEY_Y))
 	{
 		m_transform = glm::rotate(m_transform, m_fRotation, glm::vec3(-0.5f, 0, -0.5f));
 		//m4pos = glm::yawPitchRoll(0.0f, mApp->fDeltaTime * m_fRotation, m_fSpeed) * m4pos;
 		//m_transform = m4pos + m_transform;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_window, GLFW_KEY_H))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_pWindow, GLFW_KEY_H))
 	{
 		m_transform = glm::rotate(m_transform, m_fRotation, glm::vec3(0.5f, 0, 0.5f));
 		//m4pos = glm::yawPitchRoll(0.0f, mApp->fDeltaTime * m_fRotation, -m_fSpeed) * m4pos;
 		//m_transform = m4pos + m_transform;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_T))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_T))
 	{
 		m_transform[3] += m_transform[2] * frameSpeed;
 
@@ -197,7 +189,7 @@ void FlyCamera::Update(float fDeltaTime)
 		//glm::quat_cast;
 		m_transform = m4pos + m_transform; */
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_G))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_G))
 	{
 		m_transform[3] -= m_transform[2] * frameSpeed;
 		/* ---------------------------------------------------------------------------------------
@@ -215,7 +207,7 @@ void FlyCamera::Update(float fDeltaTime)
 #pragma region Random Rotations
 	// ---------------------------------------------------------------------------------------
 	int iYes = 0;
-	if (glfwGetKey(m_window, GLFW_KEY_K))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_K))
 	{
 		m_v3Movement.z += frameSpeed;
 		m_transform[iYes].z = m_v3Movement.z;
@@ -224,7 +216,7 @@ void FlyCamera::Update(float fDeltaTime)
 		m_transform[iYes + 3].z = m_v3Movement.z;
 		//m_transform = glm::rotateX(m_transform,  ;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_L))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_L))
 	{
 		m_v3Movement.z -= frameSpeed;
 		m_transform[iYes].z = m_v3Movement.z;
@@ -233,24 +225,24 @@ void FlyCamera::Update(float fDeltaTime)
 		m_transform[iYes + 3].z = m_v3Movement.z;
 	}
 
-	if (glfwGetKey(m_window, GLFW_KEY_Y))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_Y))
 	{
 		m_v3Movement.x -= m_fRotation;
 		m_transform = glm::rotate(m_transform, m_fRotation, m_v3Movement);
 		//m_transform[iYes].w = m_v3Movement.x;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_H))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_H))
 	{
 		m_v3Movement.x += m_fRotation;
 		m_transform = glm::rotate(m_transform, m_fRotation, m_v3Movement);
 		//m_transform[iYes].w = m_v3Movement.x;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_window, GLFW_KEY_X))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_pWindow, GLFW_KEY_X))
 	{
 		m_v3Movement.z += m_fRotation;
 		m_transform = glm::rotate(m_transform, m_fRotation, m_v3Movement);
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_window, GLFW_KEY_V))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_pWindow, GLFW_KEY_V))
 	{
 		m_v3Movement.z -= m_fRotation;
 		m_transform = glm::rotate(m_transform, m_fRotation, m_v3Movement);
@@ -258,30 +250,30 @@ void FlyCamera::Update(float fDeltaTime)
 	} //*/
 
 	  // Wacky Waving Inflatable Arm Flaling Tube Man
-	if (glfwGetKey(m_window, GLFW_KEY_O))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_O))
 	{
 		m_v3Movement += frameSpeed;
 		m_transform[0].w = m_v3Movement.x;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_P))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_P))
 	{
 		m_v3Movement -= frameSpeed;
 		m_transform[0].w = m_v3Movement.x;
 	}
 	// Let her rip
-	if (glfwGetKey(m_window, GLFW_KEY_U))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_U))
 	{
 		m_transform[0] -= m_transform[3] * frameSpeed;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_J))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_J))
 	{
 		m_transform[0] += m_transform[3] * frameSpeed;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_window, GLFW_KEY_U))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_pWindow, GLFW_KEY_U))
 	{
 		m_transform[1] -= m_transform[3] * frameSpeed;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_window, GLFW_KEY_J))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetKey(m_pWindow, GLFW_KEY_J))
 	{
 		m_transform[1] += m_transform[3] * frameSpeed;
 	}
@@ -289,25 +281,25 @@ void FlyCamera::Update(float fDeltaTime)
 
 #pragma region Perspective
 
-	if (glfwGetKey(m_window, GLFW_KEY_F1))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_F1))
 	{
 		//setPerspective(fovY, aspectRatio, near, far);
 		m_projection = glm::perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
 		m_projectionView = m_projection * m_view;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_F2))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_F2))
 	{
 		//setPerspective(fovY, aspectRatio, near, far);
 		m_projection = glm::perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 10.f, 15.f);
 		m_projectionView = m_projection * m_view;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_F3))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_F3))
 	{
 		//setPerspective(fovY, aspectRatio, near, far);
 		m_projection = glm::perspective(glm::pi<float>() * 0.75f, 16 / 9.f, 0.1f, 1000.f);
 		m_projectionView = m_projection * m_view;
 	}
-	if (glfwGetKey(m_window, GLFW_KEY_F4))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_F4))
 	{
 		//setPerspective(fovY, aspectRatio, near, far);
 		m_projection = glm::ortho(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
@@ -317,7 +309,7 @@ void FlyCamera::Update(float fDeltaTime)
 
 	// check for rotation
 	static bool sbMouseButtonDown = false;
-	if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_MIDDLE) || glfwGetKey(m_window, GLFW_KEY_M))
+	if (glfwGetMouseButton(m_pWindow, GLFW_MOUSE_BUTTON_MIDDLE) || glfwGetKey(m_pWindow, GLFW_KEY_M))
 	{
 		static double siPrevMouseX = 0;
 		static double siPrevMouseY = 0;
@@ -325,11 +317,11 @@ void FlyCamera::Update(float fDeltaTime)
 		if (sbMouseButtonDown == false)
 		{
 			sbMouseButtonDown = true;
-			glfwGetCursorPos(m_window, &siPrevMouseX, &siPrevMouseY);
+			glfwGetCursorPos(m_pWindow, &siPrevMouseX, &siPrevMouseY);
 		}
 
 		double mouseX = 0, mouseY = 0;
-		glfwGetCursorPos(m_window, &mouseX, &mouseY);
+		glfwGetCursorPos(m_pWindow, &mouseX, &mouseY);
 
 		double iDeltaX = mouseX - siPrevMouseX;
 		double iDeltaY = mouseY - siPrevMouseY;

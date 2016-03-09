@@ -6,6 +6,7 @@
 ///----------------------------------------------------------
 /// Brief: A TestApplication Class that Updates and Draws
 /// viewed: 
+/// Source: https://github.com/DavidAzouz29/AIEYear2Engine
 /// Invoke http://en.cppreference.com/w/cpp/utility/functional/invoke
 /// 
 /// ***EDIT***
@@ -26,6 +27,8 @@
 #include "Gizmos.h"
 #include "ParticleEmitter.h"
 #include "MathCollision.h"
+#include "imgui.h"
+#include "imgui_impl_glfw_gl3.h"
 
 #include <stb_image.h>
 #include <GLFW/glfw3.h>
@@ -43,7 +46,9 @@ using glm::mat4;
 //--------------------------------------------------------------------------------------
 TestApplication::TestApplication()
 	:// m_pCamera(nullptr),
-	m_eCurrentDrawState(E_DRAW_STATE_FILL) {
+	m_eCurrentDrawState(E_DRAW_STATE_FILL), 
+	m_bDrawGizmoGrid(true)
+{
 
 }
 
@@ -97,7 +102,7 @@ bool TestApplication::startup() {
 	m_pFbx = std::make_shared<FBXFile>();
 	//m_pFbx->load("./data/models/stanford/Bunny.fbx");
 	//m_pFbx->load("./data/models/soulspear/soulspear.fbx");
-	m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", FBXFile::UNITS_METER,true,true);
+	m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", FBXFile::UNITS_METER);
 	//m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", m_pFbx->UNITS_METER);
 	//FBXLoader(); // Needed if FBX without Animation
 	FBXSkeletonLoader();
@@ -172,6 +177,7 @@ bool TestApplication::startup() {
 	if (!m_pParticleEmitterB->create(configB)) return -5;
 #pragma endregion
 	///--------------------------------------------------
+	m_clearColour = glm::vec3(0.25f);
 	//////////////////////////////////////////////////////////////////////////
 	m_pickPosition = glm::vec3(0);
 
@@ -199,8 +205,8 @@ void TestApplication::shutdown() {
 bool TestApplication::update(float deltaTime) {
 	
 	// close the application if the window closes
-	if (glfwWindowShouldClose(m_window) ||
-		glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	if (glfwWindowShouldClose(m_pWindow) ||
+		glfwGetKey(m_pWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		return false;
 	}
@@ -210,7 +216,7 @@ bool TestApplication::update(float deltaTime) {
 	int iPrevTime = (int)m_timer;
 	// TODO: get camera cycling and lerp/ slerping/ squad working
 	// Cycles between various Cameras during run time
-	if (glfwGetKey(m_window, GLFW_KEY_GRAVE_ACCENT) || glfwGetKey(m_window, GLFW_KEY_KP_0))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_GRAVE_ACCENT) || glfwGetKey(m_pWindow, GLFW_KEY_KP_0))
 	{
 		//std::invoke(
 		E_CAMERA_MODE_STATE eCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
@@ -225,15 +231,15 @@ bool TestApplication::update(float deltaTime) {
 			iPrevTime = 0;
 		}
 	}
-	else if (glfwGetKey(m_window, GLFW_KEY_1) || glfwGetKey(m_window, GLFW_KEY_KP_1))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_1) || glfwGetKey(m_pWindow, GLFW_KEY_KP_1))
 	{
 		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_STATIC);
 	}
-	else if (glfwGetKey(m_window, GLFW_KEY_2) || glfwGetKey(m_window, GLFW_KEY_KP_2))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_2) || glfwGetKey(m_pWindow, GLFW_KEY_KP_2))
 	{
 		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_FLYCAMERA);
 	}
-	else if (glfwGetKey(m_window, GLFW_KEY_3) || glfwGetKey(m_window, GLFW_KEY_KP_3))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_3) || glfwGetKey(m_pWindow, GLFW_KEY_KP_3))
 	{
 		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_ORBIT);
 	}
@@ -248,6 +254,8 @@ bool TestApplication::update(float deltaTime) {
 	m_pCameraStateMachine->Update(deltaTime);
 	// clear the gizmos out for this frame
 	Gizmos::clear();
+
+	//TODO: ImGui here?
 
 	//////////////////////////////////////////////////////////////////////////
 	// YOUR UPDATE CODE HERE
@@ -265,9 +273,9 @@ bool TestApplication::update(float deltaTime) {
 	//////////////////////////////////////////////////////////////////////////
 
 	// an example of mouse picking
-	if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+	if (glfwGetMouseButton(m_pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
 		double x = 0, y = 0;
-		glfwGetCursorPos(m_window, &x, &y);
+		glfwGetCursorPos(m_pWindow, &x, &y);
 
 		// plane represents the ground, with a normal of (0,1,0) and a distance of 0 from (0,0,0)
 		glm::vec4 plane(0, 1, 0, 0);
@@ -278,20 +286,20 @@ bool TestApplication::update(float deltaTime) {
 
 	// Draw Mode: Filled, Poly, Dot
 #pragma region Choose Draw state
-	if (glfwGetKey(m_window, GLFW_KEY_0))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_0))
 	{
 		m_eCurrentDrawState = E_DRAW_STATE_FILL;
 	}
-	else if (glfwGetKey(m_window, GLFW_KEY_9))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_9))
 	{
 		m_eCurrentDrawState = E_DRAW_STATE_POLY;
 	}
-	else if (glfwGetKey(m_window, GLFW_KEY_8))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_8))
 	{
 		m_eCurrentDrawState = E_DRAW_STATE_DOT;
 	}
 	// Cycle Draw State
-	if (glfwGetKey(m_window, GLFW_KEY_MINUS))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_MINUS))
 	{
 		if (m_eCurrentDrawState < 0)
 		{
@@ -300,7 +308,7 @@ bool TestApplication::update(float deltaTime) {
 		//m_eCurrentDrawState--;
 		m_eCurrentDrawState = (E_DRAW_STATE)(m_eCurrentDrawState - 1);
 	}
-	else if (glfwGetKey(m_window, GLFW_KEY_EQUAL)) // == GLFW_RELEASE
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_EQUAL)) // == GLFW_RELEASE
 	{
 		//m_eCurrentDrawState++;
 		if (m_eCurrentDrawState > E_DRAW_STATE_COUNT)
@@ -323,20 +331,26 @@ void TestApplication::draw()
 	glViewport(0, 0, 512, 512); // 265 lower quarter of the texture
 
 	// ----------------------------------------------------------
-	glClearColor(0.25f, 0.25f, 0.25f, 1);
+	glClearColor(m_clearColour.r, m_clearColour.g, m_clearColour.b, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Clear ImGui
+	ImGui_ImplGlfwGL3_NewFrame();
 	// ----------------------------------------------------------
 	glBindVertexArray(m_pRender->GetSharedPointer()->GetVAO());
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 	// Draw Captured Objects Here
-	// ...for now let's add a grid to the gizmos
-	for (int i = 0; i < 21; ++i) {
-		Gizmos::addLine(vec3(-10 + i, 0, 10), vec3(-10 + i, 0, -10),
-			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+	if (m_bDrawGizmoGrid)
+	{
+		// ...for now let's add a grid to the gizmos
+		for (int i = 0; i < 21; ++i) {
+			Gizmos::addLine(vec3(-10 + i, 0, 10), vec3(-10 + i, 0, -10),
+				i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
 
-		Gizmos::addLine(vec3(10, 0, -10 + i), vec3(-10, 0, -10 + i),
-			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+			Gizmos::addLine(vec3(10, 0, -10 + i), vec3(-10, 0, -10 + i),
+				i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+		}
 	}
 
 	Gizmos::draw(m_pCameraStateMachine->GetCurrentCamera()->getProjectionView());
@@ -344,6 +358,10 @@ void TestApplication::draw()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glUseProgram(m_pRender->GetProgramID());
 	DrawApp();
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
+	//Render ImGui over everything
+	ImGui::Render();
 }
 
 void TestApplication::DrawApp()
@@ -426,14 +444,6 @@ void TestApplication::DrawApp()
 
 	//m_pRender->DrawTexture(m_pCamera.get());
 	//m_pRender->DrawTexture(pCamState); //TODO: needed for Soulspear
-	/*// ...for now let's add a grid to the gizmos
-	for (int i = 0; i < 21; ++i) {
-		Gizmos::addLine(vec3(-10 + i, 0, 10), vec3(-10 + i, 0, -10),
-			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
-
-		Gizmos::addLine(vec3(10, 0, -10 + i), vec3(-10, 0, -10 + i),
-			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
-	}*/
 
 	glBindVertexArray(m_pRender->GetSharedPointer()->GetVAO());
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -463,10 +473,17 @@ void TestApplication::DrawApp()
 
 	// get a orthographic projection matrix and draw 2D gizmos
 	int width = 0, height = 0;
-	glfwGetWindowSize(m_window, &width, &height);
+	glfwGetWindowSize(m_pWindow, &width, &height);
 	mat4 guiMatrix = glm::ortho<float>(0, 0, (float)width, (float)height);
 
-	Gizmos::draw2D(projView);	
+	Gizmos::draw2D(projView);
+
+	ImGui::ShowTestWindow();
+	ImGui::Begin("My rendering options");
+		ImGui::ColorEdit3("clear color", glm::value_ptr(m_clearColour));
+		ImGui::Checkbox("Should render Gizmo grid", &m_bDrawGizmoGrid);
+		m_pCameraStateMachine->GetCurrentCamera()->RenderUI();
+	ImGui::End();
 }
 
 #pragma region FBX

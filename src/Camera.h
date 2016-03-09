@@ -18,6 +18,7 @@ public:
 
 	virtual void Enter();
 	virtual void Update(float deltaTime) {};
+	virtual void RenderUI();
 	virtual void Exit() {}; //= 0;?
 
 	void	setSpeed(float speed)		{ m_speed = speed; }
@@ -41,7 +42,7 @@ public:
 
 protected:
 	
-	GLFWwindow* m_window;
+	GLFWwindow* m_pWindow;
 
 	float		m_speed;
 	float		m_fRotation;

@@ -1,5 +1,6 @@
 #define GLM_SWIZZLE
 #include "OrbitCamera.h"
+#include "imgui.h"
 
 #include <GLFW/glfw3.h>
 #include <glm/ext.hpp>
@@ -23,23 +24,23 @@ OrbitCamera::~OrbitCamera()
 
 void OrbitCamera::Update(float fDeltaTime)
 {
-	float frameSpeed = glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;
+	float frameSpeed = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;
 	/// <summary> 
 	/// If Any key: Rotates in the opposite direction.
 	/// <para> If was rotating Clockwise, it will now rotate Counter-Clockwise. </para>
 	/// </summary> 
-	if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS && !m_hasSpaceBeenPressed )
+	if (glfwGetKey(m_pWindow, GLFW_KEY_SPACE) == GLFW_PRESS && !m_hasSpaceBeenPressed )
 	{
 		m_isClockwise = !m_isClockwise;
 		m_hasSpaceBeenPressed = true;
 	}
-	else if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_RELEASE && m_hasSpaceBeenPressed)
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_SPACE) == GLFW_RELEASE && m_hasSpaceBeenPressed)
 	{
 		m_hasSpaceBeenPressed = false;
 	}
 
 	// Pause/ Freezes the position
-	if (glfwGetKey(m_window, GLFW_KEY_P) && !m_hasSpaceBeenPressed)
+	if (glfwGetKey(m_pWindow, GLFW_KEY_P) && !m_hasSpaceBeenPressed)
 	{
 		m_transform[3] = m_transform[3];
 	}
@@ -90,4 +91,20 @@ void OrbitCamera::Update(float fDeltaTime)
 		glfwGetKey(m_window, GLFW_KEY_E);
 	} */
 #pragma endregion
+}
+
+void OrbitCamera::RenderUI()
+{
+	if (ImGui::CollapsingHeader("Orbit Camera"))
+	{
+		if (ImGui::Button("Rotation"))
+		{
+			m_isClockwise = !m_isClockwise;
+		}
+		if (ImGui::Button("Pause"))
+		{
+			m_transform[3] = m_transform[3];
+		}
+		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (float)INT_MAX);
+	}
 }

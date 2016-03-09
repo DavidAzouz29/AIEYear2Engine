@@ -1,6 +1,8 @@
 
 #define GLM_SWIZZLE
 #include "Camera.h"
+#include "imgui.h"
+
 #include <GLFW/glfw3.h>
 #include <glm/ext.hpp>
 //#include <glm/detail/type_vec4.hpp>
@@ -76,7 +78,7 @@ void Camera::Enter()
 	// TODO: delete?
 	setLookAtFrom(glm::vec3(10, 10, 10), glm::vec3(0));
 
-	m_window = glfwGetCurrentContext();
+	m_pWindow = glfwGetCurrentContext();
 }
 
 glm::vec3 Camera::screenPositionToDirection(float x, float y) const {
@@ -107,4 +109,12 @@ glm::vec3 Camera::pickAgainstPlane(float x, float y, const glm::vec4& plane) con
 	float d = (plane.w - glm::dot(m_transform[3].xyz(), plane.xyz()) / glm::dot(dir, plane.xyz()));
 
 	return m_transform[3].xyz() + dir * d;
+}
+
+void Camera::RenderUI()
+{
+	if (ImGui::CollapsingHeader("Camera"))
+	{
+		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (float)INT_MAX);
+	}
 }
