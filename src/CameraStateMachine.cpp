@@ -58,8 +58,3 @@ void CameraStateMachine::ChangeState(E_CAMERA_MODE_STATE eState)
 	m_eCurrentState = eState;
 	m_cameraStatesArray[m_eCurrentState]->Enter();
 }
-
-/* Camera CameraStateMachine::CycleCamera()
-{
-
-} */

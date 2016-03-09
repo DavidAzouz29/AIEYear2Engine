@@ -207,17 +207,27 @@ bool TestApplication::update(float deltaTime) {
 
 	//Camera Mode: Static, FlyCamera, Orbit
 #pragma region Camera Mode
+	int iPrevTime = (int)m_timer;
 	// TODO: get camera cycling and lerp/ slerping/ squad working
 	// Cycles between various Cameras during run time
-	/*if (glfwGetKey(m_window, GLFW_KEY_GRAVE_ACCENT) || glfwGetKey(m_window, GLFW_KEY_KP_0))
+	if (glfwGetKey(m_window, GLFW_KEY_GRAVE_ACCENT) || glfwGetKey(m_window, GLFW_KEY_KP_0))
 	{
-		std::invoke(m_timer, 
-		m_pCameraStateMachine->ChangeState((E_CAMERA_MODE_STATE)(m_pCameraStateMachine->GetCurrentCameraMode() + 1)));
+		//std::invoke(
+		E_CAMERA_MODE_STATE eCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
+		if (iPrevTime > 5)
+		{
+			eCurrentCameraMode = (E_CAMERA_MODE_STATE)(eCurrentCameraMode + 1);
+			if (eCurrentCameraMode > E_CAMERA_MODE_STATE_COUNT - 1)
+			{
+				eCurrentCameraMode = (E_CAMERA_MODE_STATE)0;
+			}
+			m_pCameraStateMachine->ChangeState((E_CAMERA_MODE_STATE)(eCurrentCameraMode));
+			iPrevTime = 0;
+		}
 	}
-	else*/ if (glfwGetKey(m_window, GLFW_KEY_1) || glfwGetKey(m_window, GLFW_KEY_KP_1))
+	else if (glfwGetKey(m_window, GLFW_KEY_1) || glfwGetKey(m_window, GLFW_KEY_KP_1))
 	{
 		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_STATIC);
-		m_pCameraStateMachine->GetCurrentCameraMode(); 
 	}
 	else if (glfwGetKey(m_window, GLFW_KEY_2) || glfwGetKey(m_window, GLFW_KEY_KP_2))
 	{
@@ -283,21 +293,21 @@ bool TestApplication::update(float deltaTime) {
 	// Cycle Draw State
 	if (glfwGetKey(m_window, GLFW_KEY_MINUS))
 	{
-		//m_eCurrentDrawState--;
-		m_eCurrentDrawState = (E_DRAW_STATE)(m_eCurrentDrawState - 1);
 		if (m_eCurrentDrawState < 0)
 		{
 			m_eCurrentDrawState = (E_DRAW_STATE)(E_DRAW_STATE_COUNT - 1);
 		}
+		//m_eCurrentDrawState--;
+		m_eCurrentDrawState = (E_DRAW_STATE)(m_eCurrentDrawState - 1);
 	}
 	else if (glfwGetKey(m_window, GLFW_KEY_EQUAL)) // == GLFW_RELEASE
 	{
 		//m_eCurrentDrawState++;
-		m_eCurrentDrawState = (E_DRAW_STATE)(m_eCurrentDrawState + 1);
-		if (m_eCurrentDrawState >= E_DRAW_STATE_COUNT)
+		if (m_eCurrentDrawState > E_DRAW_STATE_COUNT)
 		{
 			m_eCurrentDrawState = (E_DRAW_STATE)0;
 		}
+		m_eCurrentDrawState = (E_DRAW_STATE)(m_eCurrentDrawState + 1);
 	}
 #pragma endregion
 
