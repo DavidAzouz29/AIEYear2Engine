@@ -27,6 +27,7 @@ public:
 	void	setPerspective(float fovY, float aspectRatio, float near, float far);
 
 	void	setLookAtFrom(const glm::vec3& from, const glm::vec3& to);
+	//void	setLookAtFrom(const glm::vec4& from, const glm::vec4& to);
 
 	const glm::mat4&	getTransform() const		{ return m_transform; }
 	const glm::mat4&	getProjection() const		{ return m_projection; }

@@ -1,3 +1,4 @@
+// viewed: https://www.reddit.com/r/Unity3D/comments/1syswe/ps4_controller_map_for_unity/
 #define GLM_SWIZZLE
 #include "FlyCamera.h"
 #include <GLFW/glfw3.h>
@@ -32,14 +33,16 @@ void FlyCamera::Update(float fDeltaTime)
 	// ---------------------------------------------------------------------------------------
 #pragma region Movement
 	// ---------------------------------------------------------------------------------------
-	if (glfwGetKey(m_pWindow, GLFW_KEY_W) || glfwGetKey(m_pWindow, GLFW_KEY_UP) 
-		|| (glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetMouseButton(m_pWindow, GLFW_MOUSE_BUTTON_LEFT)))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_W) || glfwGetKey(m_pWindow, GLFW_KEY_UP) ||
+		(glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetMouseButton(m_pWindow, GLFW_MOUSE_BUTTON_LEFT)) ||
+		glfwGetKey(m_pWindow, GLFW_JOYSTICK_4))
 	{
 		m_transform[3].x += m_transform[1].x * frameSpeed;
 		m_transform[3].z += m_transform[1].z * frameSpeed;
 	}
 	if ((glfwGetKey(m_pWindow, GLFW_KEY_LEFT_CONTROL) && glfwGetMouseButton(m_pWindow, GLFW_MOUSE_BUTTON_RIGHT)) ||
-		glfwGetKey(m_pWindow, GLFW_KEY_S) || glfwGetKey(m_pWindow, GLFW_KEY_DOWN))
+		glfwGetKey(m_pWindow, GLFW_KEY_S) || glfwGetKey(m_pWindow, GLFW_KEY_DOWN) ||
+		glfwGetKey(m_pWindow, GLFW_JOYSTICK_1))
 	{
 		m_transform[3].x -= m_transform[1].x * frameSpeed;
 		m_transform[3].z -= m_transform[1].z * frameSpeed;

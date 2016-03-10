@@ -31,7 +31,7 @@ enum E_CAMERA_MODE_STATE
 	E_CAMERA_MODE_STATE_STATIC,
 	E_CAMERA_MODE_STATE_FLYCAMERA, /* Move around scene */
 	E_CAMERA_MODE_STATE_ORBIT, /* Orbit */
-	//E_CAMERA_MODE_STATE_TRAVEL, /* travels between nodes */
+	E_CAMERA_MODE_STATE_TRAVEL, /* Travels between nodes */
 
 	E_CAMERA_MODE_STATE_COUNT,
 };

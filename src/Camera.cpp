@@ -45,6 +45,13 @@ void Camera::setLookAtFrom(const glm::vec3& from, const glm::vec3& to)
 	m_projectionView = m_projection * m_view;
 }
 
+/*void Camera::setLookAtFrom(const glm::vec4& from, const glm::vec4& to)
+{
+	m_view = glm::lookAt(from.xyz(), to.xyz(), glm::vec4(0, 1, 0, 0));
+	m_transform = glm::inverse(m_view);
+	m_projectionView = m_projection * m_view;
+} */
+
 void Camera::Enter()
 {
 	//TODO: repeated code? ^
@@ -113,8 +120,12 @@ glm::vec3 Camera::pickAgainstPlane(float x, float y, const glm::vec4& plane) con
 
 void Camera::RenderUI()
 {
+	static float vec4f[4] = { m_transform[3].x, m_transform[3].y, m_transform[3].z, m_transform[3].w };
+
 	if (ImGui::CollapsingHeader("Camera"))
 	{
 		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (float)INT_MAX);
+		ImGui::InputFloat3("Camera Location", vec4f);
+		ImGui::DragFloat3("Camera Location", vec4f, 1.1f, 0.01f, (float)INT_MAX);
 	}
 }

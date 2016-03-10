@@ -7,6 +7,7 @@
 /// Brief: A TestApplication Class that Updates and Draws
 /// viewed: 
 /// Source: https://github.com/DavidAzouz29/AIEYear2Engine
+/// Lib and related files: https://drive.google.com/folderview?id=0B1wViLeuTDL8TF9feHl2RThFR0E&usp=sharing
 /// Invoke http://en.cppreference.com/w/cpp/utility/functional/invoke
 /// 
 /// ***EDIT***
@@ -36,6 +37,8 @@
 #include <glm/ext.hpp>
 
 #include <assert.h>
+
+#define IM_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 
 using glm::vec3;
 using glm::vec4;
@@ -243,10 +246,10 @@ bool TestApplication::update(float deltaTime) {
 	{
 		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_ORBIT);
 	}
-	/*else if (glfwGetKey(m_window, GLFW_KEY_4) || glfwGetKey(m_window, GLFW_KEY_KP_4))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_4) || glfwGetKey(m_pWindow, GLFW_KEY_KP_4))
 	{
 		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_TRAVEL);
-	}*/
+	}
 #pragma endregion
 
 	// update the camera's movement
@@ -371,24 +374,29 @@ void TestApplication::DrawApp()
 	{
 	case E_CAMERA_MODE_STATE_STATIC:
 	{
-	glClearColor(0.25f, 0.55f, 0.75f, 1);
-	break;
+		glClearColor(0.25f, 0.55f, 0.75f, 1);
+		break;
 	}
 	case E_CAMERA_MODE_STATE_FLYCAMERA:
 	{
-	glClearColor(0.55f, 0.75f, 0.25f, 1);
-	break;
+		glClearColor(0.55f, 0.75f, 0.25f, 1);
+		break;
 	}
 	case E_CAMERA_MODE_STATE_ORBIT:
 	{
-	glClearColor(0.75f, 0.25f, 0.55f, 1);
-	break;
+		glClearColor(0.75f, 0.25f, 0.55f, 1);
+		break;
+	}
+	case E_CAMERA_MODE_STATE_TRAVEL:
+	{
+		glClearColor(0.75f, 1.0f, 0.55f, 1);
+		break;
 	}
 	default:
 	{
-	glClearColor(0.25f, 0.25f, 0.25f, 1);
-	//glClearColor(0.75f, 0.75f, 0.75f, 1);
-	break;
+		glClearColor(0.25f, 0.25f, 0.25f, 1);
+		//glClearColor(0.75f, 0.75f, 0.75f, 1);
+		break;
 	}
 	}
 
@@ -483,6 +491,44 @@ void TestApplication::DrawApp()
 		ImGui::ColorEdit3("clear color", glm::value_ptr(m_clearColour));
 		ImGui::Checkbox("Should render Gizmo grid", &m_bDrawGizmoGrid);
 		m_pCameraStateMachine->GetCurrentCamera()->RenderUI();
+
+		// Camera State
+		ImGui::TextWrapped("Camera Mode");
+
+		//static int selected_camera = -1;
+		static E_CAMERA_MODE_STATE selected_camera = m_pCameraStateMachine->GetCurrentCameraMode();
+		//const char* c_camera = "Camera";
+		const char* names[] = { "Static ", "Fly ", "Orbit ", "Travel "};
+
+		if (ImGui::Button("Select.."))
+			ImGui::OpenPopup("select");
+		ImGui::SameLine();
+		ImGui::Text(selected_camera == (E_CAMERA_MODE_STATE)-1 ? "<None>" : names[(int)selected_camera]);
+		if (ImGui::BeginPopup("select"))
+		{
+			ImGui::Text("Modes: ");
+			ImGui::Separator();
+			for (int i = 0; i < IM_ARRAYSIZE(names); i++)
+			{
+				if (ImGui::Selectable(names[i]))
+				{
+					selected_camera = (E_CAMERA_MODE_STATE)i;
+					m_pCameraStateMachine->ChangeState(selected_camera);
+				}
+			}
+			ImGui::EndPopup();
+		}
+
+		if (ImGui::Button("Camera State"))
+		{
+			E_CAMERA_MODE_STATE eCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
+			eCurrentCameraMode = (E_CAMERA_MODE_STATE)(eCurrentCameraMode + 1);
+			if (eCurrentCameraMode > E_CAMERA_MODE_STATE_COUNT - 1)
+			{
+				eCurrentCameraMode = (E_CAMERA_MODE_STATE)0;
+			}
+			m_pCameraStateMachine->ChangeState((E_CAMERA_MODE_STATE)(eCurrentCameraMode));
+		}
 	ImGui::End();
 }
 
@@ -522,21 +568,11 @@ void TestApplication::CreateOpenGLBuffers(FBXFile* fbx)
 			mesh->m_indices.size() * sizeof(unsigned int),
 			mesh->m_indices.data(), GL_STATIC_DRAW);
 
-		/*glEnableVertexAttribArray(0); // position
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), 0);
-
-		glEnableVertexAttribArray(1); // normal
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), ((char*)0) + FBXVertex::NormalOffset);
-
-		glEnableVertexAttribArray(2); // Texture on FBX model via coordinates
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::TexCoord1Offset);
-		*/
-		//FBXSkeletonRender();
 		glEnableVertexAttribArray(0); //position
 		glEnableVertexAttribArray(1); //normals
 
 		glEnableVertexAttribArray(2); //tangents
-		glEnableVertexAttribArray(3); //textcoords
+		glEnableVertexAttribArray(3); //textcoords Texture on FBX model via coordinates
 		glEnableVertexAttribArray(4); //weights
 		glEnableVertexAttribArray(5); //indices
 
