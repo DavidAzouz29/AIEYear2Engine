@@ -40,16 +40,16 @@ void MathCollision::Update(Camera* cam)
 	if (d > sphere.fRadius)
 	{
 		v4PlaneColor = vec4(0, 1, 1, 1);
-		printf("Front\n");
+		//printf("Front\n");
 	}
 	else if (d < -sphere.fRadius)
 	{
 		v4PlaneColor = vec4(1, 0, 0, 1);
-		printf("Back\n");
+		//printf("Back\n");
 	}
 	else
 	{
-		printf("On the plane\n");
+		//printf("On the plane\n");
 	}
 
 	Gizmos::addTri(vec3(4, 1, 4), vec3(-4, 1, -4), vec3(-4, 1, 4), v4PlaneColor);
@@ -64,17 +64,17 @@ void MathCollision::Update(Camera* cam)
 
 		if (d < -sphere.fRadius)
 		{
-			printf("Behind, don't render it!\n");
+			//printf("Behind, don't render it!\n");
 			glClearColor(0.25f, 1, 0.25f, 1);
 			break;
 		}
 		else if (d < sphere.fRadius)
 		{
-			printf("Touching, we still need to render it!\n");
+			//printf("Touching, we still need to render it!\n");
 		}
 		else
 		{
-			printf("Front, fully visible so render it!\n");
+			//printf("Front, fully visible so render it!\n");
 			glClearColor(0.25f, 0.25f, 0.25f, 1);
 		}
 	}

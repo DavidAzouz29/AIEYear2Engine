@@ -15,6 +15,7 @@ class Camera;
 class CameraStateMachine;
 class FBXFile;
 class ParticleEmitter;
+class GPUParticleEmitter;
 class MathCollision;
 
 /// <summary> 
@@ -55,15 +56,17 @@ public:
 	/// ----------------------------------------------------------
 
 private:
-
-	std::shared_ptr<Camera> m_pCamera;
+	// This should be used for any camera related activites.
 	std::shared_ptr<CameraStateMachine> m_pCameraStateMachine;
+	//std::shared_ptr<Camera> m_pCurrentCamera;
 	std::shared_ptr<FBXFile> m_pFbx;
 	std::shared_ptr<ParticleEmitter> m_pParticleEmitterA;
 	std::shared_ptr<ParticleEmitter> m_pParticleEmitterB;
+	std::shared_ptr<GPUParticleEmitter> m_pGPUEmitter;
 	std::shared_ptr<Render> m_pRender;
 	std::shared_ptr<MathCollision> m_pMath;
 
+	Camera* m_pCamState;
 	/// ----------------------------------------------------------
 	/// FBXLoader
 	/// ----------------------------------------------------------
@@ -76,6 +79,11 @@ private:
 	/// ----------------------------------------------------------
 	E_DRAW_STATE m_eCurrentDrawState;
 	/// ----------------------------------------------------------
+	glm::vec3 m_v3ClearColor;
+	glm::vec4 m_v4StartColor;
+	glm::vec4 m_v4EndColor;
+
+	bool m_bDrawGizmoGrid;
 
 	// this is an example position for camera picking
 	glm::vec3	m_pickPosition;

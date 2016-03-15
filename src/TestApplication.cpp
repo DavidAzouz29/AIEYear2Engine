@@ -6,6 +6,8 @@
 ///----------------------------------------------------------
 /// Brief: A TestApplication Class that Updates and Draws
 /// viewed: 
+/// Source: https://github.com/DavidAzouz29/AIEYear2Engine
+/// Lib and related files: https://drive.google.com/folderview?id=0B1wViLeuTDL8TF9feHl2RThFR0E&usp=sharing
 /// Invoke http://en.cppreference.com/w/cpp/utility/functional/invoke
 /// 
 /// ***EDIT***
@@ -25,7 +27,10 @@
 #include "CameraStateMachine.h"
 #include "Gizmos.h"
 #include "ParticleEmitter.h"
+#include "GPUParticleEmitter.h"
 #include "MathCollision.h"
+#include "imgui.h"
+#include "imgui_impl_glfw_gl3.h"
 
 #include <stb_image.h>
 #include <GLFW/glfw3.h>
@@ -33,6 +38,8 @@
 #include <glm/ext.hpp>
 
 #include <assert.h>
+
+#define IM_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 
 using glm::vec3;
 using glm::vec4;
@@ -43,7 +50,12 @@ using glm::mat4;
 //--------------------------------------------------------------------------------------
 TestApplication::TestApplication()
 	:// m_pCamera(nullptr),
-	m_eCurrentDrawState(E_DRAW_STATE_FILL) {
+	m_timer(0),
+	m_v4StartColor(1, 0, 0, 1),
+	m_v4EndColor(1, 1, 0, 1),
+	m_eCurrentDrawState(E_DRAW_STATE_FILL), 
+	m_bDrawGizmoGrid(true)
+{
 
 }
 
@@ -74,8 +86,9 @@ bool TestApplication::startup() {
 	vec4 v4Perspective(glm::pi<float>() * 0.25f, 16 / 9.0f, 0.1f, 10000.f);
 	m_pCameraStateMachine = std::make_shared<CameraStateMachine>(v4Perspective);
 
+	m_pCamState = m_pCameraStateMachine->GetCurrentCamera();
 	// Repeating code: TODO: change
-	/*if (m_pCameraStateMachine->GetCurrentCamera() == nullptr)
+	/*if (m_pCamState == nullptr)
 	{
 		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_FLYCAMERA);
 	}*/
@@ -97,7 +110,7 @@ bool TestApplication::startup() {
 	m_pFbx = std::make_shared<FBXFile>();
 	//m_pFbx->load("./data/models/stanford/Bunny.fbx");
 	//m_pFbx->load("./data/models/soulspear/soulspear.fbx");
-	m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", FBXFile::UNITS_METER,true,true);
+	m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", FBXFile::UNITS_METER);
 	//m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", m_pFbx->UNITS_METER);
 	//FBXLoader(); // Needed if FBX without Animation
 	FBXSkeletonLoader();
@@ -134,7 +147,7 @@ bool TestApplication::startup() {
 	m_pRender->GetSharedPointer()->CreateRenderTargetQuad();
 	//=======================================================
  	m_pMath = std::make_shared<MathCollision>();
-	///----------------------------------------------------------
+	///------------------------------------------------------
 #pragma region Particles
 	///----------------------------------------------------------
 	m_pParticleEmitterA = std::make_shared<ParticleEmitter>();
@@ -171,7 +184,16 @@ bool TestApplication::startup() {
 
 	if (!m_pParticleEmitterB->create(configB)) return -5;
 #pragma endregion
-	///--------------------------------------------------
+	///------------------------------------------------------
+#pragma region GPUParticles
+	m_pGPUEmitter = std::make_shared<GPUParticleEmitter>();
+	const GLuint MAX_PARTICLES = 100; //100000
+	m_pGPUEmitter.get()->Initalise(MAX_PARTICLES, 0.1f, 5.0f, 5, 20, 1, 0.1f,
+		m_v4StartColor, m_v4EndColor);
+
+#pragma endregion
+	///------------------------------------------------------
+	m_v3ClearColor = glm::vec3(0.25f);
 	//////////////////////////////////////////////////////////////////////////
 	m_pickPosition = glm::vec3(0);
 
@@ -199,8 +221,8 @@ void TestApplication::shutdown() {
 bool TestApplication::update(float deltaTime) {
 	
 	// close the application if the window closes
-	if (glfwWindowShouldClose(m_window) ||
-		glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	if (glfwWindowShouldClose(m_pWindow) ||
+		glfwGetKey(m_pWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		return false;
 	}
@@ -210,7 +232,7 @@ bool TestApplication::update(float deltaTime) {
 	int iPrevTime = (int)m_timer;
 	// TODO: get camera cycling and lerp/ slerping/ squad working
 	// Cycles between various Cameras during run time
-	if (glfwGetKey(m_window, GLFW_KEY_GRAVE_ACCENT) || glfwGetKey(m_window, GLFW_KEY_KP_0))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_GRAVE_ACCENT) || glfwGetKey(m_pWindow, GLFW_KEY_KP_0))
 	{
 		//std::invoke(
 		E_CAMERA_MODE_STATE eCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
@@ -225,22 +247,27 @@ bool TestApplication::update(float deltaTime) {
 			iPrevTime = 0;
 		}
 	}
-	else if (glfwGetKey(m_window, GLFW_KEY_1) || glfwGetKey(m_window, GLFW_KEY_KP_1))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_1) || glfwGetKey(m_pWindow, GLFW_KEY_KP_1))
 	{
 		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_STATIC);
 	}
-	else if (glfwGetKey(m_window, GLFW_KEY_2) || glfwGetKey(m_window, GLFW_KEY_KP_2))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_2) || glfwGetKey(m_pWindow, GLFW_KEY_KP_2))
 	{
 		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_FLYCAMERA);
 	}
-	else if (glfwGetKey(m_window, GLFW_KEY_3) || glfwGetKey(m_window, GLFW_KEY_KP_3))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_3) || glfwGetKey(m_pWindow, GLFW_KEY_KP_3))
 	{
 		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_ORBIT);
 	}
-	/*else if (glfwGetKey(m_window, GLFW_KEY_4) || glfwGetKey(m_window, GLFW_KEY_KP_4))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_4) || glfwGetKey(m_pWindow, GLFW_KEY_KP_4))
 	{
 		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_TRAVEL);
-	}*/
+	}
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_5) || glfwGetKey(m_pWindow, GLFW_KEY_KP_5))
+	{
+		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_LOCATION);
+	}
+
 #pragma endregion
 
 	// update the camera's movement
@@ -249,6 +276,8 @@ bool TestApplication::update(float deltaTime) {
 	// clear the gizmos out for this frame
 	Gizmos::clear();
 
+	//TODO: ImGui here?
+
 	//////////////////////////////////////////////////////////////////////////
 	// YOUR UPDATE CODE HERE
 
@@ -256,42 +285,44 @@ bool TestApplication::update(float deltaTime) {
 	FBXUpdate();
 
 	//m_pMath->Update(m_pCamera.get());
-	m_pMath->Update(m_pCameraStateMachine->GetCurrentCamera());
+	m_pCamState = m_pCameraStateMachine.get()->GetCurrentCamera();
+
+	m_pMath->Update(m_pCamState);
 	///----------------------------------------------------------
 	// Particles
 	//m_pParticleEmitterA->update(deltaTime, m_pCamera->getTransform());
-	m_pParticleEmitterA->update(deltaTime, m_pCameraStateMachine->GetCurrentCamera()->getTransform());
-	m_pParticleEmitterB->update(deltaTime, m_pCameraStateMachine->GetCurrentCamera()->getTransform());
+	m_pParticleEmitterA->update(deltaTime, m_pCamState->getTransform());
+	m_pParticleEmitterB->update(deltaTime, m_pCamState->getTransform());
 	//////////////////////////////////////////////////////////////////////////
 
 	// an example of mouse picking
-	if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+	if (glfwGetMouseButton(m_pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
 		double x = 0, y = 0;
-		glfwGetCursorPos(m_window, &x, &y);
+		glfwGetCursorPos(m_pWindow, &x, &y);
 
 		// plane represents the ground, with a normal of (0,1,0) and a distance of 0 from (0,0,0)
 		glm::vec4 plane(0, 1, 0, 0);
 		//m_pickPosition = m_pCamera->pickAgainstPlane((float)x, (float)y, plane);
-		m_pickPosition = m_pCameraStateMachine->GetCurrentCamera()->pickAgainstPlane((float)x, (float)y, plane);
+		m_pickPosition = m_pCamState->pickAgainstPlane((float)x, (float)y, plane);
 	}
 	Gizmos::addTransform(glm::translate(m_pickPosition));
 
 	// Draw Mode: Filled, Poly, Dot
 #pragma region Choose Draw state
-	if (glfwGetKey(m_window, GLFW_KEY_0))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_0))
 	{
 		m_eCurrentDrawState = E_DRAW_STATE_FILL;
 	}
-	else if (glfwGetKey(m_window, GLFW_KEY_9))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_9))
 	{
 		m_eCurrentDrawState = E_DRAW_STATE_POLY;
 	}
-	else if (glfwGetKey(m_window, GLFW_KEY_8))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_8))
 	{
 		m_eCurrentDrawState = E_DRAW_STATE_DOT;
 	}
 	// Cycle Draw State
-	if (glfwGetKey(m_window, GLFW_KEY_MINUS))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_MINUS))
 	{
 		if (m_eCurrentDrawState < 0)
 		{
@@ -300,7 +331,7 @@ bool TestApplication::update(float deltaTime) {
 		//m_eCurrentDrawState--;
 		m_eCurrentDrawState = (E_DRAW_STATE)(m_eCurrentDrawState - 1);
 	}
-	else if (glfwGetKey(m_window, GLFW_KEY_EQUAL)) // == GLFW_RELEASE
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_EQUAL)) // == GLFW_RELEASE
 	{
 		//m_eCurrentDrawState++;
 		if (m_eCurrentDrawState > E_DRAW_STATE_COUNT)
@@ -323,27 +354,37 @@ void TestApplication::draw()
 	glViewport(0, 0, 512, 512); // 265 lower quarter of the texture
 
 	// ----------------------------------------------------------
-	glClearColor(0.25f, 0.25f, 0.25f, 1);
+	glClearColor(m_v3ClearColor.r, m_v3ClearColor.g, m_v3ClearColor.b, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Clear ImGui
+	ImGui_ImplGlfwGL3_NewFrame();
 	// ----------------------------------------------------------
 	glBindVertexArray(m_pRender->GetSharedPointer()->GetVAO());
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 	// Draw Captured Objects Here
-	// ...for now let's add a grid to the gizmos
-	for (int i = 0; i < 21; ++i) {
-		Gizmos::addLine(vec3(-10 + i, 0, 10), vec3(-10 + i, 0, -10),
-			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+	if (m_bDrawGizmoGrid)
+	{
+		// ...for now let's add a grid to the gizmos
+		for (int i = 0; i < 21; ++i) {
+			Gizmos::addLine(vec3(-10 + i, 0, 10), vec3(-10 + i, 0, -10),
+				i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
 
-		Gizmos::addLine(vec3(10, 0, -10 + i), vec3(-10, 0, -10 + i),
-			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+			Gizmos::addLine(vec3(10, 0, -10 + i), vec3(-10, 0, -10 + i),
+				i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+		}
 	}
 
-	Gizmos::draw(m_pCameraStateMachine->GetCurrentCamera()->getProjectionView());
+	Gizmos::draw(m_pCamState->getProjectionView());
 	// draw
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glUseProgram(m_pRender->GetProgramID());
 	DrawApp();
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
+	//Render ImGui over everything
+	ImGui::Render();
 }
 
 void TestApplication::DrawApp()
@@ -353,24 +394,35 @@ void TestApplication::DrawApp()
 	{
 	case E_CAMERA_MODE_STATE_STATIC:
 	{
-	glClearColor(0.25f, 0.55f, 0.75f, 1);
-	break;
+		glClearColor(0.25f, 0.55f, 0.75f, 1);
+		break;
 	}
 	case E_CAMERA_MODE_STATE_FLYCAMERA:
 	{
-	glClearColor(0.55f, 0.75f, 0.25f, 1);
-	break;
+		glClearColor(0.55f, 0.75f, 0.25f, 1);
+		break;
 	}
 	case E_CAMERA_MODE_STATE_ORBIT:
 	{
-	glClearColor(0.75f, 0.25f, 0.55f, 1);
-	break;
+		glClearColor(0.75f, 0.25f, 0.55f, 1);
+		break;
+	}
+	case E_CAMERA_MODE_STATE_TRAVEL:
+	{
+		glClearColor(0.75f, 1.0f, 0.55f, 1);
+		break;
+	}
+	case E_CAMERA_MODE_STATE_LOCATION:
+	{
+		glClearColor(0.55f, 0.75f, 1.0f, 1);
+		break;
 	}
 	default:
 	{
-	glClearColor(0.25f, 0.25f, 0.25f, 1);
-	//glClearColor(0.75f, 0.75f, 0.75f, 1);
-	break;
+		glClearColor(0.25f, 0.25f, 0.25f, 1);
+		//TODO: new Cam//glClearColor(1.0f, 0.55f, 0.75f, 1);
+		//glClearColor(0.75f, 0.75f, 0.75f, 1);
+		break;
 	}
 	}
 
@@ -379,7 +431,8 @@ void TestApplication::DrawApp()
 	glViewport(0, 0, 1280, 720);
 	// use our texture program
 
-	glm::mat4 projView = m_pCameraStateMachine->GetCurrentCamera()->getProjectionView();
+	//glm::mat4 projView = m_pCameraStateMachine->GetCurrentCamera()->getProjectionView();
+	glm::mat4 projView = m_pCamState->getProjectionView();
 
 	// Render Target
 	// bind the camera
@@ -399,55 +452,45 @@ void TestApplication::DrawApp()
 	{
 	case E_DRAW_STATE_FILL:
 	{
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
-	break;
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
+		break;
 	}
 	case E_DRAW_STATE_POLY:
 	{
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Poly
-	break;
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Poly
+		break;
 	}
 	case E_DRAW_STATE_DOT:
 	{
-	glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); // Dot
-	break;
+		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); // Dot
+		break;
 	}
 	default:
 	{
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
-	break;
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
+		break;
 	}
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	// DRAW YOUR THINGS HERE
 	// 
-	Camera* pCamState = m_pCameraStateMachine->GetCurrentCamera();
-
 	//m_pRender->DrawTexture(m_pCamera.get());
-	//m_pRender->DrawTexture(pCamState); //TODO: needed for Soulspear
-	/*// ...for now let's add a grid to the gizmos
-	for (int i = 0; i < 21; ++i) {
-		Gizmos::addLine(vec3(-10 + i, 0, 10), vec3(-10 + i, 0, -10),
-			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
-
-		Gizmos::addLine(vec3(10, 0, -10 + i), vec3(-10, 0, -10 + i),
-			i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
-	}*/
+	//m_pRender->DrawTexture(m_pCamState); //TODO: needed for Soulspear
 
 	glBindVertexArray(m_pRender->GetSharedPointer()->GetVAO());
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
-	m_pRender->DrawTextureP(pCamState); // TODO: FBX Texture - Needed for Render Target
+	m_pRender->DrawTextureP(m_pCamState); // TODO: FBX Texture - Needed for Render Target
 	
-	Gizmos::addSphere(glm::vec3(0, 5, 0), 0.5f, 8, 8, glm::vec4(1, 1, 0, 1));
+	Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, m_v4EndColor);
 	//
 	//m_pVertexColoredGrid->draw(projView);
 	//m_pSpriteSheetQuad->draw(projView);
 	//m_pFBXMesh->draw(projView);
 
 	// FBX
-	//RenderFBX(pCamState); // Need this for FBX
+	//RenderFBX(m_pCamState); // Need this for FBX
 	FBXDraw();
 	//FBXSkeletonRender();
 
@@ -455,6 +498,10 @@ void TestApplication::DrawApp()
 	m_pParticleEmitterA->draw(projView);
 	m_pParticleEmitterB->draw(projView);
 
+	// GPU Particles
+	m_pGPUEmitter.get()->Draw((GLfloat)glfwGetTime(),
+		m_pCamState->getTransform(),
+		m_pCamState->getProjectionView());
 	//////////////////////////////////////////////////////////////////////////
 
 	//draw our meshes, or gizmos, to the render target
@@ -463,10 +510,98 @@ void TestApplication::DrawApp()
 
 	// get a orthographic projection matrix and draw 2D gizmos
 	int width = 0, height = 0;
-	glfwGetWindowSize(m_window, &width, &height);
+	glfwGetWindowSize(m_pWindow, &width, &height);
 	mat4 guiMatrix = glm::ortho<float>(0, 0, (float)width, (float)height);
 
-	Gizmos::draw2D(projView);	
+	Gizmos::draw2D(projView);
+
+	ImGui::ShowTestWindow();
+	ImGui::Begin("My rendering options");
+		ImGui::ColorEdit3("clear color", glm::value_ptr(m_v3ClearColor));
+		ImGui::ColorEdit3("Particle Start Colour", glm::value_ptr(m_v4StartColor));
+		ImGui::ColorEdit3("Particle End Colour", glm::value_ptr(m_v4EndColor));
+		ImGui::Checkbox("Should render Gizmo grid", &m_bDrawGizmoGrid);
+		ImGui::Separator();
+
+		// Camera State
+		ImGui::TextWrapped("Camera Mode");
+
+		//static int selected_camera = -1;
+		static E_CAMERA_MODE_STATE selected_camera = m_pCameraStateMachine->GetCurrentCameraMode();
+		//const char* c_camera = "Camera"; //TODO:
+		const char* names[] = { "Static ", "Fly ", "Orbit ", "Travel ", "Location "};
+
+		if (ImGui::Button("Select.."))
+			ImGui::OpenPopup("select");
+		ImGui::SameLine();
+		ImGui::Text(selected_camera == (E_CAMERA_MODE_STATE)-1 ? "<None>" : names[(int)selected_camera]);
+		if (ImGui::BeginPopup("select"))
+		{
+			ImGui::Text("Modes: ");
+			ImGui::Separator();
+			for (int i = 0; i < IM_ARRAYSIZE(names); i++)
+			{
+				if (ImGui::Selectable(names[i]))
+				{
+					selected_camera = (E_CAMERA_MODE_STATE)i;
+					m_pCameraStateMachine->ChangeState(selected_camera);
+				}
+			}
+			ImGui::EndPopup();
+		}
+
+		///-----------------------------------------------------------------------------------------------------------
+		//static int e = 0; // E_CAMERA_MODE_STATE 
+		//TODO: Make radio buttons select state
+		static int iCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
+		ImGui::RadioButton(names[0], &iCurrentCameraMode, 0); ImGui::SameLine();
+		ImGui::RadioButton(names[1], &iCurrentCameraMode, 1); ImGui::SameLine();
+		ImGui::RadioButton(names[2], &iCurrentCameraMode, 2); ImGui::SameLine();
+		ImGui::RadioButton(names[3], &iCurrentCameraMode, 3); ImGui::SameLine();
+		ImGui::RadioButton(names[4], &iCurrentCameraMode, 4);
+
+		if (ImGui::Button("Camera State"))
+		{
+			E_CAMERA_MODE_STATE eCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
+			eCurrentCameraMode = (E_CAMERA_MODE_STATE)(eCurrentCameraMode + 1);
+			if (eCurrentCameraMode > E_CAMERA_MODE_STATE_COUNT - 1)
+			{
+				eCurrentCameraMode = (E_CAMERA_MODE_STATE)0;
+			}
+			m_pCameraStateMachine->ChangeState((E_CAMERA_MODE_STATE)(eCurrentCameraMode));
+		}
+
+		// Each Camera specific UI attributes
+		m_pCamState->RenderUI();
+		ImGui::Separator();
+
+	ImGui::End();
+
+	// Overlay FPS 
+	static bool show_app_fixed_overlay = true;
+	if (glfwGetKey(m_pWindow, GLFW_KEY_F1))
+	{
+		show_app_fixed_overlay = !show_app_fixed_overlay;		
+	}
+	if (show_app_fixed_overlay)
+	{
+		ImGui::SetNextWindowPos(ImVec2(10, 10));
+		if (!ImGui::Begin("Example: Fixed Overlay", &show_app_fixed_overlay, ImVec2(0, 0), 0.3f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings))
+		{
+			ImGui::End();
+			return;
+		}
+		ImGui::Text("Simple overlay\non the top-left side of the screen.");
+		ImGui::Separator();
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Text("%d vertices, %d indices (%d triangles)", ImGui::GetIO().MetricsRenderVertices, ImGui::GetIO().MetricsRenderIndices, ImGui::GetIO().MetricsRenderIndices / 3);
+		ImGui::Text("%d allocations", ImGui::GetIO().MetricsAllocs);
+		ImGui::Text("Mouse Position: (%.1f,%.1f)", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
+		ImGui::End();
+		// for FPS and so on
+		//ImGui::ShowMetricsWindow(&show_app_fixed_overlay);
+	}
+	///-----------------------------------------------------------------------------------------------------------
 }
 
 #pragma region FBX
@@ -505,21 +640,11 @@ void TestApplication::CreateOpenGLBuffers(FBXFile* fbx)
 			mesh->m_indices.size() * sizeof(unsigned int),
 			mesh->m_indices.data(), GL_STATIC_DRAW);
 
-		/*glEnableVertexAttribArray(0); // position
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), 0);
-
-		glEnableVertexAttribArray(1); // normal
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), ((char*)0) + FBXVertex::NormalOffset);
-
-		glEnableVertexAttribArray(2); // Texture on FBX model via coordinates
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::TexCoord1Offset);
-		*/
-		//FBXSkeletonRender();
 		glEnableVertexAttribArray(0); //position
 		glEnableVertexAttribArray(1); //normals
 
 		glEnableVertexAttribArray(2); //tangents
-		glEnableVertexAttribArray(3); //textcoords
+		glEnableVertexAttribArray(3); //textcoords Texture on FBX model via coordinates
 		glEnableVertexAttribArray(4); //weights
 		glEnableVertexAttribArray(5); //indices
 
@@ -857,7 +982,7 @@ void TestApplication::FBXDraw()
 	glUseProgram(m_FBX_program_ID);
 
 	int loc = glGetUniformLocation(m_FBX_program_ID, "ProjectionView");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m_pCameraStateMachine->GetCurrentCamera()->getProjectionView()));
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m_pCamState->getProjectionView()));
 
 	/*int light_dir_uniform = glGetUniformLocation(m_programID, "LightDir");
 	glUniform3f(light_dir_uniform, 0, 1, 0);*/
@@ -869,7 +994,7 @@ void TestApplication::FBXDraw()
 	int light_colour_uniform = glGetUniformLocation(m_FBX_program_ID, "LightColour");
 	glUniform3f(light_colour_uniform, 1, 1, 1);
 
-	mat4 camera_matrix = m_pCameraStateMachine->GetCurrentCamera()->getTransform();
+	mat4 camera_matrix = m_pCamState->getTransform();
 	int camera_pos_uniform = glGetUniformLocation(m_FBX_program_ID, "CameraPos");
 	glUniform3f(camera_pos_uniform, camera_matrix[3][0], camera_matrix[3][1], camera_matrix[3][2]);
 
