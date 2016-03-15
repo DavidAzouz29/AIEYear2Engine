@@ -62,26 +62,26 @@ void Camera::Enter()
 		m_speed = 10.0f;
 		printf("Speed Needed \n");
 	}
-	else if (m_fRotation != 0.01f)
+	if (m_fRotation != 0.01f)
 	{
 		m_fRotation = 0.01f;
 		printf("Rotation Needed \n");
 	}
-	else if(m_transform != glm::mat4(1))
+	
+	m_up = glm::vec3(0, 1, 0);
+	
+	if(m_transform != glm::mat4(1))
 	{
 		m_transform = glm::mat4(1);
 	}
-	else if(m_view != glm::mat4(1))
+	if(m_view != glm::mat4(1))
 	{
 		m_transform = glm::mat4(1);
 	}
-	else if (m_v3Movement != glm::vec3(0))
+	if (m_v3Movement != glm::vec3(0))
 	{
 		m_v3Movement = glm::vec3(0);
 	}
-	
-	m_up = glm::vec3(0, 1, 0);
-
 	// TODO: delete?
 	setLookAtFrom(glm::vec3(10, 10, 10), glm::vec3(0));
 
@@ -120,10 +120,12 @@ glm::vec3 Camera::pickAgainstPlane(float x, float y, const glm::vec4& plane) con
 
 void Camera::RenderUI()
 {
+	static float vec4f[4] = { m_transform[3].x, m_transform[3].y, m_transform[3].z, m_transform[3].w };
+
 	if (ImGui::CollapsingHeader("Camera"))
 	{
 		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (float)INT_MAX);
-		ImGui::InputFloat4("Camera Location", m_transform[3].data);
-		ImGui::DragFloat4("Camera Location", m_transform[3].data, 1.1f, 0.01f, (float)INT_MAX);
+		ImGui::InputFloat3("Camera Location", vec4f);
+		ImGui::DragFloat3("Camera Location", vec4f, 1.1f, 0.01f, (float)INT_MAX);
 	}
 }

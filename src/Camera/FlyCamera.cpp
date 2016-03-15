@@ -284,25 +284,25 @@ void FlyCamera::Update(float fDeltaTime)
 
 #pragma region Perspective
 
-	if (glfwGetKey(m_pWindow, GLFW_KEY_F6))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_F1))
 	{
 		//setPerspective(fovY, aspectRatio, near, far);
 		m_projection = glm::perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
 		m_projectionView = m_projection * m_view;
 	}
-	if (glfwGetKey(m_pWindow, GLFW_KEY_F7))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_F2))
 	{
 		//setPerspective(fovY, aspectRatio, near, far);
 		m_projection = glm::perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 10.f, 15.f);
 		m_projectionView = m_projection * m_view;
 	}
-	if (glfwGetKey(m_pWindow, GLFW_KEY_F8))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_F3))
 	{
 		//setPerspective(fovY, aspectRatio, near, far);
 		m_projection = glm::perspective(glm::pi<float>() * 0.75f, 16 / 9.f, 0.1f, 1000.f);
 		m_projectionView = m_projection * m_view;
 	}
-	if (glfwGetKey(m_pWindow, GLFW_KEY_F9))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_F4))
 	{
 		//setPerspective(fovY, aspectRatio, near, far);
 		m_projection = glm::ortho(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
