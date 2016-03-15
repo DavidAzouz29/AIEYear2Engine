@@ -55,16 +55,35 @@ public:
 	void FBXDraw();
 	/// ----------------------------------------------------------
 
+	class Entity
+	{
+		bool create();
+		void update();
+		void draw();
+		void destroy();
+	};
+
+	class ParticleEmitter : public Entity
+	{};
+
+	class FBXModel : public Entity
+	{};
+
 private:
+	std::vector< std::shared_ptr<Entity> > m_entities;
+
 	// This should be used for any camera related activites.
 	std::shared_ptr<CameraStateMachine> m_pCameraStateMachine;
 	//std::shared_ptr<Camera> m_pCurrentCamera;
-	std::shared_ptr<FBXFile> m_pFbx;
 	std::shared_ptr<ParticleEmitter> m_pParticleEmitterA;
 	std::shared_ptr<ParticleEmitter> m_pParticleEmitterB;
 	std::shared_ptr<GPUParticleEmitter> m_pGPUEmitter;
 	std::shared_ptr<Render> m_pRender;
 	std::shared_ptr<MathCollision> m_pMath;
+
+	std::shared_ptr<FBXFile> m_pFbx;
+	GLuint m_FBX_program_ID;
+
 
 	Camera* m_pCamState;
 	/// ----------------------------------------------------------
@@ -75,7 +94,6 @@ private:
 	GLfloat m_timer;
 
 	GLuint m_program_ID;
-	GLuint m_FBX_program_ID;
 	/// ----------------------------------------------------------
 	E_DRAW_STATE m_eCurrentDrawState;
 	/// ----------------------------------------------------------

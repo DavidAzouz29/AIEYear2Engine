@@ -478,6 +478,11 @@ void TestApplication::DrawApp()
 	//m_pRender->DrawTexture(m_pCamera.get());
 	//m_pRender->DrawTexture(m_pCamState); //TODO: needed for Soulspear
 
+	for (auto pEntity : m_entities)
+	{
+		pEntity->draw();
+	}
+
 	glBindVertexArray(m_pRender->GetSharedPointer()->GetVAO());
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
