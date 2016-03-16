@@ -26,7 +26,7 @@ TravelCamera::TravelCamera(glm::vec4 a_v4Perspective) :
 	m_v4EndLocation(v4Location2),
 	m_fTimer(0),
 	m_fStartTime(0),
-	m_fLengthTime(10),
+	m_fLengthTime(5),
 	m_fEndTime(m_fLengthTime),
 	m_fTravelLerp(0.0f),
 	m_iIter(0)
@@ -218,8 +218,8 @@ void TravelCamera::RenderUI()
 		ImGui::DragFloat("Lerped Interpolant", &m_fTravelLerp, 0.1f, 0.01f, 1.0f);
 		ImGui::Separator();
 		ImGui::DragFloat4("Camera Location", m_transform[3].data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 1", v4Location1.data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 2", v4Location2.data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
+		ImGui::DragFloat4("Location 1", glm::value_ptr(v4Location1), 1.1f, -(float)INT_MAX, (float)INT_MAX);
+		ImGui::DragFloat4("Location 2", glm::value_ptr(v4Location2), 1.1f, -(float)INT_MAX, (float)INT_MAX);
 		ImGui::DragFloat4("Location 3", v4Location3.data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
 		ImGui::DragFloat4("Location 4", v4Location4.data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
 	}

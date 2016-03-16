@@ -187,8 +187,8 @@ bool TestApplication::startup() {
 	///------------------------------------------------------
 #pragma region GPUParticles
 	m_pGPUEmitter = std::make_shared<GPUParticleEmitter>();
-	const GLuint MAX_PARTICLES = 100; //100000
-	m_pGPUEmitter.get()->Initalise(MAX_PARTICLES, 0.1f, 5.0f, 5, 20, 1, 0.1f,
+	const GLuint MAX_PARTICLES = 100000; //100000
+	m_pGPUEmitter.get()->Initalise(MAX_PARTICLES, 3.0f, 5.0f, 5, 20, 1, 0.1f,
 		m_v4StartColor, m_v4EndColor);
 
 #pragma endregion
@@ -478,10 +478,11 @@ void TestApplication::DrawApp()
 	//m_pRender->DrawTexture(m_pCamera.get());
 	//m_pRender->DrawTexture(m_pCamState); //TODO: needed for Soulspear
 
-	for (auto pEntity : m_entities)
+	// TODO:
+/*	for (auto pEntity : m_entities)
 	{
 		pEntity->draw();
-	}
+	} */
 
 	glBindVertexArray(m_pRender->GetSharedPointer()->GetVAO());
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -579,6 +580,9 @@ void TestApplication::DrawApp()
 		// Each Camera specific UI attributes
 		m_pCamState->RenderUI();
 		ImGui::Separator();
+
+		// GPU Particles
+		m_pGPUEmitter.get()->RenderUI();
 
 	ImGui::End();
 

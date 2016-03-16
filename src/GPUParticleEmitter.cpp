@@ -8,7 +8,7 @@
 /// viewed: 
 /// Robert Bridson - co-author of "Fluid Simulation for Computer Graphics"
 /// https://github.com/johnsietsma/RefEngine/blob/master/Engine/src/Engine/Helpers.cpp
-///
+/// http://en.cppreference.com/w/cpp/types/extent
 ///
 /// ***EDIT***
 /// - Partcles on the GPU	 	- David Azouz 11/03/16
@@ -25,9 +25,11 @@
 /// ----------------------------------------------------------
 
 #include "GPUParticleEmitter.h"
+#include "imgui.h"
+#include "imgui_impl_glfw_gl3.h"
 
+#include <glm/ext.hpp>
 #include <cstdio>
-//#include <stdio.h>
 
 GPUParticleEmitter::GPUParticleEmitter()
 	: m_particles(nullptr), m_uiMaxParticles(0),
@@ -154,7 +156,8 @@ void GPUParticleEmitter::CreateUpdateShader()
 	// specify the data that we will stream back
 	const GLchar* c_cVaryings[] = { "v3Position", "velocity",
 									"vLifetime", "vLifespan" };
-	glTransformFeedbackVaryings(m_updateShader, 4, c_cVaryings, GL_INTERLEAVED_ATTRIBS);
+	GLuint uiSize = sizeof(c_cVaryings) / sizeof(const GLchar*);
+	glTransformFeedbackVaryings(m_updateShader, uiSize, c_cVaryings, GL_INTERLEAVED_ATTRIBS);
 
 	glLinkProgram(m_updateShader);
 
@@ -174,7 +177,6 @@ void GPUParticleEmitter::CreateUpdateShader()
 		delete[] infoLog;
 	}
 	/// ----------------------------------------------------------
-
 	// remove unneeded handles
 	glDeleteShader(vs);
 
@@ -311,12 +313,36 @@ void GPUParticleEmitter::Draw(GLfloat a_ftime,
 	location = glGetUniformLocation(m_drawShader, "m4CameraTransform");
 	glUniformMatrix4fv(location, 1, false, &a_m4CameraTransform[0][0]);
 
+	// bind colour information for interpolation that won't change
+	location = glGetUniformLocation(m_drawShader, "v4ColorStart");
+	glUniform4fv(location, 1, &m_v4StartColor[0]);
+	location = glGetUniformLocation(m_drawShader, "v4ColorEnd");
+	glUniform4fv(location, 1, &m_v4EndColor[0]);
+
 	// draw particles in the "other" buffer
 	glBindVertexArray(m_vao[otherBuffer]);
 	glDrawArrays(GL_POINTS, 0, m_uiMaxParticles);
 
 	// swap for next frame
 	m_activeBuffer = otherBuffer;
+}
+
+/// -----------------------------
+// Renders UI elements via ImGui
+/// -----------------------------
+void GPUParticleEmitter::RenderUI()
+{
+	if (ImGui::CollapsingHeader("GPU Particles"))
+	{
+		// Locations in Grid format
+		if (ImGui::TreeNode("Patricle Color"))
+		{
+			ImGui::ColorEdit4("Particle Start Color", glm::value_ptr(m_v4StartColor));
+			ImGui::ColorEdit4("Particle End Color", glm::value_ptr(m_v4EndColor));
+
+			ImGui::TreePop();
+		}
+	}
 }
 
 /// ----------------------------------------------------------

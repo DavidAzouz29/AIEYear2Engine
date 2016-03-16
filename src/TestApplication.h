@@ -55,22 +55,24 @@ public:
 	void FBXDraw();
 	/// ----------------------------------------------------------
 
-	class Entity
+	//TODO: set up Entity/ Game Object
+/*	class Entity
 	{
 		bool create();
 		void update();
 		void draw();
 		void destroy();
+		void RenderUI();
 	};
 
 	class ParticleEmitter : public Entity
 	{};
 
 	class FBXModel : public Entity
-	{};
+	{}; */
 
 private:
-	std::vector< std::shared_ptr<Entity> > m_entities;
+	//std::vector< std::shared_ptr<Entity> > m_entities;
 
 	// This should be used for any camera related activites.
 	std::shared_ptr<CameraStateMachine> m_pCameraStateMachine;

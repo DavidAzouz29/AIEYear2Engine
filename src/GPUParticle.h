@@ -11,9 +11,6 @@ struct GPUParticle
 
 	glm::vec3 v3Position;
 	glm::vec3 v3Velocity;
-	//GLfloat fLifetime;
-	//GLfloat fLifespan;
 	GLfloat vLifetime;
 	GLfloat vLifespan;
 };
-

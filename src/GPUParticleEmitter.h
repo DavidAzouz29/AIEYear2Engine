@@ -30,6 +30,7 @@ public:
 	void Draw(GLfloat a_ftime, const glm::mat4& a_m4CameraTransform,
 		const glm::mat4& a_m4ProectionView);
 
+	void RenderUI();
 	GLuint LoadShader(GLuint a_iType, const GLchar* ac_cPath);
 
 protected:
