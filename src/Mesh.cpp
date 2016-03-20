@@ -21,7 +21,7 @@ Mesh::~Mesh()
 
 }
 
-void Mesh::destroy()
+GLvoid Mesh::Destroy()
 {
 	glDeleteVertexArrays(1, &m_VAO);
 	glDeleteBuffers(1, &m_VBO);
@@ -32,7 +32,7 @@ void Mesh::destroy()
 	// m_IBO = (GLuint)-1; // TODO: Needed?
 }
 
-bool Mesh::createFrame()
+bool Mesh::CreateFrame()
 {
 	// setup and bind a frambuffer
 	glGenFramebuffers(1, &m_FBO);
@@ -70,16 +70,14 @@ bool Mesh::createFrame()
 		printf("Framebuffer Error!\n");
 	}
 
-	// Render Geometry to the FBO.
-	//CreateRenderTargetQuad(); //TODO: this saves things from breaking?
-
 	// unbind the FBO so that we can render to the back buffer
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return true;
 }
 
-void Mesh::CreateRenderTargetQuad()
+// Render Geometry to the FBO.
+GLvoid Mesh::CreateRenderTargetQuad()
 {
 	float vertexData[] = {
 		-5,0, -5,1,0,0,

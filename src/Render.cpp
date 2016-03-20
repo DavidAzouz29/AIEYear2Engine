@@ -26,6 +26,7 @@
 
 #include "Render.h"
 #include "Mesh.h"
+#include "Camera\Camera.h"
 #include "gl_core_4_4.h"
 //#include "VertexData.h"
 
@@ -38,16 +39,11 @@
 #include <cstdio>
 
 
-Render::Render()
+Render::Render() :
+	fHeightScale(2.0f),
+	fTime(0.0f)
 {
 	m_pMesh = std::make_shared<Mesh>();
-
-	//m_fbx = new FBXFile();
-	//m_fbx->load("./data/models/stanford/Bunny.fbx");
-	//CreateOpenGLBuffers(m_fbx);
-
-	fHeightScale = 2.0f;
-	fTime = 0.0f;
 }
 
 Render::~Render()
@@ -57,8 +53,54 @@ Render::~Render()
 	//glDeleteProgram(m_programID);
 }
 
+bool Render::Create()
+{
+	//m_pMesh = std::make_shared<Mesh>(); //TODO: needed here? - in con^
+
+	//m_pRender = std::make_shared<Render>(); //TODO: I need this somewhere
+	// -----------------------
+	// Creates Grid
+	// -----------------------
+	GLint uiGrid = 21;
+	//m_pRender->generateGrid(uiGrid, uiGrid);
+	//m_pRender->InitGeometry();
+	// -----------------------
+
+	//m_pRender->TextureLoader();
+
+	//unsigned int id = m_pRender->TextureInit("./data/textures/crate.png");
+	//m_pRender->AddTexture("crate", id);
+
+	//glActiveTexture(GL_TEXTURE3);
+	//glBindTexture(GL_TEXTURE_2D, id); */
+
+	unsigned int id = TextureInit("./data/models/soulspear/soulspear_diffuse.tga");
+	AddTexture("soulspear_d", id);
+
+	id = TextureInit("./data/models/soulspear/soulspear_normal.tga");
+	AddTexture("soulspear_n", id);
+
+	id = TextureInit("./data/models/characters/Pyro/Pyro_D.tga");
+	AddTexture("Pyro_D", id);
+
+	id = TextureInit("./data/models/characters/Pyro/Pyro_N.tga");
+	AddTexture("Pyro_N", id);
+
+	id = TextureInit("./data/models/characters/Pyro/Pyro_S.tga");
+	AddTexture("Pyro_S", id);
+
+	//m_pRender->RenderTexture(); //For the Render Target?
+
+	//=======================================================
+	//m_pRender.get()->RenderTargetLoader();
+	RenderTargetLoader();
+	GetSharedPointer()->CreateRenderTargetQuad();
+	//=======================================================
+	return false;
+}
+
 //function to create a grid
-void Render::generateGrid(const unsigned int a_iRows, const unsigned int a_iCols)
+GLvoid Render::generateGrid(const unsigned int a_iRows, const unsigned int a_iCols)
 {
 	Vertex_PositionColor* aoVertices = new Vertex_PositionColor[a_iRows * a_iCols];
 	for (unsigned short r = 0; r < a_iRows; ++r)
@@ -166,7 +208,7 @@ void Render::generateGrid(const unsigned int a_iRows, const unsigned int a_iCols
 	delete[] aoVertices;
 }
 
-void Render::InitGeometry()
+GLvoid Render::InitGeometry()
 {
 	/// ----------------------------------------------------------
 	/// Create shaders
@@ -224,7 +266,7 @@ void Render::InitGeometry()
 	glDeleteShader(iVertexShader);
 }
 
-void Render::DrawGeometry(Camera* cam)
+GLvoid Render::DrawGeometry(Camera* cam)
 {
 	fTime = static_cast<float>(glfwGetTime());
 	glUseProgram(m_programID);
@@ -376,7 +418,7 @@ unsigned int Render::TextureInit(const char* name)
 
 	return id;
 }
-void Render::TextureLoader()
+GLvoid Render::TextureLoader()
 {
 	/// ----------------------------------------------------------
 	/// Create shaders
@@ -467,7 +509,7 @@ struct Vertex
 	float s, t;
 };
 
-void Render::RenderTexture()
+GLvoid Render::RenderTexture()
 {
 	/*float vertexData[] = {
 		-5,0,5,1,0,1,
@@ -527,7 +569,7 @@ void Render::RenderTexture()
 	//m_pMesh->SetVAO(m_VAO);
 	//delete[] vertexData; //TODO: more clean up code?
 }
-void Render::DrawTexture(Camera* cam)
+GLvoid Render::DrawTexture(Camera* cam)
 {
 	// use our texture program
 	glUseProgram(m_programID);
@@ -569,7 +611,7 @@ void Render::DrawTexture(Camera* cam)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
-void Render::DrawTextureP(Camera* cam)
+GLvoid Render::DrawTextureP(Camera* cam)
 {
 	// use our texture program
 	glUseProgram(m_programID);
@@ -607,7 +649,7 @@ void Render::DrawTextureP(Camera* cam)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
-void Render::AddTexture(const char* name, const unsigned int id)
+GLvoid Render::AddTexture(const char* name, const unsigned int id)
 {
 	m_textures.insert(std::pair<const std::string, const unsigned int>(name, id));
 }
@@ -618,7 +660,7 @@ unsigned int Render::GetTextureByName(const char* name)
 	return m_textures[name];
 }
 
-void Render::RenderTargetLoader()
+GLvoid Render::RenderTargetLoader()
 {
 	/// ----------------------------------------------------------
 	/// Create shaders
@@ -678,5 +720,5 @@ void Render::RenderTargetLoader()
 	glDeleteShader(iVertexShader);
 	glDeleteShader(iFragmentShader);
 
-	m_pMesh.get()->createFrame();
+	m_pMesh.get()->CreateFrame();
 }

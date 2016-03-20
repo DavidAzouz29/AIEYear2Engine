@@ -1,4 +1,5 @@
 #pragma once
+#include "Entity\Entity.h"
 #include "Render.h"
 #include "Program.h"
 #include "Mesh.h"
@@ -12,54 +13,51 @@ struct ParticleEmitterConfig
 	
 	GLuint particleCount; // How many I have
 	
-	//float emitTimer;
-	float emitRate;
+	GLfloat emitRate;
 
-	float lifespanMin;
-	float lifespanMax;
+	GLfloat lifespanMin;
+	GLfloat lifespanMax;
 
-	float velocityMin;
-	float velocityMax;
+	GLfloat velocityMin;
+	GLfloat velocityMax;
 
-	float startSize;
-	float endSize;
+	GLfloat startSize;
+	GLfloat endSize;
 
 	glm::vec4 startColor;
 	glm::vec4 endColor;
 
 	glm::vec3 v3ParticlePosition;
-	//glm::vec3 m_positionB;
 };
 
 /**
 
 */
 
-class ParticleEmitter
+class ParticleEmitter : public Entity
 {
 public:
 	ParticleEmitter();
 	~ParticleEmitter();
 
 	bool isValid() { return m_config.particleCount != -1; }
-	int create(ParticleEmitterConfig config);
-	void destroy();
-
-	void update(float a_deltaTime, const glm::mat4 a_m4camMatrix);
-	void draw(const glm::mat4& projView);
+	bool Create();
+	bool ParticleLoader(ParticleEmitterConfig config);
+	GLvoid Update(GLfloat a_deltaTime, const glm::mat4 a_m4camMatrix);
+	GLvoid Draw(const glm::mat4& projView);
+	GLvoid Destroy();
 
 	/// ----------------------------------------------------------
 	/// Safety for dangling pointer
 	/// ----------------------------------------------------------
 	ParticleEmitter(const ParticleEmitter& rhs) = delete;
-	void operator =(const ParticleEmitter& rhs) = delete;
+	GLvoid operator =(const ParticleEmitter& rhs) = delete;
 
 private:
-	void emit();
-	void billboardParticle(unsigned int vertexIndex, const glm::mat4& billboardMat, const Particle* particle);
+	GLvoid Emit();
+	GLvoid BillboardParticle(unsigned int vertexIndex, const glm::mat4& billboardMat, const Particle* particle);
 	
 	glm::vec3 m_v3particlePosition;
-	//glm::vec3 m_positionB;
 
 	Particle* m_pPartiles; //could be a smart pointer
 	Vertex_PositionColor* m_pVertices; // GPU sides, verts that will render
@@ -68,7 +66,7 @@ private:
 	//GLuint m_uiMaxParticles; // Maximum amount of particles we have
 
 	ParticleEmitterConfig m_config;
-	GLfloat m_emitTimer;
+	GLfloat m_fEmitTimer;
 
 	//Render m_render; 
 	//Geometry m_geometry; //

@@ -1,15 +1,18 @@
 #pragma once
 
+#include "Entity\Entity.h"
 #include "GPUParticle.h"
 #include "gl_core_4_4.h"
 
 #include <glm/mat4x4.hpp>
 
-class GPUParticleEmitter
+class GPUParticleEmitter : public Entity
 {
 public:
 	GPUParticleEmitter();
 	virtual ~GPUParticleEmitter();
+
+	bool Create();
 
 	/// ----------------------------------------------------------
 	/// <summary> Initialise GPU Particle System
@@ -68,5 +71,7 @@ protected:
 	GLuint m_updateShader;
 
 	GLfloat m_fLastDrawTime;
+
+	const GLuint MAX_PARTICLES = 100000;
 };
 

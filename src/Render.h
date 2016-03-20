@@ -1,18 +1,22 @@
 #pragma once
 
-#include "FBXFile.h"
-#include "Camera.h"
-#include "VertexData.h"
-#include "Mesh.h"
+//#include "FBXFile.h"
+#include "Entity\Entity.h"
+//#include "VertexData.h"
 
 #include <map>
 #include <memory>
 
-class Render
+class Camera;
+class Mesh;
+
+class Render : public Entity
 {
 public:
 	Render();
 	~Render();
+
+	bool Create();
 
 	/// ----------------------------------------------------------
 	/// function to create a grid
@@ -21,20 +25,20 @@ public:
 	///			a_iRows: a set of rows
 	///			a_iCols: a set of columns
 	/// ----------------------------------------------------------
-	void generateGrid(const unsigned int a_iRows, const unsigned int a_iCols);
+	GLvoid generateGrid(const unsigned int a_iRows, const unsigned int a_iCols);
 
-	void InitGeometry();
-	void DrawGeometry(Camera* cam);
+	GLvoid InitGeometry();
+	GLvoid DrawGeometry(Camera* cam);
 
 	///void FBXLoader();
 	//void RenderFBX(Camera* cam);
 
 	unsigned int TextureInit(const char* name);
-	void TextureLoader();
-	void RenderTexture();
-	void DrawTexture(Camera* cam);
-	void DrawTextureP(Camera* cam);
-	void AddTexture(const char* name, const unsigned int id);
+	GLvoid TextureLoader();
+	GLvoid RenderTexture();
+	GLvoid DrawTexture(Camera* cam);
+	GLvoid DrawTextureP(Camera* cam);
+	GLvoid AddTexture(const char* name, const unsigned int id);
 
 	unsigned int GetTextureByName(const char* name);
 
@@ -66,6 +70,5 @@ private:
 	float fTime;
 
 	std::shared_ptr<Mesh> m_pMesh;
-	//FBXFile* m_fbx;
 };
 

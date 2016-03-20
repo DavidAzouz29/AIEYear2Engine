@@ -1,4 +1,5 @@
 #pragma once
+#include "Entity\Entity.h"
 #include "gl_core_4_4.h"
 #include "Gizmos.h"
 
@@ -11,13 +12,14 @@
 
 class Camera;
 
-class MathCollision
+class MathCollision : public Entity //TODO: Does Math need to inherit from Entity?
 {
 public:
 	MathCollision();
 	~MathCollision();
 
-	void Update(Camera* cam);
+	bool Create();
+	GLvoid Update(Camera* cam);
 };
 
 class AABB

@@ -25,17 +25,17 @@ public:
 	GLuint& GetFboDepth() { return m_fboDepth; }
 	GLuint GetIndexCount() const { return m_indexCount; }
 
-	void SetIndexCount(unsigned int a_iIndexCount) { m_indexCount = a_iIndexCount; }
+	GLvoid SetIndexCount(unsigned int a_iIndexCount) { m_indexCount = a_iIndexCount; }
 
-	void CreateRenderTargetQuad();
+	GLvoid CreateRenderTargetQuad();
 
 	// Setup OpenGL buffers and vertex attributes to be able to render these vertices.
 	template<typename T>
-	bool create(T* pVertices, unsigned int vertexCount, unsigned int* pInidices, unsigned int indexCount);
+	bool Create(T* pVertices, unsigned int vertexCount, unsigned int* pInidices, unsigned int indexCount);
 
-	bool createFrame();
+	bool CreateFrame();
 
-	void destroy();
+	GLvoid Destroy();
 
 private:
 	// Specialize this template to do custom vertex attribute setup for your struct.
@@ -96,7 +96,7 @@ private:
 		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)(offsetof(FBXVertex, indices)));
 	}
 
-	unsigned int m_indexCount;
+	GLuint m_indexCount;
 	GLuint m_VAO;
 	GLuint m_VBO;
 	GLuint m_IBO;
@@ -123,7 +123,7 @@ private:
 /// |___|___| - 
 ///-----------------------------------------------------------------------------------------------------------
 template<typename T>
-bool Mesh::create(T* pVertices, GLuint vertexCount, GLuint* pIndices, GLuint indexCount)
+bool Mesh::Create(T* pVertices, GLuint vertexCount, GLuint* pIndices, GLuint indexCount)
 {
 	assert(m_VAO == -1 && "Mesh has already been created.");
 	assert(pVertices != nullptr);

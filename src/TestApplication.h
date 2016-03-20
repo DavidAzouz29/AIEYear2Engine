@@ -1,22 +1,16 @@
 #pragma once
 
 #include "BaseApplication.h"
-#include "Render.h"
-#include "VertexData.h"
-#include "MathCollision.h"
-#include "gl_core_4_4.h"
 
+#include <vector>
+#include <memory>
 // only needed for the camera picking
 #include <glm/vec3.hpp>
 
-#include <memory>
-
-class Camera;
 class CameraStateMachine;
-class FBXFile;
-class ParticleEmitter;
-class GPUParticleEmitter;
-class MathCollision;
+class Camera;
+class Render; //TODO: remove
+class Entity;
 
 /// <summary> 
 /// Enumeration to decide which method to draw our scene with.
@@ -37,31 +31,21 @@ public:
 	virtual ~TestApplication();
 
 	virtual bool startup();
-	virtual void shutdown();
+	virtual GLvoid shutdown();
 
-	virtual bool update(float deltaTime);
-	virtual void draw();
-	virtual void DrawApp();
+	virtual bool Update(float deltaTime);
+	virtual GLvoid Draw();
+	// Items to be drawn to our Render Target.
+	GLvoid DrawApp();
+	//virtual GLvoid RenderUI();
 
-	/// ----------------------------------------------------------
-	void PlanetCreation();
-	void RenderGeometry();
-	/// ----------------------------------------------------------
-	void FBXLoader();
-	void RenderFBX(Camera* cam);
-	void FBXSkeletonLoader();
-	void FBXSkeletonRender();
-	void FBXUpdate();
-	void FBXDraw();
-	/// ----------------------------------------------------------
-
-	//TODO: set up Entity/ Game Object
+	//TODO: 
 /*	class Entity
 	{
-		bool create();
-		void update();
-		void draw();
-		void destroy();
+		bool Create();
+		void Update();
+		void Draw();
+		void Destroy();
 		void RenderUI();
 	};
 
@@ -72,39 +56,16 @@ public:
 	{}; */
 
 private:
-	//std::vector< std::shared_ptr<Entity> > m_entities;
-
 	// This should be used for any camera related activites.
 	std::shared_ptr<CameraStateMachine> m_pCameraStateMachine;
-	//std::shared_ptr<Camera> m_pCurrentCamera;
-	std::shared_ptr<ParticleEmitter> m_pParticleEmitterA;
-	std::shared_ptr<ParticleEmitter> m_pParticleEmitterB;
-	std::shared_ptr<GPUParticleEmitter> m_pGPUEmitter;
-	std::shared_ptr<Render> m_pRender;
-	std::shared_ptr<MathCollision> m_pMath;
-
-	std::shared_ptr<FBXFile> m_pFbx;
-	GLuint m_FBX_program_ID;
-
-
+	std::shared_ptr<Render> m_pRenderApp; //TODO: remove other
+	std::vector< std::shared_ptr<Entity> > m_entities;
 	Camera* m_pCamState;
-	/// ----------------------------------------------------------
-	/// FBXLoader
-	/// ----------------------------------------------------------
-	void CreateOpenGLBuffers(FBXFile* fbx);
-	void CleanupOpenGLBuffers(FBXFile* fbx);
-	GLfloat m_timer;
 
-	GLuint m_program_ID;
 	/// ----------------------------------------------------------
 	E_DRAW_STATE m_eCurrentDrawState;
+	GLfloat m_fPrevTime;
 	/// ----------------------------------------------------------
-	glm::vec3 m_v3ClearColor;
-	glm::vec4 m_v4StartColor;
-	glm::vec4 m_v4EndColor;
-
-	bool m_bDrawGizmoGrid;
-
 	// this is an example position for camera picking
 	glm::vec3	m_pickPosition;
 };

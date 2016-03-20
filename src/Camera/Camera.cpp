@@ -5,6 +5,7 @@
 
 #include <GLFW/glfw3.h>
 #include <glm/ext.hpp>
+//#include <string>
 //#include <glm/detail/type_vec4.hpp>
 
 Camera::Camera(float fovY, float aspectRatio, float near, float far)
@@ -120,6 +121,8 @@ glm::vec3 Camera::pickAgainstPlane(float x, float y, const glm::vec4& plane) con
 
 void Camera::RenderUI()
 {
+	//std::string sLocationName = "Location "; //TODO: get camera mode? names[] from TestApp
+
 	if (ImGui::CollapsingHeader("Camera"))
 	{
 		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (float)INT_MAX);

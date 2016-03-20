@@ -60,23 +60,23 @@ bool BaseApplication::createWindow(const char* title, int width, int height) {
 	return true;
 }
 
-void BaseApplication::destroyWindow() {
+GLvoid BaseApplication::destroyWindow() {
 
 	ImGui_ImplGlfwGL3_Shutdown();
 	glfwDestroyWindow(m_pWindow);
 	glfwTerminate();
 }
 
-void BaseApplication::run() {
+GLvoid BaseApplication::run() {
 
 	double prevTime = glfwGetTime();
 	double currTime = 0;
 
 	while (currTime = glfwGetTime(),
-		update((float)(currTime - prevTime))) {
+		Update((float)(currTime - prevTime))) {
 
 		glfwPollEvents();
-		draw();
+		Draw();
 		glfwSwapBuffers(m_pWindow);
 
 		prevTime = currTime;

@@ -1,5 +1,5 @@
 #include "MathCollision.h"
-#include "Camera.h"
+#include "Camera\Camera.h"
 
 using glm::vec3;
 using glm::vec4;
@@ -15,7 +15,13 @@ MathCollision::~MathCollision()
 {
 }
 
-void MathCollision::Update(Camera* cam)
+bool MathCollision::Create()
+{
+	m_pMath = std::make_shared<MathCollision>();
+	return false;
+}
+
+GLvoid MathCollision::Update(Camera* cam)
 {
 	///----------------------------------------------------------
 	BoundingSphere bound;

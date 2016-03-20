@@ -57,6 +57,14 @@ GPUParticleEmitter::~GPUParticleEmitter()
 	glDeleteProgram(m_updateShader);
 }
 
+bool GPUParticleEmitter::Create()
+{
+	m_pGPUEmitter = std::make_shared<GPUParticleEmitter>();
+	m_pGPUEmitter.get()->Initalise(MAX_PARTICLES, 3.0f, 5.0f, 5, 20, 1, 0.1f,
+		m_v4StartColor, m_v4EndColor);
+	return false;
+}
+
 /// ----------------------------------------------------------
 /// <summary> Initialise GPU Particle System (won't appear)
 /// <para><param>P1: Maximum amount of particles wanted to be used.</param></para>

@@ -23,6 +23,8 @@
     <ClCompile Include="dep\imgui-master\imgui_demo.cpp" />
     <ClCompile Include="dep\imgui-master\imgui_draw.cpp" />
     <ClCompile Include="dep\imgui-master\imgui_impl_glfw_gl3.cpp" />
+    <ClCompile Include="src\Entity\FBXModel.cpp" />
+    <ClCompile Include="src\Entity\Entity.cpp" />
     <ClCompile Include="src\Camera\LocationCamera.cpp" />
     <ClCompile Include="src\GPUParticleEmitter.cpp" />
     <ClCompile Include="src\Camera\CameraStateMachine.cpp" />
@@ -46,6 +48,8 @@
     <ClInclude Include="dep\imgui-master\imgui.h" />
     <ClInclude Include="dep\imgui-master\imgui_impl_glfw_gl3.h" />
     <ClInclude Include="dep\imgui-master\imgui_internal.h" />
+    <ClInclude Include="src\Entity\FBXModel.h" />
+    <ClInclude Include="src\Entity\Entity.h" />
     <ClInclude Include="src\Camera\LocationCamera.h" />
     <ClInclude Include="src\GPUParticle.h" />
     <ClInclude Include="src\GPUParticleEmitter.h" />
@@ -150,7 +154,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)dep\stb;$(ProjectDir)dep\FBXLoader\;$(ProjectDir)dep\aieutilities-master\aie;$(ProjectDir)dep\glfw\include\;$(ProjectDir)dep\imgui-master;$(ProjectDir)dep\glm;$(ProjectDir)src\;$(ProjectDir)src\Camera;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dep\stb;$(ProjectDir)dep\FBXLoader\;$(ProjectDir)dep\aieutilities-master\aie;$(ProjectDir)dep\glfw\include\;$(ProjectDir)dep\imgui-master;$(ProjectDir)dep\glm;$(ProjectDir)src\;$(ProjectDir)src\Camera;$(ProjectDir)src\Entity;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

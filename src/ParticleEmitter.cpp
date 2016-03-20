@@ -18,7 +18,45 @@ ParticleEmitter::~ParticleEmitter()
 {
 }
 
-int ParticleEmitter::create(ParticleEmitterConfig config)
+bool ParticleEmitter::Create()
+{
+	///----------------------------------------------------------
+	m_pParticleEmitterA = std::make_shared<ParticleEmitter>();
+	m_pParticleEmitterB = std::make_shared<ParticleEmitter>();
+	///----------------------------------------------------------
+	GLuint uiAmount = 20; //TODO: 3000
+	ParticleEmitterConfig configA;
+	configA.particleCount = uiAmount; //1000 
+	configA.emitRate = (float)configA.particleCount / 2; //500
+	configA.startColor = glm::vec4(1.56f, 0, 1.25f, 0.8f); //glm::vec4(1, 0, 0, 1); <-RED
+	configA.endColor = glm::vec4(0, 0.07f, 0.3f, 1);  //vec4(0, 0, 1, 0.8f); //vec4(0, 0, 1, 0.8f);//vec4(1, 1, 0, 1);
+	configA.lifespanMin = 0.1f;
+	configA.lifespanMax = 5; //5
+	configA.startSize = 0.4f; // 1
+	configA.endSize = 0.1f;
+	configA.velocityMin = 0.1f;
+	configA.velocityMax = 1.0f;
+	configA.v3ParticlePosition = glm::vec3(-3, 5, 0);
+
+	if (!m_pParticleEmitterA->ParticleLoader(configA)) return -4;
+
+	ParticleEmitterConfig configB;
+	configB.particleCount = uiAmount; //5000
+	configB.emitRate = (float)configB.particleCount / 2; //500
+	configB.startColor = glm::vec4(1, 0, 1, 0.8f); //glm::vec4(1, 0, 0, 1); <-RED
+	configB.endColor = glm::vec4(0.3, 0, 0.07f, 1);  //vec4(0, 0, 1, 0.8f); //vec4(0, 0, 1, 0.8f);//vec4(1, 1, 0, 1);
+	configB.lifespanMin = 0.9f;
+	configB.lifespanMax = 3; //5
+	configB.startSize = 0.4f; // 1
+	configB.endSize = 0.2f;
+	configB.velocityMin = 0.1f;
+	configB.velocityMax = 2.0f;
+	configB.v3ParticlePosition = glm::vec3(3, 5, 0);
+
+	if (!m_pParticleEmitterB->ParticleLoader(configB)) return -5;
+	return false;
+}
+bool ParticleEmitter::ParticleLoader(ParticleEmitterConfig config)
 {
 	assert(!isValid());
 
@@ -50,7 +88,7 @@ int ParticleEmitter::create(ParticleEmitterConfig config)
 	if (!m_program.create(vsSource, fsSource)) return false;
 
 	m_config = config;
-	m_emitTimer = 0;
+	m_fEmitTimer = 0;
 
 	m_pPartiles = new Particle[m_config.particleCount];
 	m_uiFirstDeadIndex = 0;
@@ -81,23 +119,23 @@ int ParticleEmitter::create(ParticleEmitterConfig config)
 	}
 
 	// Creates storage (OpenGL)
-	m_mesh.create(m_pVertices, vertCount, pIndexData, indexCount);
+	m_mesh.Create(m_pVertices, vertCount, pIndexData, indexCount);
 
 	delete pIndexData;
 
 	return true;
 }
-void ParticleEmitter::destroy()
+void ParticleEmitter::Destroy()
 {
 	assert(isValid());
 
 	delete[] m_pPartiles; 
 	delete[] m_pVertices; 
 
-	m_mesh.destroy();
+	m_mesh.Destroy();
 }
 
-void ParticleEmitter::emit()
+void ParticleEmitter::Emit()
 {
 	assert(isValid());
 
@@ -132,15 +170,15 @@ void ParticleEmitter::emit()
 
 }
 
-void ParticleEmitter::update(float a_deltaTime, const glm::mat4 a_m4camMatrix)
+void ParticleEmitter::Update(float a_deltaTime, const glm::mat4 a_m4camMatrix)
 {
-	m_emitTimer += a_deltaTime;
+	m_fEmitTimer += a_deltaTime;
 
 	float invEmitRate = 1.f / m_config.emitRate;
-	while (m_emitTimer > invEmitRate)
+	while (m_fEmitTimer > invEmitRate)
 	{
-		emit();
-		m_emitTimer -= invEmitRate;
+		Emit();
+		m_fEmitTimer -= invEmitRate;
 	}
 
 	int quadIndex = 0;
@@ -188,24 +226,24 @@ void ParticleEmitter::update(float a_deltaTime, const glm::mat4 a_m4camMatrix)
 			glm::vec4(0, 0, 0, 1)
 			);
 
-		billboardParticle(vertexIndex + 0, billboard, particle);
-		billboardParticle(vertexIndex + 1, billboard, particle);
-		billboardParticle(vertexIndex + 2, billboard, particle);
-		billboardParticle(vertexIndex + 3, billboard, particle);
+		BillboardParticle(vertexIndex + 0, billboard, particle);
+		BillboardParticle(vertexIndex + 1, billboard, particle);
+		BillboardParticle(vertexIndex + 2, billboard, particle);
+		BillboardParticle(vertexIndex + 3, billboard, particle);
 
 		quadIndex++;
 	}
 
 }
 
-void ParticleEmitter::billboardParticle(unsigned int vertexIndex, const glm::mat4& billboardMat, const Particle* particle)
+void ParticleEmitter::BillboardParticle(unsigned int vertexIndex, const glm::mat4& billboardMat, const Particle* particle)
 {
 	m_pVertices[vertexIndex].position =	billboardMat *
 		m_pVertices[vertexIndex].position +
 		glm::vec4(particle->position, 0);
 }
 
-void ParticleEmitter::draw(const glm::mat4& projView)
+void ParticleEmitter::Draw(const glm::mat4& projView)
 {
 	glBindBuffer(GL_ARRAY_BUFFER, m_mesh.GetVBO());
 	glBufferSubData(GL_ARRAY_BUFFER, 0, m_uiFirstDeadIndex * 4 * sizeof(Vertex_PositionColor), m_pVertices);
