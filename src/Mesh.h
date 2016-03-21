@@ -17,13 +17,12 @@ public:
 
 	bool isValid() { return m_indexCount > 0 && m_VAO != (GLuint)-1; }
 
+	//TODO: these should not be public
 	GLuint& GetVAO() { return m_VAO; }
 	GLuint& GetVBO() { return m_VBO; }
 	GLuint& GetIBO() { return m_IBO; }
-	GLuint& GetFBO() { return m_FBO; }
-	GLuint& GetFboTexture() { return m_fboTexture; }
-	GLuint& GetFboDepth() { return m_fboDepth; }
 	GLuint GetIndexCount() const { return m_indexCount; }
+	//--------------------------------
 
 	GLvoid SetIndexCount(unsigned int a_iIndexCount) { m_indexCount = a_iIndexCount; }
 
@@ -32,8 +31,6 @@ public:
 	// Setup OpenGL buffers and vertex attributes to be able to render these vertices.
 	template<typename T>
 	bool Create(T* pVertices, unsigned int vertexCount, unsigned int* pInidices, unsigned int indexCount);
-
-	bool CreateFrame();
 
 	GLvoid Destroy();
 
@@ -100,10 +97,6 @@ private:
 	GLuint m_VAO;
 	GLuint m_VBO;
 	GLuint m_IBO;
-
-	GLuint m_FBO;
-	GLuint m_fboTexture;
-	GLuint m_fboDepth;
 };
 
 /// ----------------------------------------------------------

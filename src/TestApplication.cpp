@@ -25,10 +25,14 @@
 /// ----------------------------------------------------------
 #include "TestApplication.h"
 #include "Entity\Entity.h"
+#include "Entity\FBXModel.h"
+#include "Camera\CameraStateMachine.h"
 #include "Camera\Camera.h"
-#include "Render.h"// | TODO: remove if Draw is removed
-#include "Mesh.h"  // | TODO: remove if Draw is removed
-#include "CameraStateMachine.h"
+#include "Render.h"// | TODO: remove if Draw is removed?
+#include "Mesh.h"  // | TODO: remove if Draw is removed?
+#include "ParticleEmitter.h"
+#include "GPUParticleEmitter.h"
+#include "MathCollision.h"
 #include "Gizmos.h"
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
@@ -53,17 +57,17 @@ TestApplication::TestApplication() :
 	m_pRenderApp(nullptr),
 	m_fPrevTime(0)
 {
-	//m_entities = std::make_shared<Entity>();
-	//m_entities.insert = std::make_shared<Mesh>();
-	//m_entities.insert (m_entities.begin, std::make_shared<Render>());
-	// TODO: #1 Entity is not "shared" (make_shared) the one that fits in the vector <-
-	// how do I add more things to the vector to be created?
-/*	m_entities.emplace(m_entities.end, std::make_shared<Render>());
-	m_entities.insert (m_entities.end, std::make_shared<FBXModel>(), m_entities.end);
-	m_entities.insert (m_entities.end, std::make_shared<ParticleEmitter>());
-	m_entities.insert (m_entities.end, std::make_shared<GPUParticleEmitter>());
-	m_entities.insert (m_entities.end, std::make_shared<MathCollision>()); */
-	//m_entities.resize(sizeof(m_entities)); //TODO: this okay?
+	//m_pRenderApp = std::make_shared<Render>();
+	// Adds our inherited classes to the vector.
+	//m_entities.push_back(std::make_shared<Render>());
+	m_entities.push_back(std::make_shared<FBXModel>());
+	m_entities.push_back(std::make_shared<ParticleEmitter>());
+	m_entities.push_back(std::make_shared<GPUParticleEmitter>());
+
+	m_pMath = std::make_shared<MathCollision>();
+
+	//m_entities.resize(m_entities.size()); //TODO: this okay?
+
 } //: m_pCamera(nullptr),
 
 TestApplication::~TestApplication() {}
@@ -76,7 +80,7 @@ bool TestApplication::startup() {
 	// start the gizmo system that can draw basic shapes
 	Gizmos::create();
 
-	// create a camera
+	// create a camera - may need later
 	//m_pCamera = std::make_shared<Camera>(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
 	//m_pCamera->setLookAtFrom(vec3(10, 10, 10), vec3(0));
 
@@ -101,11 +105,13 @@ bool TestApplication::startup() {
 	// -----------------------
 	//Entity::CreateSingleton();
 
+	//m_pRenderApp = pEntity->GetRender().get(); //TODO: remove for efficiency
+	//m_pRenderApp = m_entities->GetRender().get(); //TODO: remove for efficiency
+
 	// Loops through each entity and calls their respected Create functions.
 	for (auto pEntity : m_entities)
 	{
 		pEntity->Create();
-		m_pRenderApp = pEntity->GetRender(); //TODO: remove for efficiency
 		//Entity::GetSingleton()->Create();
 	}
 
@@ -187,7 +193,6 @@ bool TestApplication::Update(float deltaTime)
 #pragma endregion
 
 	// update the camera's movement
-	//m_pCamera->Update(deltaTime);
 	m_pCameraStateMachine->Update(deltaTime);
 	// clear the gizmos out for this frame
 	Gizmos::clear();
@@ -203,8 +208,8 @@ bool TestApplication::Update(float deltaTime)
 	// FBX Skeleton and Animation
 	//FBXUpdate();
 
-	//m_pMath->Update(m_pCamera.get());
 	m_pCamState = m_pCameraStateMachine.get()->GetCurrentCamera();
+	m_pMath->Update(m_pCamState);
 
 /*	m_pMath->Update(m_pCamState);
 	///----------------------------------------------------------
@@ -266,7 +271,7 @@ bool TestApplication::Update(float deltaTime)
 
 GLvoid TestApplication::Draw()
 {
-	//
+/*	// For the render target
 	glBindFramebuffer(GL_FRAMEBUFFER, m_pRenderApp->GetSharedPointer()->GetFBO());
 	//printf("%d\n", m_pRenderApp->GetSharedPointer());
 	glViewport(0, 0, 512, 512); // 265 lower quarter of the texture
@@ -300,7 +305,7 @@ GLvoid TestApplication::Draw()
 	// draw
 	// unbind the FBO so that we can render to the back buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glUseProgram(m_pRenderApp->GetProgramID());
+	glUseProgram(m_pRenderApp->GetProgramID()); */
 	DrawApp();
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
@@ -444,6 +449,8 @@ GLvoid TestApplication::DrawApp()
 
 	Gizmos::draw2D(projView);
 
+#pragma region ImGui
+#pragma region My Rendering Options
 	ImGui::ShowTestWindow();
 	ImGui::Begin("My rendering options");
 		// Camera State
@@ -507,6 +514,9 @@ GLvoid TestApplication::DrawApp()
 		}
 
 	ImGui::End();
+#pragma endregion
+
+#pragma region Overlay
 
 	// Overlay FPS 
 	static bool show_app_fixed_overlay = true;
@@ -532,6 +542,9 @@ GLvoid TestApplication::DrawApp()
 		// for FPS and so on
 		//ImGui::ShowMetricsWindow(&show_app_fixed_overlay);
 	}
+#pragma endregion
+#pragma endregion
+
 	///-----------------------------------------------------------------------------------------------------------
 }
 

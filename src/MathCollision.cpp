@@ -17,7 +17,7 @@ MathCollision::~MathCollision()
 
 bool MathCollision::Create()
 {
-	m_pMath = std::make_shared<MathCollision>();
+	//m_pMath = std::make_shared<MathCollision>();
 	return false;
 }
 
@@ -86,6 +86,12 @@ GLvoid MathCollision::Update(Camera* cam)
 	}
 }
 
+/*bool BoundingShape::Create()
+{
+
+	return false;
+} */
+
 #pragma region AABB
 
 void AABB::Reset()
@@ -128,12 +134,19 @@ void AABB::Fit(const std::vector<glm::vec3>& a_v3Points)
 #pragma endregion
 
 #pragma region BoundingSphere
+BoundingSphere::BoundingSphere() :
+	v3Centre(0),
+	fRadius(0)
+{
+	m_pAABB = std::make_shared<AABB>();
+}
 
 void BoundingSphere::Fit(const std::vector<glm::vec3>& a_v3Points)
 {
 	glm::vec3 min(1e37f), max(-1e37f);
 
-	for (auto& p : a_v3Points)
+	m_pAABB->Fit(a_v3Points);
+/*	for (auto& p : a_v3Points)
 	{
 		if (p.x < min.x)
 		{
@@ -159,7 +172,7 @@ void BoundingSphere::Fit(const std::vector<glm::vec3>& a_v3Points)
 		{
 			max.z = p.z;
 		}
-	}
+	} */
 
 	v3Centre = (min + max) * 0.5f;
 	fRadius = glm::distance(min, v3Centre);

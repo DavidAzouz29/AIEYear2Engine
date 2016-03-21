@@ -68,6 +68,9 @@ private:
 	ParticleEmitterConfig m_config;
 	GLfloat m_fEmitTimer;
 
+	std::shared_ptr<ParticleEmitter> m_pParticleEmitterA;
+	std::shared_ptr<ParticleEmitter> m_pParticleEmitterB;
+
 	//Render m_render; 
 	//Geometry m_geometry; //
 	Mesh m_mesh; // need the VAO, VBO, IBO.

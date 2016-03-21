@@ -1,7 +1,7 @@
 #pragma once
 
 //#include "FBXFile.h"
-#include "Entity\Entity.h"
+//#include "Entity\Entity.h"
 //#include "VertexData.h"
 
 #include <map>
@@ -10,7 +10,7 @@
 class Camera;
 class Mesh;
 
-class Render : public Entity
+class Render // : public Entity
 {
 public:
 	Render();
@@ -69,6 +69,7 @@ private:
 	float fHeightScale;
 	float fTime;
 
-	std::shared_ptr<Mesh> m_pMesh;
+	//std::shared_ptr<Render> m_pRender;
+	//std::shared_ptr<Mesh> m_pMesh;
 };
 

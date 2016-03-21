@@ -4,6 +4,7 @@
 //TODO: ResourceCreator.h
 
 #include <assert.h>
+#include <memory>
 
 ParticleEmitter::ParticleEmitter() :
 	m_pPartiles(nullptr),
@@ -125,7 +126,7 @@ bool ParticleEmitter::ParticleLoader(ParticleEmitterConfig config)
 
 	return true;
 }
-void ParticleEmitter::Destroy()
+GLvoid ParticleEmitter::Destroy()
 {
 	assert(isValid());
 
@@ -135,7 +136,7 @@ void ParticleEmitter::Destroy()
 	m_mesh.Destroy();
 }
 
-void ParticleEmitter::Emit()
+GLvoid ParticleEmitter::Emit()
 {
 	assert(isValid());
 
@@ -170,7 +171,7 @@ void ParticleEmitter::Emit()
 
 }
 
-void ParticleEmitter::Update(float a_deltaTime, const glm::mat4 a_m4camMatrix)
+GLvoid ParticleEmitter::Update(float a_deltaTime, const glm::mat4 a_m4camMatrix)
 {
 	m_fEmitTimer += a_deltaTime;
 
@@ -236,14 +237,14 @@ void ParticleEmitter::Update(float a_deltaTime, const glm::mat4 a_m4camMatrix)
 
 }
 
-void ParticleEmitter::BillboardParticle(unsigned int vertexIndex, const glm::mat4& billboardMat, const Particle* particle)
+GLvoid ParticleEmitter::BillboardParticle(unsigned int vertexIndex, const glm::mat4& billboardMat, const Particle* particle)
 {
 	m_pVertices[vertexIndex].position =	billboardMat *
 		m_pVertices[vertexIndex].position +
 		glm::vec4(particle->position, 0);
 }
 
-void ParticleEmitter::Draw(const glm::mat4& projView)
+GLvoid ParticleEmitter::Draw(const glm::mat4& projView)
 {
 	glBindBuffer(GL_ARRAY_BUFFER, m_mesh.GetVBO());
 	glBufferSubData(GL_ARRAY_BUFFER, 0, m_uiFirstDeadIndex * 4 * sizeof(Vertex_PositionColor), m_pVertices);

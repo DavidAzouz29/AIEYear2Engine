@@ -11,6 +11,7 @@ class CameraStateMachine;
 class Camera;
 class Render; //TODO: remove
 class Entity;
+class MathCollision;
 
 /// <summary> 
 /// Enumeration to decide which method to draw our scene with.
@@ -39,26 +40,12 @@ public:
 	GLvoid DrawApp();
 	//virtual GLvoid RenderUI();
 
-	//TODO: 
-/*	class Entity
-	{
-		bool Create();
-		void Update();
-		void Draw();
-		void Destroy();
-		void RenderUI();
-	};
-
-	class ParticleEmitter : public Entity
-	{};
-
-	class FBXModel : public Entity
-	{}; */
-
 private:
 	// This should be used for any camera related activites.
 	std::shared_ptr<CameraStateMachine> m_pCameraStateMachine;
 	std::shared_ptr<Render> m_pRenderApp; //TODO: remove other
+	//Render* m_pRenderApp; //TODO: remove other
+	std::shared_ptr<MathCollision> m_pMath;
 	std::vector< std::shared_ptr<Entity> > m_entities;
 	Camera* m_pCamState;
 

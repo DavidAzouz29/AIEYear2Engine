@@ -12,7 +12,9 @@ class ParticleEmitter;
 class GPUParticleEmitter;
 class FBXModel;
 class Render; //TODO: render?
-class MathCollision;
+class Mesh;
+//class MathCollision;
+class BoundingShape;
 
 class Entity
 {
@@ -39,14 +41,18 @@ public:
 // Protected so that other classes that inherit from
 // Entity can have access to certain member variables.
 protected:
-	
+	// Every entity uses frustum culling.
+	//BoundingShape m_boundShape; //TODO: frustum culling
+
 	//std::shared_ptr<Camera> m_pCurrentCamera;
-	std::shared_ptr<ParticleEmitter> m_pParticleEmitterA;
+/*	std::shared_ptr<ParticleEmitter> m_pParticleEmitterA;
 	std::shared_ptr<ParticleEmitter> m_pParticleEmitterB;
-	std::shared_ptr<GPUParticleEmitter> m_pGPUEmitter;
-	std::shared_ptr<Render> m_pRender;
-	std::shared_ptr<MathCollision> m_pMath;
+	std::shared_ptr<GPUParticleEmitter> m_pGPUEmitter;*/
+	std::shared_ptr<Render> m_pRender; 
+	std::shared_ptr<Mesh> m_pMesh;
+	//std::shared_ptr<MathCollision> m_pMath;
 	Camera* m_pCamState;
+	//Render* m_pRender;
 
 	/// ----------------------------------------------------------
 	glm::vec3 m_v3ClearColor;

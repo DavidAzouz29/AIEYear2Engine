@@ -23,10 +23,11 @@
     <ClCompile Include="dep\imgui-master\imgui_demo.cpp" />
     <ClCompile Include="dep\imgui-master\imgui_draw.cpp" />
     <ClCompile Include="dep\imgui-master\imgui_impl_glfw_gl3.cpp" />
+    <ClCompile Include="src\RenderTarget.cpp" />
     <ClCompile Include="src\Entity\FBXModel.cpp" />
     <ClCompile Include="src\Entity\Entity.cpp" />
     <ClCompile Include="src\Camera\LocationCamera.cpp" />
-    <ClCompile Include="src\GPUParticleEmitter.cpp" />
+    <ClCompile Include="src\Entity\GPUParticleEmitter.cpp" />
     <ClCompile Include="src\Camera\CameraStateMachine.cpp" />
     <ClCompile Include="src\Camera\FlyCamera.cpp" />
     <ClCompile Include="src\Camera\OrbitCamera.cpp" />
@@ -38,7 +39,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MathCollision.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
-    <ClCompile Include="src\ParticleEmitter.cpp" />
+    <ClCompile Include="src\Entity\ParticleEmitter.cpp" />
     <ClCompile Include="src\Program.cpp" />
     <ClCompile Include="src\Render.cpp" />
     <ClCompile Include="src\TestApplication.cpp" />
@@ -48,11 +49,12 @@
     <ClInclude Include="dep\imgui-master\imgui.h" />
     <ClInclude Include="dep\imgui-master\imgui_impl_glfw_gl3.h" />
     <ClInclude Include="dep\imgui-master\imgui_internal.h" />
+    <ClInclude Include="src\RenderTarget.h" />
     <ClInclude Include="src\Entity\FBXModel.h" />
     <ClInclude Include="src\Entity\Entity.h" />
     <ClInclude Include="src\Camera\LocationCamera.h" />
-    <ClInclude Include="src\GPUParticle.h" />
-    <ClInclude Include="src\GPUParticleEmitter.h" />
+    <ClInclude Include="src\Entity\GPUParticle.h" />
+    <ClInclude Include="src\Entity\GPUParticleEmitter.h" />
     <ClInclude Include="src\Camera\CameraStateMachine.h" />
     <ClInclude Include="src\Camera\FlyCamera.h" />
     <ClInclude Include="src\Camera\OrbitCamera.h" />
@@ -64,7 +66,7 @@
     <ClInclude Include="src\MathCollision.h" />
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\Particle.h" />
-    <ClInclude Include="src\ParticleEmitter.h" />
+    <ClInclude Include="src\Entity\ParticleEmitter.h" />
     <ClInclude Include="src\Program.h" />
     <ClInclude Include="src\Render.h" />
     <ClInclude Include="src\TestApplication.h" />

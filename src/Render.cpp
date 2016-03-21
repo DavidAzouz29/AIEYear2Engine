@@ -21,6 +21,9 @@
 /// search for TODO:
 /// DrawGeom(m_projectionViewMatrix or in this case m4ProjectionTrans
 /// FBXTexture
+///
+/// would have textures and shaders
+/// 
 /// </summary>
 /// ----------------------------------------------------------
 
@@ -43,7 +46,7 @@ Render::Render() :
 	fHeightScale(2.0f),
 	fTime(0.0f)
 {
-	m_pMesh = std::make_shared<Mesh>();
+	//m_pMesh = std::make_shared<Mesh>();
 }
 
 Render::~Render()
@@ -55,14 +58,12 @@ Render::~Render()
 
 bool Render::Create()
 {
-	//m_pMesh = std::make_shared<Mesh>(); //TODO: needed here? - in con^
-
 	//m_pRender = std::make_shared<Render>(); //TODO: I need this somewhere
 	// -----------------------
 	// Creates Grid
 	// -----------------------
 	GLint uiGrid = 21;
-	//m_pRender->generateGrid(uiGrid, uiGrid);
+	/*m_pRender->generateGrid(uiGrid, uiGrid);
 	//m_pRender->InitGeometry();
 	// -----------------------
 

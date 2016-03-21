@@ -9,10 +9,11 @@
 #include <glm\ext.hpp>
 
 #include <vector>
+#include <memory>
 
 class Camera;
 
-class MathCollision : public Entity //TODO: Does Math need to inherit from Entity?
+class MathCollision
 {
 public:
 	MathCollision();
@@ -22,7 +23,14 @@ public:
 	GLvoid Update(Camera* cam);
 };
 
-class AABB
+/*class BoundingShape 
+{
+public:
+	bool Create();
+	//GLvoid Update(Camera* cam);
+}; */
+
+class AABB// : public BoundingShape
 {
 public:
 	AABB() { Reset(); }
@@ -35,10 +43,10 @@ public:
 	glm::vec3 min, max;
 };
 
-class BoundingSphere
+class BoundingSphere// : public BoundingShape
 {
 public:
-	BoundingSphere() : v3Centre(0), fRadius(0) {}
+	BoundingSphere();// : v3Centre(0), fRadius(0) {}
 	~BoundingSphere() {}
 
 	void Fit(const std::vector<glm::vec3>& a_v3Points);
@@ -47,4 +55,7 @@ public:
 
 	glm::vec3	v3Centre;
 	GLfloat		fRadius;
+
+private:
+	std::shared_ptr<AABB> m_pAABB;
 };

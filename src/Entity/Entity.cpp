@@ -17,14 +17,16 @@
 /// ----------------------------------------------------------
 #include "Entity\Entity.h"
 #include "Render.h"
-/*#include "ParticleEmitter.h"
-#include "GPUParticleEmitter.h"
-#include "MathCollision.h" */
+#include "Mesh.h"
 #include "Gizmos.h"
+#include "MathCollision.h"
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 
 #include <glm/ext.hpp>
+
+using glm::vec3;
+using glm::vec4;
 
 //--------------------------------------------------------------------------------------
 // Default Constructor with Initializer list
@@ -38,6 +40,7 @@ Entity::Entity() :
 	m_bDrawGizmoGrid(true)
 {
 	m_pRender = std::make_shared<Render>();
+	m_pMesh = std::make_shared<Mesh>();
 }
 
 /*bool Entity::Create()
@@ -66,14 +69,50 @@ GLvoid Entity::Update()
 
 GLvoid Entity::Draw()
 {
-	Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, m_v4EndColor);
-}
-/*
-GLvoid Entity::DrawApp()
-{
+	// For the render target
+	glBindFramebuffer(GL_FRAMEBUFFER, m_pMesh->GetFBO());
+	//printf("%d\n", m_pRenderApp->GetSharedPointer());
+	glViewport(0, 0, 512, 512); // 265 lower quarter of the texture
+
+	// ----------------------------------------------------------
+	//vec3 m_v3ClearColor(0.25f); //TODO: remove
+	glClearColor(m_v3ClearColor.r, m_v3ClearColor.g, m_v3ClearColor.b, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Clear ImGui
+	ImGui_ImplGlfwGL3_NewFrame();
+	// ----------------------------------------------------------
+	glBindVertexArray(m_pMesh->GetVAO());
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+	// Draw Captured Objects Here
+	bool m_bDrawGizmoGrid = true; //TODO: remove - found in Entity
+	if (m_bDrawGizmoGrid)
+	{
+		// ...for now let's add a grid to the gizmos
+		for (int i = 0; i < 21; ++i) {
+			Gizmos::addLine(vec3(-10 + i, 0, 10), vec3(-10 + i, 0, -10),
+				i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+
+			Gizmos::addLine(vec3(10, 0, -10 + i), vec3(-10, 0, -10 + i),
+				i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+		}
+	}
+
+	Gizmos::draw(m_pCamState->getProjectionView());
+	// draw
+	// unbind the FBO so that we can render to the back buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(m_pRender->GetProgramID());
 }
 
-GLvoid Entity::Destroy()
+GLvoid Entity::DrawApp()
+{
+	Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, m_v4EndColor);
+
+}
+
+/*GLvoid Entity::Destroy()
 {
 } */
 
