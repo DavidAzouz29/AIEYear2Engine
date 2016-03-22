@@ -9,7 +9,8 @@
 /// Singletons using smart pointers http://www.cplusplus.com/forum/general/37113/
 /// 
 /// ***EDIT***
-/// - Classes inheriting from Entity	- David Azouz 18/03/16
+/// - Created: Classes inheriting from Entity	- David Azouz 18/03/16
+/// - Classes inheriting from Entity			- David Azouz /03/16 //TODO: date
 /// 
 /// TODO: View the link above
 /// 
@@ -70,12 +71,11 @@ GLvoid Entity::Update()
 GLvoid Entity::Draw()
 {
 	// For the render target
-	glBindFramebuffer(GL_FRAMEBUFFER, m_pMesh->GetFBO());
+	glBindFramebuffer(GL_FRAMEBUFFER, m_renderTarget.GetFBO());
 	//printf("%d\n", m_pRenderApp->GetSharedPointer());
 	glViewport(0, 0, 512, 512); // 265 lower quarter of the texture
 
 	// ----------------------------------------------------------
-	//vec3 m_v3ClearColor(0.25f); //TODO: remove
 	glClearColor(m_v3ClearColor.r, m_v3ClearColor.g, m_v3ClearColor.b, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

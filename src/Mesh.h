@@ -26,7 +26,7 @@ public:
 
 	GLvoid SetIndexCount(unsigned int a_iIndexCount) { m_indexCount = a_iIndexCount; }
 
-	GLvoid CreateRenderTargetQuad();
+	//GLvoid CreateRenderTargetQuad();
 
 	// Setup OpenGL buffers and vertex attributes to be able to render these vertices.
 	template<typename T>

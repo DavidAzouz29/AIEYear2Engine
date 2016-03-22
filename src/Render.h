@@ -1,14 +1,15 @@
 #pragma once
 
 //#include "FBXFile.h"
-//#include "Entity\Entity.h"
+#include "Entity\Entity.h"
+#include "Mesh.h" //TOOD: needed?
 //#include "VertexData.h"
 
 #include <map>
 #include <memory>
 
 class Camera;
-class Mesh;
+//class Mesh;
 
 class Render // : public Entity
 {
@@ -42,9 +43,9 @@ public:
 
 	unsigned int GetTextureByName(const char* name);
 
-	void RenderTargetLoader();
+	//void RenderTargetLoader();
 
-	Mesh* GetSharedPointer() const { return m_pMesh.get(); }
+//	Mesh* GetSharedPointer() const { return m_pMesh.get(); }
 	GLuint GetProgramID() const { return m_programID; }
 
 private:
@@ -53,7 +54,7 @@ private:
 	//unsigned int m_VBO;	// Vertex Buffer Object
 	//unsigned int m_IBO;	// Index Buffer Object
 
-	unsigned int m_programID;
+	GLuint m_programID;
 //	Vertex_PositionColor* aoVertices;
 	
 	/// ----------------------------------------------------------
@@ -69,6 +70,7 @@ private:
 	float fHeightScale;
 	float fTime;
 
+	Mesh m_mesh;
 	//std::shared_ptr<Render> m_pRender;
 	//std::shared_ptr<Mesh> m_pMesh;
 };

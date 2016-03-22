@@ -1,11 +1,12 @@
 #pragma once
 #include "Entity\Entity.h"
 #include "Render.h"
-#include "Program.h"
 #include "Mesh.h"
+#include "Program.h"
 #include <glm/vec4.hpp>
 
 struct Particle;
+//class Mesh;
 
 struct ParticleEmitterConfig 
 {
@@ -38,7 +39,7 @@ class ParticleEmitter : public Entity
 {
 public:
 	ParticleEmitter();
-	~ParticleEmitter();
+	~ParticleEmitter() {}
 
 	bool isValid() { return m_config.particleCount != -1; }
 	bool Create();
@@ -55,7 +56,7 @@ public:
 
 private:
 	GLvoid Emit();
-	GLvoid BillboardParticle(unsigned int vertexIndex, const glm::mat4& billboardMat, const Particle* particle);
+	GLvoid BillboardParticle(GLuint vertexIndex, const glm::mat4& billboardMat, const Particle* particle);
 	
 	glm::vec3 m_v3particlePosition;
 
@@ -73,7 +74,7 @@ private:
 
 	//Render m_render; 
 	//Geometry m_geometry; //
-	Mesh m_mesh; // need the VAO, VBO, IBO.
+	//Mesh m_mesh; // need the VAO, VBO, IBO.
 	Program m_program;
 };
 

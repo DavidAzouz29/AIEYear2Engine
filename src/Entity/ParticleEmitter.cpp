@@ -15,9 +15,9 @@ ParticleEmitter::ParticleEmitter() :
 
 }
 
-ParticleEmitter::~ParticleEmitter()
+/*ParticleEmitter::~ParticleEmitter()
 {
-}
+}*/
 
 bool ParticleEmitter::Create()
 {
@@ -94,18 +94,18 @@ bool ParticleEmitter::ParticleLoader(ParticleEmitterConfig config)
 	m_pPartiles = new Particle[m_config.particleCount];
 	m_uiFirstDeadIndex = 0;
 
-	unsigned int vertCount = m_config.particleCount * 8; //4
+	GLuint vertCount = m_config.particleCount * 8; //4
 	m_pVertices = new Vertex_PositionColor[vertCount];
 
-	unsigned int indexCount = m_config.particleCount * 6;
-	unsigned int* pIndexData = new unsigned int[indexCount];
+	GLuint indexCount = m_config.particleCount * 6;
+	GLuint* pIndexData = new GLuint[indexCount];
 
 	m_v3particlePosition = m_config.v3ParticlePosition;
 
-	for (unsigned int i = 0; i < m_config.particleCount; i++)
+	for (GLuint i = 0; i < m_config.particleCount; i++)
 	{
-		unsigned int indexStart = i * 6;
-		unsigned int vertStart = i * 4;
+		GLuint indexStart = i * 6;
+		GLuint vertStart = i * 4;
 		// -----------------------
 		// Two triangles
 		// -----------------------
@@ -120,7 +120,7 @@ bool ParticleEmitter::ParticleLoader(ParticleEmitterConfig config)
 	}
 
 	// Creates storage (OpenGL)
-	m_mesh.Create(m_pVertices, vertCount, pIndexData, indexCount);
+	m_pMesh->Create(m_pVertices, vertCount, pIndexData, indexCount);
 
 	delete pIndexData;
 
@@ -133,7 +133,7 @@ GLvoid ParticleEmitter::Destroy()
 	delete[] m_pPartiles; 
 	delete[] m_pVertices; 
 
-	m_mesh.Destroy();
+	m_pMesh->Destroy();
 }
 
 GLvoid ParticleEmitter::Emit()
@@ -148,7 +148,7 @@ GLvoid ParticleEmitter::Emit()
 	particle.position = m_v3particlePosition;
 
 	particle.lifeTime = 0;
-	particle.lifeSpan = (rand() / (float)RAND_MAX) * 
+	particle.lifeSpan = (rand() / (GLfloat)RAND_MAX) * 
 		(m_config.lifespanMax - m_config.lifespanMin) 
 		+ m_config.lifespanMin; 
 
@@ -158,24 +158,24 @@ GLvoid ParticleEmitter::Emit()
 	/// <summary> 
 	/// Rand velocity between 0 and 1,
 	/// </summary>
-	float fSpeed = (rand() / (float)RAND_MAX *
+	GLfloat fSpeed = (rand() / (GLfloat)RAND_MAX *
 		(m_config.velocityMax - m_config.velocityMin) 
 		+ m_config.velocityMin);
 
-	particle.velocity.x = (rand() / (float)RAND_MAX) * 2 - 1;
-	particle.velocity.y = (rand() / (float)RAND_MAX) * 2 - 1;
-	particle.velocity.z = (rand() / (float)RAND_MAX) * 2 - 1;
+	particle.velocity.x = (rand() / (GLfloat)RAND_MAX) * 2 - 1;
+	particle.velocity.y = (rand() / (GLfloat)RAND_MAX) * 2 - 1;
+	particle.velocity.z = (rand() / (GLfloat)RAND_MAX) * 2 - 1;
 
 	// TODO: Needed?
 	particle.velocity = glm::normalize(particle.velocity) * fSpeed;
 
 }
 
-GLvoid ParticleEmitter::Update(float a_deltaTime, const glm::mat4 a_m4camMatrix)
+GLvoid ParticleEmitter::Update(GLfloat a_deltaTime, const glm::mat4 a_m4camMatrix)
 {
 	m_fEmitTimer += a_deltaTime;
 
-	float invEmitRate = 1.f / m_config.emitRate;
+	GLfloat invEmitRate = 1.f / m_config.emitRate;
 	while (m_fEmitTimer > invEmitRate)
 	{
 		Emit();
@@ -237,7 +237,7 @@ GLvoid ParticleEmitter::Update(float a_deltaTime, const glm::mat4 a_m4camMatrix)
 
 }
 
-GLvoid ParticleEmitter::BillboardParticle(unsigned int vertexIndex, const glm::mat4& billboardMat, const Particle* particle)
+GLvoid ParticleEmitter::BillboardParticle(GLuint vertexIndex, const glm::mat4& billboardMat, const Particle* particle)
 {
 	m_pVertices[vertexIndex].position =	billboardMat *
 		m_pVertices[vertexIndex].position +
@@ -246,11 +246,11 @@ GLvoid ParticleEmitter::BillboardParticle(unsigned int vertexIndex, const glm::m
 
 GLvoid ParticleEmitter::Draw(const glm::mat4& projView)
 {
-	glBindBuffer(GL_ARRAY_BUFFER, m_mesh.GetVBO());
+	glBindBuffer(GL_ARRAY_BUFFER, m_pMesh->GetVBO());
 	glBufferSubData(GL_ARRAY_BUFFER, 0, m_uiFirstDeadIndex * 4 * sizeof(Vertex_PositionColor), m_pVertices);
 
 	glUseProgram(m_program.getId());
 	m_program.setUniform("ProjectionView", projView);
-	glBindVertexArray(m_mesh.GetVAO());
+	glBindVertexArray(m_pMesh->GetVAO());
 	glDrawElements(GL_TRIANGLES, m_uiFirstDeadIndex * 6, GL_UNSIGNED_INT, 0);
 }

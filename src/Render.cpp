@@ -94,8 +94,8 @@ bool Render::Create()
 
 	//=======================================================
 	//m_pRender.get()->RenderTargetLoader();
-	RenderTargetLoader();
-	GetSharedPointer()->CreateRenderTargetQuad();
+	//RenderTargetLoader();
+	//GetSharedPointer()->CreateRenderTargetQuad();
 	//=======================================================
 	return false;
 }
@@ -141,7 +141,7 @@ GLvoid Render::generateGrid(const unsigned int a_iRows, const unsigned int a_iCo
 		}
 	}
 
-	m_pMesh->SetIndexCount((a_iRows - 1) * (a_iCols - 1) * 6);
+	m_mesh.SetIndexCount((a_iRows - 1) * (a_iCols - 1) * 6);
 
 #pragma region Big Old
 #pragma region Old
@@ -280,9 +280,9 @@ GLvoid Render::DrawGeometry(Camera* cam)
 	glUniform1f(uiHeightScale, fHeightScale);
 	glUniform1f(uiTime, fTime);
 
-	glBindVertexArray(m_pMesh->GetVAO()); //TODO: replace m_VAO with VAO
+	glBindVertexArray(m_mesh.GetVAO()); //TODO: replace m_VAO with VAO
 							  //unsigned int indexCount = (a_iRows - 1) * (a_iCols - 1) * 6; //TODO: m_iIndexCount = this formula
-	glDrawElements(GL_TRIANGLES, m_pMesh->GetIndexCount(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, m_mesh.GetIndexCount(), GL_UNSIGNED_INT, 0);
 }
 /*
 void Render::FBXLoader()
@@ -533,23 +533,23 @@ GLvoid Render::RenderTexture()
 	};
 	
 	// Add the following line to generate a VertexArrayObject
-	glGenVertexArrays(1, &m_pMesh->GetVAO());
-	glBindVertexArray(m_pMesh->GetVAO());
+	glGenVertexArrays(1, &m_mesh.GetVAO());
+	glBindVertexArray(m_mesh.GetVAO());
 
 	// ----------------------------------------------------------
 	// Generate our GL Buffers
 	// Let's move these so that they are all generated together
 	// ----------------------------------------------------------
-	glGenBuffers(1, &m_pMesh->GetVBO());
+	glGenBuffers(1, &m_mesh.GetVBO());
 	//... Code Segment here to bind and fill VBO + IBO
 	//
-	glBindBuffer(GL_ARRAY_BUFFER, m_pMesh->GetVBO());
+	glBindBuffer(GL_ARRAY_BUFFER, m_mesh.GetVBO());
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, vertexData, GL_STATIC_DRAW);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * 4, vertexData, GL_STATIC_DRAW);
 
-	glGenBuffers(1, &m_pMesh->GetIBO());
+	glGenBuffers(1, &m_mesh.GetIBO());
 	// 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_pMesh->GetIBO());
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_mesh.GetIBO());
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, indexData, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
@@ -607,7 +607,7 @@ GLvoid Render::DrawTexture(Camera* cam)
 	glUniform3f(loc, light.x, light.y, light.z);
 
 	// draw
-	glBindVertexArray(m_pMesh->GetVAO()); //TODO: replace m_VAO with VAO
+	glBindVertexArray(m_mesh.GetVAO()); //TODO: replace m_VAO with VAO
 	//glBindVertexArray(m_pMesh->GetVAO()); //TODO: replace m_VAO with VAO
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
@@ -645,7 +645,7 @@ GLvoid Render::DrawTextureP(Camera* cam)
 	glUniform3f(loc, light.x, light.y, light.z);
 
 	// draw
-	glBindVertexArray(m_pMesh->GetVAO()); //TODO: replace m_VAO with VAO
+	glBindVertexArray(m_mesh.GetVAO()); //TODO: replace m_VAO with VAO
 										  //glBindVertexArray(m_pMesh->GetVAO()); //TODO: replace m_VAO with VAO
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
@@ -659,67 +659,4 @@ unsigned int Render::GetTextureByName(const char* name)
 {
 	//std::vector<std::string>::iterator iter = m_textures.begin();
 	return m_textures[name];
-}
-
-GLvoid Render::RenderTargetLoader()
-{
-	/// ----------------------------------------------------------
-	/// Create shaders
-	/// ----------------------------------------------------------
-	/// Storing writing out our shader code into char arrays for processign by OpenGL.
-	/// ----------------------------------------------------------
-	const char* vsSource = "#version 410\n \
-							layout(location=0) in vec4 Position; \
-							layout(location=1) in vec2 TexCoord; \
-							out vec2 vTexCoord; \
-							uniform mat4 ProjectionView; \
-							void main() { \
-							vTexCoord = TexCoord; \
-							gl_Position = ProjectionView * Position; \
-							}";
-
-	// RGB x 2 - 1 to move it from RGB to XYZ, or 
-	// XYZ x 0.5 + 0.5 to move it from XYZ to RGB.
-	const char* fsSource = "#version 410\n \
-							in vec2 vTexCoord; \
-							out vec4 FragColor; \
-							uniform sampler2D diffuse; \
-							void main() { \
-							FragColor = texture(diffuse, vTexCoord);}";
-
-	/// ----------------------------------------------------------
-	/// Compile shaders
-	/// ----------------------------------------------------------
-	//if (!m_program.create(vsSource, fsSource)) return false; //TODO:
-	int success = GL_FALSE;
-	unsigned int iVertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(iVertexShader, 1, (const char**)&vsSource, 0);
-	glCompileShader(iVertexShader);
-
-	unsigned int iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(iFragmentShader, 1, (const char**)&fsSource, 0);
-	glCompileShader(iFragmentShader);
-
-	m_programID = glCreateProgram();
-	glAttachShader(m_programID, iVertexShader);
-	glAttachShader(m_programID, iFragmentShader);
-	glLinkProgram(m_programID);
-
-	glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
-	if (success == GL_FALSE)
-	{
-	int infoLogLength = 0;
-	glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &infoLogLength);
-	char* infoLog = new char[infoLogLength];
-
-	glGetProgramInfoLog(m_programID, infoLogLength, 0, infoLog);
-	printf("Error: Failed to link shader program!\n");
-	printf("%s\n", infoLog);
-	delete[] infoLog;
-	} //*/
-
-	glDeleteShader(iVertexShader);
-	glDeleteShader(iFragmentShader);
-
-	m_pMesh.get()->CreateFrame();
 }

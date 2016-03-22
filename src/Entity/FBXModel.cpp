@@ -29,7 +29,6 @@ FBXModel::~FBXModel()
 }
 
 
-
 bool FBXModel::Create()
 {
 	m_pFbx = std::make_shared<FBXFile>();
@@ -319,7 +318,6 @@ void FBXModel::FBXSkeletonLoader()
 	/// ----------------------------------------------------------
 	/// Storing writing out our shader code into char arrays for processign by OpenGL.
 	/// ----------------------------------------------------------
-
 	const char* vsSource = "#version 410\n \
 							layout(location=0) in vec4 Position; \
 							layout(location=1) in vec4 Normal; \

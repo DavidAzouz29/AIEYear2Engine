@@ -30,6 +30,7 @@
 #include "Camera\Camera.h"
 #include "Render.h"// | TODO: remove if Draw is removed?
 #include "Mesh.h"  // | TODO: remove if Draw is removed?
+#include "RenderTarget.h"
 #include "ParticleEmitter.h"
 #include "GPUParticleEmitter.h"
 #include "MathCollision.h"
@@ -54,7 +55,7 @@ using glm::mat4;
 //--------------------------------------------------------------------------------------
 TestApplication::TestApplication() : 
 	m_eCurrentDrawState(E_DRAW_STATE_FILL),
-	m_pRenderApp(nullptr),
+	//m_pRenderApp(nullptr),
 	m_fPrevTime(0)
 {
 	//m_pRenderApp = std::make_shared<Render>();
@@ -66,7 +67,7 @@ TestApplication::TestApplication() :
 
 	m_pMath = std::make_shared<MathCollision>();
 
-	//m_entities.resize(m_entities.size()); //TODO: this okay?
+	//m_entities.resize(m_entities.size()); //TODO: remove?
 
 } //: m_pCamera(nullptr),
 
@@ -105,15 +106,13 @@ bool TestApplication::startup() {
 	// -----------------------
 	//Entity::CreateSingleton();
 
-	//m_pRenderApp = pEntity->GetRender().get(); //TODO: remove for efficiency
-	//m_pRenderApp = m_entities->GetRender().get(); //TODO: remove for efficiency
-
 	// Loops through each entity and calls their respected Create functions.
-	for (auto pEntity : m_entities)
+	for (auto &pEntity : m_entities)
 	{
 		pEntity->Create();
 		//Entity::GetSingleton()->Create();
 	}
+	m_pRenderTarget = std::make_shared<RenderTarget>();
 
 	//////////////////////////////////////////////////////////////////////////
 	m_pickPosition = glm::vec3(0);
@@ -151,8 +150,8 @@ bool TestApplication::Update(float deltaTime)
 
 	// Camera Mode: Static, FlyCamera, Orbit
 #pragma region Camera Mode
-	m_fPrevTime += deltaTime; //TODO: += not working?
-	// TODO: get camera cycling and lerp/ slerping/ squad working
+	m_fPrevTime += deltaTime;
+	// Camera cycling and lerping // slerping/ squad.
 	// Cycles between various Cameras during run time
 	if (glfwGetKey(m_pWindow, GLFW_KEY_GRAVE_ACCENT) || glfwGetKey(m_pWindow, GLFW_KEY_KP_0))
 	{
@@ -277,7 +276,6 @@ GLvoid TestApplication::Draw()
 	glViewport(0, 0, 512, 512); // 265 lower quarter of the texture
 
 	// ----------------------------------------------------------
-	vec3 m_v3ClearColor(0.25f); //TODO: remove
 	glClearColor(m_v3ClearColor.r, m_v3ClearColor.g, m_v3ClearColor.b, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -362,15 +360,16 @@ GLvoid TestApplication::DrawApp()
 
 	// Render Target
 	// bind the camera
-	int loc = glGetUniformLocation(m_pRenderApp->GetProgramID(), "ProjectionView"); //m_program_ID
+	int loc = glGetUniformLocation(m_render.GetProgramID(), "ProjectionView"); //m_program_ID
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projView));
 
 	// Set texture slots
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_pRenderApp->GetSharedPointer()->GetFboTexture());
+	//glBindTexture(GL_TEXTURE_2D, m_pRenderApp->GetSharedPointer()->GetFboTexture());
+	glBindTexture(GL_TEXTURE_2D, m_pRenderTarget->GetFboTexture());
 
 	// tell the shader where it is
-	int diffLoc = glGetUniformLocation(m_pRenderApp->GetProgramID(), "diffuse"); // m_program_ID
+	int diffLoc = glGetUniformLocation(m_render.GetProgramID(), "diffuse"); // m_program_ID
 	glUniform1i(diffLoc, 0);
 
 	// Rendering mode
@@ -410,14 +409,13 @@ GLvoid TestApplication::DrawApp()
 		pEntity->Draw();
 	}
 
-	glBindVertexArray(m_pRenderApp->GetSharedPointer()->GetVAO());
+	glBindVertexArray(m_mesh.GetVAO()); // mesh Vertex Array Object
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
-	m_pRenderApp->DrawTextureP(m_pCamState); // TODO: FBX Texture - Needed for Render Target
+	m_render.DrawTextureP(m_pCamState); // TODO: FBX Texture - Needed for Render Target
 	
 	// Old draw items
-/*	//vec4 m_v4EndColor(1, 1, 0, 1); //TODO: remove.
-	//Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, m_v4EndColor);
+/*	//Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, m_v4EndColor);
 	//
 	//m_pVertexColoredGrid->draw(projView);
 	//m_pSpriteSheetQuad->draw(projView);
