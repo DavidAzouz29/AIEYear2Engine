@@ -2,8 +2,8 @@
 //#include "VertexData.h"
 #include "Camera\Camera.h"
 #include "RenderTarget.h"
-#include "gl_core_4_4.h"
 
+#include <gl_core_4_4.h>
 #include <glm/vec3.hpp>
 //#include <glm/mat4x2.hpp>
 #include <glm/mat4x4.hpp>
@@ -35,6 +35,10 @@ public:
 
 	const std::shared_ptr<Render>&	GetRender() const { return m_pRender; }
 
+	/// <summary> Function Pointer TODO: what do I do with this?
+	/// <param>P1: Program ID</param>
+	/// </summary>
+	/*Entity */ void(*EntityRender)(GLint) = NULL;
 /*	//glm::mat4 GetColor() { return m_m4Colors; }
 
 	static std::shared_ptr<Entity> GetSingleton() { return ms_pSingleton; }

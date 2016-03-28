@@ -30,7 +30,7 @@
 #include "Render.h"
 #include "Mesh.h"
 #include "Camera\Camera.h"
-#include "gl_core_4_4.h"
+//#include "gl_core_4_4.h"
 //#include "VertexData.h"
 
 //#define STB_IMAGE_IMPLEMENTATION //TODO: delete me

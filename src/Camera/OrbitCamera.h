@@ -8,9 +8,9 @@ public:
 	virtual ~OrbitCamera();
 
 	//void Enter() {};
-	void Update(float fDeltaTime) override;
-	void RenderUI() override;
-	void Exit() {};
+	GLvoid Update(GLfloat fDeltaTime) override;
+	GLvoid RenderUI() override;
+	//GLvoid Exit() {};
 
 private:
 	bool m_isClockwise;

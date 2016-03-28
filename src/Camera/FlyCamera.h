@@ -8,7 +8,7 @@ public:
 	virtual ~FlyCamera();
 
 	//void Enter() {};
-	void Update(float fDeltaTime) override;
-	void Exit() {};
+	GLvoid Update(GLfloat fDeltaTime) override;
+	//GLvoid Exit() {};
 };
 

@@ -16,12 +16,13 @@
 
 #pragma once
 
+#include <gl_core_4_4.h>
 #include <glm/vec4.hpp>
 
 #include <memory>
 
 class Camera;
-class FlyCamera;
+//class FlyCamera;
 
 /// <summary> 
 /// Enumeration to decide which method to draw our scene with.
@@ -43,8 +44,8 @@ public:
 	CameraStateMachine(glm::vec4 a_v4Perspective);
 	~CameraStateMachine();
 
-	void Update(float fDeltaTime);
-	void ChangeState(E_CAMERA_MODE_STATE eState);
+	GLvoid Update(GLfloat fDeltaTime);
+	GLvoid ChangeState(E_CAMERA_MODE_STATE eState);
 
 	Camera* GetCurrentCamera() const { return m_cameraStatesArray[m_eCurrentState].get(); }
 	E_CAMERA_MODE_STATE GetCurrentCameraMode() const { return m_eCurrentState; }

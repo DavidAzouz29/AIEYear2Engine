@@ -9,12 +9,13 @@
 /// Robert Bridson - co-author of "Fluid Simulation for Computer Graphics"
 /// https://github.com/johnsietsma/RefEngine/blob/master/Engine/src/Engine/Helpers.cpp
 /// http://en.cppreference.com/w/cpp/types/extent
+/// http://www.opengl-tutorial.org/intermediate-tutorials/billboards-particles/particles-instancing/
 ///
 /// ***EDIT***
 /// - Partcles on the GPU	 	- David Azouz 11/03/16
 ///
 /// Notes:
-/// in shader code '#version 410' = line 2, count onwards
+/// in shader code '#version 410' = line 1, count onwards
 /// 
 /// TODO:
 /// - Add gravity to the emitter that gets applied to the particle's movement during update.
@@ -75,7 +76,7 @@ bool GPUParticleEmitter::Create()
 /// <para><param>P8 + P9: What color a particle should be when it's born/ dies.</param></para>
 /// </summary>
 /// ----------------------------------------------------------
-void GPUParticleEmitter::Initalise(GLuint a_uiMaxParticles,
+GLvoid GPUParticleEmitter::Initalise(GLuint a_uiMaxParticles,
 	GLfloat a_fLifespanMin, GLfloat a_fLifespanMax,
 	GLfloat a_fVelocityMin, GLfloat a_fVelocityMax,
 	GLfloat a_fStartSize, GLfloat a_fEndSize,
@@ -106,7 +107,7 @@ void GPUParticleEmitter::Initalise(GLuint a_uiMaxParticles,
 	CreateDrawShader();
 }
 
-void GPUParticleEmitter::CreateBuffers()
+GLvoid GPUParticleEmitter::CreateBuffers()
 {
 	// create OpenGL buffers
 	glGenVertexArrays(2, m_vao);
@@ -153,11 +154,11 @@ void GPUParticleEmitter::CreateBuffers()
 /// <para>Flawlessly.</para>
 /// </summary>
 /// ----------------------------------------------------------
-void GPUParticleEmitter::CreateUpdateShader()
+GLvoid GPUParticleEmitter::CreateUpdateShader()
 {
-	int success = GL_FALSE;
+	GLint success = GL_FALSE;
 	// create a shader
-	GLuint vs = LoadShader(GL_VERTEX_SHADER, "./data/shaders/gpuParticleUpdate.vert");
+	GLushort vs = LoadShader(GL_VERTEX_SHADER, "./data/shaders/gpuParticleUpdate.vert");
 
 	m_updateShader = glCreateProgram();
 	glAttachShader(m_updateShader, vs);
@@ -165,8 +166,8 @@ void GPUParticleEmitter::CreateUpdateShader()
 	// specify the data that we will stream back
 	const GLchar* c_cVaryings[] = { "v3Position", "velocity",
 									"vLifetime", "vLifespan" };
-	GLuint uiSize = sizeof(c_cVaryings) / sizeof(const GLchar*);
-	glTransformFeedbackVaryings(m_updateShader, uiSize, c_cVaryings, GL_INTERLEAVED_ATTRIBS);
+	GLushort usSize = sizeof(c_cVaryings) / sizeof(*c_cVaryings); //sizeof(const GLchar*)
+	glTransformFeedbackVaryings(m_updateShader, usSize, c_cVaryings, GL_INTERLEAVED_ATTRIBS);
 
 	glLinkProgram(m_updateShader);
 
@@ -176,9 +177,9 @@ void GPUParticleEmitter::CreateUpdateShader()
 	glGetProgramiv(m_updateShader, GL_LINK_STATUS, &success);
 	if (success == GL_FALSE)
 	{
-		int infoLogLength = 0;
+		GLint infoLogLength = 0;
 		glGetProgramiv(m_updateShader, GL_INFO_LOG_LENGTH, &infoLogLength);
-		char* infoLog = new char[infoLogLength];
+		GLchar* infoLog = new GLchar[infoLogLength];
 
 		glGetProgramInfoLog(m_updateShader, infoLogLength, 0, infoLog);
 		printf("Error: Failed to link shader program!\n");
@@ -194,7 +195,7 @@ void GPUParticleEmitter::CreateUpdateShader()
 	glUseProgram(m_updateShader);
 
 	// bind lifetime minimum and maximum
-	int location = glGetUniformLocation(m_updateShader, "lifeMin");
+	GLint location = glGetUniformLocation(m_updateShader, "lifeMin");
 	glUniform1f(location, m_fLifespanMin);
 	location = glGetUniformLocation(m_updateShader, "lifeMax");
 	glUniform1f(location, m_fLifespanMax);
@@ -207,13 +208,13 @@ void GPUParticleEmitter::CreateUpdateShader()
 /// <para>Geometry Shader recieves points -> outputs two tris for every point.</para>
 /// </summary>
 /// ----------------------------------------------------------
-void GPUParticleEmitter::CreateDrawShader()
+GLvoid GPUParticleEmitter::CreateDrawShader()
 {
-	int success = GL_FALSE;
+	GLint success = GL_FALSE;
 	
-	GLuint vs = LoadShader(GL_VERTEX_SHADER,	"./data/shaders/gpuParticle.vert");
-	GLuint gs = LoadShader(GL_GEOMETRY_SHADER,	"./data/shaders/gpuParticle.geom");
-	GLuint fs = LoadShader(GL_FRAGMENT_SHADER,	"./data/shaders/gpuParticle.frag");
+	GLushort vs = LoadShader(GL_VERTEX_SHADER,	 "./data/shaders/gpuParticle.vert");
+	GLushort gs = LoadShader(GL_GEOMETRY_SHADER, "./data/shaders/gpuParticle.geom");
+	GLushort fs = LoadShader(GL_FRAGMENT_SHADER, "./data/shaders/gpuParticle.frag");
 
 	m_drawShader = glCreateProgram();
 	glAttachShader(m_drawShader, vs);
@@ -227,9 +228,9 @@ void GPUParticleEmitter::CreateDrawShader()
 	glGetProgramiv(m_drawShader, GL_LINK_STATUS, &success);
 	if (success == GL_FALSE)
 	{
-		int infoLogLength = 0;
+		GLint infoLogLength = 0;
 		glGetProgramiv(m_drawShader, GL_INFO_LOG_LENGTH, &infoLogLength);
-		char* infoLog = new char[infoLogLength];
+		GLchar* infoLog = new GLchar[infoLogLength];
 
 		glGetProgramInfoLog(m_drawShader, infoLogLength, 0, infoLog);
 		printf("Error: Failed to link shader program!\n");
@@ -248,7 +249,8 @@ void GPUParticleEmitter::CreateDrawShader()
 	glUseProgram(m_drawShader);
 
 	// bind size information for interpolation that won't change
-	GLint location = glGetUniformLocation(m_drawShader, "fSizeStart");
+	// TOOO: GLshort? from GLint okay?
+	GLshort location = glGetUniformLocation(m_drawShader, "fSizeStart");
 	glUniform1f(location, m_fStartSize);
 	location = glGetUniformLocation(m_drawShader, "fSizeEnd");
 	glUniform1f(location, m_fEndSize);
@@ -269,7 +271,7 @@ void GPUParticleEmitter::CreateDrawShader()
 /// <param><para>P3: Proj View.</para></param>
 /// </summary>
 /// ----------------------------------------------------------
-void GPUParticleEmitter::Draw(GLfloat a_ftime, 
+GLvoid GPUParticleEmitter::Draw(GLfloat a_ftime,
 	const glm::mat4& a_m4CameraTransform,
 	const glm::mat4& a_m4ProectionView)
 {
@@ -277,7 +279,7 @@ void GPUParticleEmitter::Draw(GLfloat a_ftime,
 	glUseProgram(m_updateShader);
 
 	// bind time information
-	int location = glGetUniformLocation(m_updateShader, "time");
+	GLint location = glGetUniformLocation(m_updateShader, "time");
 	glUniform1f(location, a_ftime);
 
 	GLfloat deltaTime = a_ftime - m_fLastDrawTime;
@@ -339,7 +341,7 @@ void GPUParticleEmitter::Draw(GLfloat a_ftime,
 /// -----------------------------
 // Renders UI elements via ImGui
 /// -----------------------------
-void GPUParticleEmitter::RenderUI()
+GLvoid GPUParticleEmitter::RenderUI()
 {
 	if (ImGui::CollapsingHeader("GPU Particles"))
 	{

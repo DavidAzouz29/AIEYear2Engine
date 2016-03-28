@@ -20,6 +20,7 @@
 /// 
 /// TODO: 
 /// Invoke and cycle camera
+/// change to #include <gl_core_4_4.h, <Gizmos.h, and to GLvoid
 /// Fix this whole pRender & m_pRender business
 /// </summary>
 /// ----------------------------------------------------------
@@ -34,10 +35,10 @@
 #include "ParticleEmitter.h"
 #include "GPUParticleEmitter.h"
 #include "MathCollision.h"
-#include "Gizmos.h"
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 
+#include <Gizmos.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp> //needed for pi
@@ -92,7 +93,7 @@ bool TestApplication::startup() {
 	/// <para>P3: Near: nearest clipping plane to render to.</para>
 	/// <para>P4: Far: furthest clipping plane to render to.</para>
 	/// </summary>
-	vec4 v4Perspective(glm::pi<float>() * 0.25f, 16 / 9.0f, 0.1f, 10000.f);
+	vec4 v4Perspective(glm::pi<GLfloat>() * 0.25f, 16 / 9.0f, 0.1f, 10000.f);
 	m_pCameraStateMachine = std::make_shared<CameraStateMachine>(v4Perspective);
 
 	m_pCamState = m_pCameraStateMachine->GetCurrentCamera();
@@ -125,7 +126,7 @@ GLvoid TestApplication::shutdown()
 	//////////////////////////////////////////////////////////////////////////
 	// YOUR SHUTDOWN CODE HERE
 	// -----------------------
-	for (auto pEntity : m_entities)
+	for (auto &pEntity : m_entities)
 	{
 		pEntity->Destroy();
 	}
@@ -139,7 +140,7 @@ GLvoid TestApplication::shutdown()
 	destroyWindow();
 }
 
-bool TestApplication::Update(float deltaTime) 
+bool TestApplication::Update(GLfloat deltaTime) 
 {
 	// close the application if the window closes
 	if (glfwWindowShouldClose(m_pWindow) ||
@@ -200,7 +201,7 @@ bool TestApplication::Update(float deltaTime)
 
 	//////////////////////////////////////////////////////////////////////////
 	// YOUR UPDATE CODE HERE
-	for (auto pEntity : m_entities)
+	for (auto &pEntity : m_entities)
 	{
 		pEntity->Update();
 	}
@@ -220,12 +221,12 @@ bool TestApplication::Update(float deltaTime)
 
 	// an example of mouse picking
 	if (glfwGetMouseButton(m_pWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-		double x = 0, y = 0;
+		GLdouble x = 0, y = 0;
 		glfwGetCursorPos(m_pWindow, &x, &y);
 
 		// plane represents the ground, with a normal of (0,1,0) and a distance of 0 from (0,0,0)
 		glm::vec4 plane(0, 1, 0, 0);
-		m_pickPosition = m_pCamState->pickAgainstPlane((float)x, (float)y, plane);
+		m_pickPosition = m_pCamState->pickAgainstPlane((GLfloat)x, (GLfloat)y, plane);
 	}
 	Gizmos::addTransform(glm::translate(m_pickPosition));
 
@@ -360,7 +361,7 @@ GLvoid TestApplication::DrawApp()
 
 	// Render Target
 	// bind the camera
-	int loc = glGetUniformLocation(m_render.GetProgramID(), "ProjectionView"); //m_program_ID
+	GLint loc = glGetUniformLocation(m_render.GetProgramID(), "ProjectionView"); //m_program_ID
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projView));
 
 	// Set texture slots
@@ -369,7 +370,7 @@ GLvoid TestApplication::DrawApp()
 	glBindTexture(GL_TEXTURE_2D, m_pRenderTarget->GetFboTexture());
 
 	// tell the shader where it is
-	int diffLoc = glGetUniformLocation(m_render.GetProgramID(), "diffuse"); // m_program_ID
+	GLint diffLoc = glGetUniformLocation(m_render.GetProgramID(), "diffuse"); // m_program_ID
 	glUniform1i(diffLoc, 0);
 
 	// Rendering mode
@@ -404,7 +405,7 @@ GLvoid TestApplication::DrawApp()
 	//pRender->DrawTexture(m_pCamState); //TODO: needed for Soulspear
 
 	// TODO:
-	for (auto pEntity : m_entities)
+	for (auto &pEntity : m_entities)
 	{
 		pEntity->Draw();
 	}
@@ -441,9 +442,9 @@ GLvoid TestApplication::DrawApp()
 	Gizmos::draw(projView);
 
 	// get a orthographic projection matrix and draw 2D gizmos
-	int width = 0, height = 0;
+	GLint width = 0, height = 0;
 	glfwGetWindowSize(m_pWindow, &width, &height);
-	mat4 guiMatrix = glm::ortho<float>(0, 0, (float)width, (float)height);
+	mat4 guiMatrix = glm::ortho<GLfloat>(0, 0, (GLfloat)width, (GLfloat)height);
 
 	Gizmos::draw2D(projView);
 
@@ -457,17 +458,17 @@ GLvoid TestApplication::DrawApp()
 		//static int selected_camera = -1;
 		static E_CAMERA_MODE_STATE selected_camera = m_pCameraStateMachine->GetCurrentCameraMode();
 		//const char* c_camera = "Camera"; //TODO:
-		const char* names[] = { "Static ", "Fly ", "Orbit ", "Travel ", "Location "};
+		const GLchar* names[] = { "Static ", "Fly ", "Orbit ", "Travel ", "Location "};
 
 		if (ImGui::Button("Select.."))
 			ImGui::OpenPopup("select");
 		ImGui::SameLine();
-		ImGui::Text(selected_camera == (E_CAMERA_MODE_STATE)-1 ? "<None>" : names[(int)selected_camera]);
+		ImGui::Text(selected_camera == (E_CAMERA_MODE_STATE)-1 ? "<None>" : names[(GLint)selected_camera]);
 		if (ImGui::BeginPopup("select"))
 		{
 			ImGui::Text("Modes: ");
 			ImGui::Separator();
-			for (int i = 0; i < IM_ARRAYSIZE(names); i++)
+			for (GLint i = 0; i < IM_ARRAYSIZE(names); i++)
 			{
 				if (ImGui::Selectable(names[i]))
 				{
@@ -481,13 +482,15 @@ GLvoid TestApplication::DrawApp()
 		///-----------------------------------------------------------------------------------------------------------
 		//static int e = 0; // E_CAMERA_MODE_STATE 
 		//TODO: Make radio buttons select state
-		static int iCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
+		static GLint iCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
+		//for (GLushort i = 0; i < IM_ARRAYSIZE(names); i++) { //TODO: is this doable?
+		// replace numbers in names to be names[i] and    V here
 		ImGui::RadioButton(names[0], &iCurrentCameraMode, 0); ImGui::SameLine();
 		ImGui::RadioButton(names[1], &iCurrentCameraMode, 1); ImGui::SameLine();
 		ImGui::RadioButton(names[2], &iCurrentCameraMode, 2); ImGui::SameLine();
 		ImGui::RadioButton(names[3], &iCurrentCameraMode, 3); ImGui::SameLine();
 		ImGui::RadioButton(names[4], &iCurrentCameraMode, 4);
-
+		//}
 		if (ImGui::Button("Camera State"))
 		{
 			E_CAMERA_MODE_STATE eCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
@@ -505,7 +508,7 @@ GLvoid TestApplication::DrawApp()
 
 		// GPU Particles
 		//m_pGPUEmitter.get()->RenderUI();
-		for (auto pEntity : m_entities)
+		for (auto &pEntity : m_entities)
 		{
 			pEntity->RenderUI();
 			ImGui::Separator();
@@ -542,7 +545,6 @@ GLvoid TestApplication::DrawApp()
 	}
 #pragma endregion
 #pragma endregion
-
 	///-----------------------------------------------------------------------------------------------------------
 }
 

@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "Render.h"
 
+#include <gl_core_4_4.h>
 #include <vector>
 #include <memory>
 // only needed for the camera picking
@@ -38,7 +39,7 @@ public:
 	virtual bool startup();
 	virtual GLvoid shutdown();
 
-	virtual bool Update(float deltaTime);
+	virtual bool Update(GLfloat deltaTime);
 	virtual GLvoid Draw();
 	// Items to be drawn to our Render Target.
 	GLvoid DrawApp();

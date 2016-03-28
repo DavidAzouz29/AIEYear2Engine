@@ -60,12 +60,12 @@ LocationCamera::~LocationCamera()
 {
 }
 
-void LocationCamera::Update(GLfloat fDeltaTime)
+GLvoid LocationCamera::Update(GLfloat fDeltaTime)
 {
-	float frameSpeed = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;
+	GLfloat frameSpeed = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;
 	// ---------------------------------------------------------------------------------------
 	// TODO: update our locations via ImGui
-	for (int i = 0; i < MAX_LOCATIONS; ++i)
+	for (GLint i = 0; i < MAX_LOCATIONS; ++i)
 	{
 		m_v4LocationArray[i] = m_v4LocationArray[i];
 	}
@@ -81,7 +81,7 @@ void LocationCamera::Update(GLfloat fDeltaTime)
 /// -----------------------------
 // Renders UI elements via ImGui
 /// -----------------------------
-void LocationCamera::RenderUI()
+GLvoid LocationCamera::RenderUI()
 {
 	if (ImGui::CollapsingHeader("Location Camera"))
 	{
@@ -116,20 +116,20 @@ void LocationCamera::RenderUI()
 			NextLocation();
 		}
 
-		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (float)INT_MAX);
+		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (GLfloat)INT_MAX);
 		ImGui::Separator();
-		ImGui::DragFloat4("Camera Location", m_transform[3].data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 1", v4Location1.data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 2", v4Location2.data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 3", v4Location3.data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 4", v4Location4.data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
+		ImGui::DragFloat4("Camera Location", m_transform[3].data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
+		ImGui::DragFloat4("Location 1", v4Location1.data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
+		ImGui::DragFloat4("Location 2", v4Location2.data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
+		ImGui::DragFloat4("Location 3", v4Location3.data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
+		ImGui::DragFloat4("Location 4", v4Location4.data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
 	}
 }
 
 /// ------------------------------------
 // Travels to the next location stored.
 /// ------------------------------------
-void LocationCamera::NextLocation()
+GLvoid LocationCamera::NextLocation()
 {
 	// If we're within our range...
 	if (m_iIter <= MAX_LOCATIONS)

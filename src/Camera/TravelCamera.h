@@ -1,6 +1,6 @@
 #pragma once
 #include "Camera.h"
-#include "gl_core_4_4.h"
+//#include <gl_core_4_4.h>
 
 #define MAX_LOCATIONS 4
 
@@ -13,8 +13,8 @@ public:
 	TravelCamera(vec4 a_v4Perspective);
 	virtual ~TravelCamera();
 
-	void Enter();
-	void Update(GLfloat fDeltaTime) override;
+	GLvoid Enter();
+	GLvoid Update(GLfloat fDeltaTime) override;
 	/// --------------------------------------------------------------------------------------------------
 	/// <summary> Travels via Linear interpolation (Lerp) to designated locations
 	/// <param><para>P1 + P2: Time frame to Lerp between Location 'A' and 'B'.</para>
@@ -24,9 +24,9 @@ public:
 	/// <param><para>P4: Lerp To (Can be changed during runtime).</para></param>
 	/// </summary>
 	/// --------------------------------------------------------------------------------------------------
-	void Travel(GLfloat a_fStartTime, GLfloat a_fEndTime, vec4 a_v4StartLocation, vec4 a_v4EndLocation);
-	void RenderUI() override;
-	void Exit() {};
+	GLvoid Travel(GLfloat a_fStartTime, GLfloat a_fEndTime, vec4 a_v4StartLocation, vec4 a_v4EndLocation);
+	GLvoid RenderUI() override;
+	//GLvoid Exit() {};
 
 protected:
 	GLfloat m_fTimer;

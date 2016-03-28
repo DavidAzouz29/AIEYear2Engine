@@ -1,6 +1,8 @@
 // viewed: https://www.reddit.com/r/Unity3D/comments/1syswe/ps4_controller_map_for_unity/
 #define GLM_SWIZZLE
+
 #include "FlyCamera.h"
+
 #include <GLFW/glfw3.h>
 #include <glm/ext.hpp>
 
@@ -14,9 +16,9 @@ FlyCamera::~FlyCamera()
 {
 }
 
-void FlyCamera::Update(float fDeltaTime)
+GLvoid FlyCamera::Update(GLfloat fDeltaTime)
 {
-	float frameSpeed = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;
+	GLfloat frameSpeed = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;
 	
 	if (glfwGetKey(m_pWindow, GLFW_KEY_KP_ADD))
 	{
@@ -209,7 +211,7 @@ void FlyCamera::Update(float fDeltaTime)
 	// ---------------------------------------------------------------------------------------
 #pragma region Random Rotations
 	// ---------------------------------------------------------------------------------------
-	int iYes = 0;
+	GLint iYes = 0;
 	if (glfwGetKey(m_pWindow, GLFW_KEY_K))
 	{
 		m_v3Movement.z += frameSpeed;
@@ -287,25 +289,25 @@ void FlyCamera::Update(float fDeltaTime)
 	if (glfwGetKey(m_pWindow, GLFW_KEY_F6))
 	{
 		//setPerspective(fovY, aspectRatio, near, far);
-		m_projection = glm::perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
+		m_projection = glm::perspective(glm::pi<GLfloat>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
 		m_projectionView = m_projection * m_view;
 	}
 	if (glfwGetKey(m_pWindow, GLFW_KEY_F7))
 	{
 		//setPerspective(fovY, aspectRatio, near, far);
-		m_projection = glm::perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 10.f, 15.f);
+		m_projection = glm::perspective(glm::pi<GLfloat>() * 0.25f, 16 / 9.f, 10.f, 15.f);
 		m_projectionView = m_projection * m_view;
 	}
 	if (glfwGetKey(m_pWindow, GLFW_KEY_F8))
 	{
 		//setPerspective(fovY, aspectRatio, near, far);
-		m_projection = glm::perspective(glm::pi<float>() * 0.75f, 16 / 9.f, 0.1f, 1000.f);
+		m_projection = glm::perspective(glm::pi<GLfloat>() * 0.75f, 16 / 9.f, 0.1f, 1000.f);
 		m_projectionView = m_projection * m_view;
 	}
 	if (glfwGetKey(m_pWindow, GLFW_KEY_F9))
 	{
 		//setPerspective(fovY, aspectRatio, near, far);
-		m_projection = glm::ortho(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
+		m_projection = glm::ortho(glm::pi<GLfloat>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
 		m_projectionView = m_projection * m_view;
 	}
 #pragma endregion
@@ -314,8 +316,8 @@ void FlyCamera::Update(float fDeltaTime)
 	static bool sbMouseButtonDown = false;
 	if (glfwGetMouseButton(m_pWindow, GLFW_MOUSE_BUTTON_MIDDLE) || glfwGetKey(m_pWindow, GLFW_KEY_M))
 	{
-		static double siPrevMouseX = 0;
-		static double siPrevMouseY = 0;
+		static GLdouble siPrevMouseX = 0;
+		static GLdouble siPrevMouseY = 0;
 
 		if (sbMouseButtonDown == false)
 		{
@@ -323,11 +325,11 @@ void FlyCamera::Update(float fDeltaTime)
 			glfwGetCursorPos(m_pWindow, &siPrevMouseX, &siPrevMouseY);
 		}
 
-		double mouseX = 0, mouseY = 0;
+		GLdouble mouseX = 0, mouseY = 0;
 		glfwGetCursorPos(m_pWindow, &mouseX, &mouseY);
 
-		double iDeltaX = mouseX - siPrevMouseX;
-		double iDeltaY = mouseY - siPrevMouseY;
+		GLdouble iDeltaX = mouseX - siPrevMouseX;
+		GLdouble iDeltaY = mouseY - siPrevMouseY;
 
 		siPrevMouseX = mouseX;
 		siPrevMouseY = mouseY;
@@ -337,7 +339,7 @@ void FlyCamera::Update(float fDeltaTime)
 		// pitch
 		if (iDeltaY != 0)
 		{
-			mMat = glm::axisAngleMatrix(m_transform[0].xyz(), (float)-iDeltaY / 150.0f);
+			mMat = glm::axisAngleMatrix(m_transform[0].xyz(), (GLfloat)-iDeltaY / 150.0f);
 			m_transform[0] = mMat * m_transform[0];
 			m_transform[1] = mMat * m_transform[1];
 			m_transform[2] = mMat * m_transform[2];
@@ -346,7 +348,7 @@ void FlyCamera::Update(float fDeltaTime)
 		// yaw
 		if (iDeltaX != 0)
 		{
-			mMat = glm::axisAngleMatrix(m_up, (float)-iDeltaX / 150.0f);
+			mMat = glm::axisAngleMatrix(m_up, (GLfloat)-iDeltaX / 150.0f);
 			m_transform[0] = mMat * m_transform[0];
 			m_transform[1] = mMat * m_transform[1];
 			m_transform[2] = mMat * m_transform[2];

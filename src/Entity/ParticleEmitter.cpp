@@ -1,8 +1,8 @@
-#include "gl_core_4_4.h"
 #include "ParticleEmitter.h"
 #include "Particle.h"
 //TODO: ResourceCreator.h
 
+//#include <gl_core_4_4.h>
 #include <assert.h>
 #include <memory>
 

@@ -22,9 +22,9 @@ OrbitCamera::~OrbitCamera()
 {
 }
 
-void OrbitCamera::Update(float fDeltaTime)
+GLvoid OrbitCamera::Update(GLfloat fDeltaTime)
 {
-	float frameSpeed = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;
+	GLfloat frameSpeed = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;
 	/// <summary> 
 	/// If Any key: Rotates in the opposite direction.
 	/// <para> If was rotating Clockwise, it will now rotate Counter-Clockwise. </para>
@@ -93,7 +93,7 @@ void OrbitCamera::Update(float fDeltaTime)
 #pragma endregion
 }
 
-void OrbitCamera::RenderUI()
+GLvoid OrbitCamera::RenderUI()
 {
 	if (ImGui::CollapsingHeader("Orbit Camera"))
 	{
@@ -105,6 +105,6 @@ void OrbitCamera::RenderUI()
 		{
 			m_transform[3] = m_transform[3];
 		}
-		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (float)INT_MAX);
+		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (GLfloat)INT_MAX);
 	}
 }

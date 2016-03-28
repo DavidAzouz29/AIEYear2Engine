@@ -8,7 +8,7 @@
 //#include <string>
 //#include <glm/detail/type_vec4.hpp>
 
-Camera::Camera(float fovY, float aspectRatio, float near, float far)
+Camera::Camera(GLfloat a_fFovY, GLfloat a_fAspectRatio, GLfloat a_fNear, GLfloat a_fFar)
 	: m_speed(10),
 	m_fRotation(0.01f),
 	m_up(0,1,0),
@@ -16,7 +16,7 @@ Camera::Camera(float fovY, float aspectRatio, float near, float far)
 	m_view(1),
 	m_v3Movement(0)
 {
-	setPerspective(fovY, aspectRatio, near, far);
+	setPerspective(a_fFovY, a_fAspectRatio, a_fNear, a_fFar);
 	setLookAtFrom(glm::vec3(10, 10, 10), glm::vec3(0));
 }
 
@@ -33,13 +33,13 @@ Camera::Camera(glm::vec4 a_v4Perspective)
 	setLookAtFrom(glm::vec3(10, 10, 10), glm::vec3(0));
 }
 
-void Camera::setPerspective(float fovY, float aspectRatio, float near, float far)
+GLvoid Camera::setPerspective(GLfloat a_fFovY, GLfloat a_fAspectRatio, GLfloat a_fNear, GLfloat a_fFar)
 {
-	m_projection = glm::perspective(fovY, aspectRatio, near, far);
+	m_projection = glm::perspective(a_fFovY, a_fAspectRatio, a_fNear, a_fFar);
 	m_projectionView = m_projection * m_view;
 }
 
-void Camera::setLookAtFrom(const glm::vec3& from, const glm::vec3& to)
+GLvoid Camera::setLookAtFrom(const glm::vec3& from, const glm::vec3& to)
 {
 	m_view = glm::lookAt(from, to, glm::vec3(0, 1, 0));
 	m_transform = glm::inverse(m_view);
@@ -53,10 +53,10 @@ void Camera::setLookAtFrom(const glm::vec3& from, const glm::vec3& to)
 	m_projectionView = m_projection * m_view;
 } */
 
-void Camera::Enter()
+GLvoid Camera::Enter()
 {
 	//TODO: repeated code? ^
-	setPerspective(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
+	setPerspective(glm::pi<GLfloat>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
 
 	if (m_speed != 10)
 	{
@@ -89,9 +89,9 @@ void Camera::Enter()
 	m_pWindow = glfwGetCurrentContext();
 }
 
-glm::vec3 Camera::screenPositionToDirection(float x, float y) const {
+glm::vec3 Camera::screenPositionToDirection(GLfloat x, GLfloat y) const {
 	
-	int width = 0, height = 0;
+	GLint width = 0, height = 0;
 	glfwGetWindowSize(glfwGetCurrentContext(), &width, &height);
 
 	glm::vec3 screenPos(x / width * 2 - 1, (y / height * 2 - 1) * -1, -1);
@@ -102,9 +102,9 @@ glm::vec3 Camera::screenPositionToDirection(float x, float y) const {
 	return glm::normalize(m_transform * glm::vec4(screenPos, 0)).xyz();
 }
 
-glm::vec3 Camera::pickAgainstPlane(float x, float y, const glm::vec4& plane) const {
+glm::vec3 Camera::pickAgainstPlane(GLfloat x, GLfloat y, const glm::vec4& plane) const {
 
-	int width = 0, height = 0;
+	GLint width = 0, height = 0;
 	glfwGetWindowSize(glfwGetCurrentContext(), &width, &height);
 
 	glm::vec3 screenPos(x / width * 2 - 1, (y / height * 2 - 1) * -1, -1);
@@ -114,19 +114,19 @@ glm::vec3 Camera::pickAgainstPlane(float x, float y, const glm::vec4& plane) con
 
 	glm::vec3 dir = glm::normalize(m_transform * glm::vec4(screenPos, 0)).xyz();
 
-	float d = (plane.w - glm::dot(m_transform[3].xyz(), plane.xyz()) / glm::dot(dir, plane.xyz()));
+	GLfloat d = (plane.w - glm::dot(m_transform[3].xyz(), plane.xyz()) / glm::dot(dir, plane.xyz()));
 
 	return m_transform[3].xyz() + dir * d;
 }
 
-void Camera::RenderUI()
+GLvoid Camera::RenderUI()
 {
 	//std::string sLocationName = "Location "; //TODO: get camera mode? names[] from TestApp
 
 	if (ImGui::CollapsingHeader("Camera"))
 	{
-		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (float)INT_MAX);
+		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (GLfloat)INT_MAX);
 		ImGui::InputFloat4("Camera Location", m_transform[3].data);
-		ImGui::DragFloat4("Camera Location", m_transform[3].data, 1.1f, 0.01f, (float)INT_MAX);
+		ImGui::DragFloat4("Camera Location", m_transform[3].data, 1.1f, 0.01f, (GLfloat)INT_MAX);
 	}
 }

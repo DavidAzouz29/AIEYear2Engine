@@ -49,13 +49,13 @@ CameraStateMachine::~CameraStateMachine()
 	m_cameraStatesArray[m_eCurrentState]->Exit();
 }
 
-void CameraStateMachine::Update(float fDeltaTime)
+GLvoid CameraStateMachine::Update(GLfloat fDeltaTime)
 {
 	m_cameraStatesArray[m_eCurrentState]->Update(fDeltaTime);
 	//GetCurrentCamera()->Update(fDeltaTime); //TODO
 }
 
-void CameraStateMachine::ChangeState(E_CAMERA_MODE_STATE eState)
+GLvoid CameraStateMachine::ChangeState(E_CAMERA_MODE_STATE eState)
 {
 	m_cameraStatesArray[m_eCurrentState]->Exit();
 	m_eCurrentState = eState;

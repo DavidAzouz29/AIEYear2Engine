@@ -47,7 +47,7 @@ TravelCamera::~TravelCamera()
 /// ----------------------------------------------------------
 /// Enter: Used to reset values upon entering or return.
 /// ----------------------------------------------------------
-void TravelCamera::Enter()
+GLvoid TravelCamera::Enter()
 {
 	// Call our Enter func. of our Camera to attain its properties.
 	Camera::Enter();
@@ -62,11 +62,11 @@ void TravelCamera::Enter()
 	}
 }
 
-void TravelCamera::Update(GLfloat fDeltaTime)
+GLvoid TravelCamera::Update(GLfloat fDeltaTime)
 {
 	m_fTimer += fDeltaTime;
 
-	float frameSpeed = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;
+	GLfloat frameSpeed = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;
 
 	// ---------------------------------------------------------------------------------------
 	/// <summary><example><code>
@@ -120,7 +120,7 @@ void TravelCamera::Update(GLfloat fDeltaTime)
 /// <param><para>P4: Lerp To (Can be changed during runtime).</para></param>
 /// </summary>
 /// --------------------------------------------------------------------------------------------------
-void TravelCamera::Travel(GLfloat a_fStartTime, GLfloat a_fEndTime, vec4 a_v4StartLocation, vec4 a_v4EndLocation)
+GLvoid TravelCamera::Travel(GLfloat a_fStartTime, GLfloat a_fEndTime, vec4 a_v4StartLocation, vec4 a_v4EndLocation)
 {
 	// If within the desired time frame...
 	if (m_fTimer >= a_fStartTime && m_fTimer < a_fEndTime)
@@ -158,7 +158,7 @@ void TravelCamera::Travel(GLfloat a_fStartTime, GLfloat a_fEndTime, vec4 a_v4Sta
 /// -----------------------------
 // Renders UI elements via ImGui
 /// -----------------------------
-void TravelCamera::RenderUI()
+GLvoid TravelCamera::RenderUI()
 {
 	if (ImGui::CollapsingHeader("Travel Camera"))
 	{
@@ -166,7 +166,7 @@ void TravelCamera::RenderUI()
 		if (ImGui::TreeNode("Locations"))
 		{
 			//static bool selected[MAX_LOCATIONS] = { true, false, false, false };
-			for (int i = 0; i < MAX_LOCATIONS; i++)
+			for (GLint i = 0; i < MAX_LOCATIONS; i++)
 			{
 				ImGui::PushID(i); // TODO: better way to do this?
 				std::string sLocationName = "Location ";
@@ -209,18 +209,18 @@ void TravelCamera::RenderUI()
 			m_transform[3] = m_transform[3];
 		}
 
-		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (float)INT_MAX);
+		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (GLfloat)INT_MAX);
 		ImGui::DragFloat("Timer", &m_fTimer, 0.1f, 0.01f, MAX_LOCATIONS * m_fLengthTime + m_fLengthTime);
-		ImGui::DragFloat("Start Time", &m_fStartTime, 0.1f, 0.01f, (float)INT_MAX);
-		ImGui::DragFloat("End Time", &m_fEndTime, 0.1f, 0.01f, (float)INT_MAX);
+		ImGui::DragFloat("Start Time", &m_fStartTime, 0.1f, 0.01f, (GLfloat)INT_MAX);
+		ImGui::DragFloat("End Time", &m_fEndTime, 0.1f, 0.01f, (GLfloat)INT_MAX);
 		ImGui::DragFloat("Length of time", &m_fLengthTime, 0.1f, 0.01f, MAX_LOCATIONS * m_fLengthTime);
 		ImGui::DragInt("Iterations", &m_iIter, 0.1f, m_iIter, MAX_LOCATIONS);
 		ImGui::DragFloat("Lerped Interpolant", &m_fTravelLerp, 0.1f, 0.01f, 1.0f);
 		ImGui::Separator();
-		ImGui::DragFloat4("Camera Location", m_transform[3].data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 1", glm::value_ptr(v4Location1), 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 2", glm::value_ptr(v4Location2), 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 3", v4Location3.data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 4", v4Location4.data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
+		ImGui::DragFloat4("Camera Location", m_transform[3].data, 1.1f, -(GLfloat)INT_MAX,  (GLfloat)INT_MAX);
+		ImGui::DragFloat4("Location 1", glm::value_ptr(v4Location1), 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
+		ImGui::DragFloat4("Location 2", glm::value_ptr(v4Location2), 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
+		ImGui::DragFloat4("Location 3", v4Location3.data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
+		ImGui::DragFloat4("Location 4", v4Location4.data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
 	}
 }

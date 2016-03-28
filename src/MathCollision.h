@@ -1,8 +1,8 @@
 #pragma once
 #include "Entity\Entity.h"
-#include "gl_core_4_4.h"
 #include "Gizmos.h"
 
+#include <gl_core_4_4.h>
 #include <GLFW/glfw3.h>
 #include <glm/vec3.hpp>
 #include <glm\glm.hpp>

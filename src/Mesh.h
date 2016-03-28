@@ -1,9 +1,9 @@
 #pragma once
 
-#include "gl_core_4_4.h"
 #include "FBXFile.h"
 #include "VertexData.h"
 
+#include <gl_core_4_4.h>
 #include <assert.h>
 
 /*

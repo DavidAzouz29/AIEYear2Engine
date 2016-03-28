@@ -9,11 +9,11 @@ public:
 	LocationCamera(vec4 a_v4Perspective);
 	virtual ~LocationCamera();
 
-	void Update(GLfloat fDeltaTime) override;
-	void RenderUI() override;
-	void Exit() {};
+	GLvoid Update(GLfloat fDeltaTime) override;
+	GLvoid RenderUI() override;
+	//GLvoid Exit() {};
 
-	void NextLocation();
+	GLvoid NextLocation();
 
 private:
 	GLint m_iIterIndex;
