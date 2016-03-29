@@ -32,8 +32,8 @@
 #include "Render.h"// | TODO: remove if Draw is removed?
 #include "Mesh.h"  // | TODO: remove if Draw is removed?
 #include "RenderTarget.h"
-#include "ParticleEmitter.h"
-#include "GPUParticleEmitter.h"
+#include "Entity\ParticleEmitter.h"
+#include "Entity\GPUParticleEmitter.h"
 #include "MathCollision.h"
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
