@@ -19,11 +19,12 @@
 #include "Entity\Entity.h"
 #include "Render.h"
 #include "Mesh.h"
-#include "Gizmos.h"
+//#include "RenderTarget.h"
 #include "MathCollision.h"
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 
+#include <Gizmos.h>
 #include <glm/ext.hpp>
 
 using glm::vec3;
@@ -44,7 +45,7 @@ Entity::Entity() :
 	m_pMesh = std::make_shared<Mesh>();
 }
 
-/*bool Entity::Create()
+bool Entity::Create()
 {
 	// -----------------------
 #pragma region FBX
@@ -57,18 +58,20 @@ Entity::Entity() :
 	//FBXLoader(); // Needed if FBX without Animation
 	FBXSkeletonLoader();
 
-	CreateOpenGLBuffers(m_pFbx.get()); * /
+	CreateOpenGLBuffers(m_pFbx.get()); */
 #pragma endregion
 	///------------------------------------------------------
+	m_pRender->Create();
+	//m_pMesh->Create();
 	return false;
 } 
 
 
-GLvoid Entity::Update()
+/*GLvoid Entity::Update()
 {
 } */
 
-GLvoid Entity::Draw()
+GLvoid Entity::Draw(Camera* m_pCamState)
 {
 	// For the render target
 	glBindFramebuffer(GL_FRAMEBUFFER, m_renderTarget.GetFBO());
@@ -79,8 +82,7 @@ GLvoid Entity::Draw()
 	glClearColor(m_v3ClearColor.r, m_v3ClearColor.g, m_v3ClearColor.b, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Clear ImGui
-	ImGui_ImplGlfwGL3_NewFrame();
+	
 	// ----------------------------------------------------------
 	glBindVertexArray(m_pMesh->GetVAO());
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -90,7 +92,7 @@ GLvoid Entity::Draw()
 	if (m_bDrawGizmoGrid)
 	{
 		// ...for now let's add a grid to the gizmos
-		for (int i = 0; i < 21; ++i) {
+		for (GLint i = 0; i < 21; ++i) {
 			Gizmos::addLine(vec3(-10 + i, 0, 10), vec3(-10 + i, 0, -10),
 				i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
 
@@ -109,7 +111,6 @@ GLvoid Entity::Draw()
 GLvoid Entity::DrawApp()
 {
 	Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, m_v4EndColor);
-
 }
 
 /*GLvoid Entity::Destroy()

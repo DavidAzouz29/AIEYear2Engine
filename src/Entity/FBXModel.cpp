@@ -23,9 +23,6 @@ FBXModel::FBXModel() : m_timer(0)
 FBXModel::~FBXModel()
 {
 	CleanupOpenGLBuffers(m_pFbx.get());
-
-	glDeleteProgram(m_program_ID);
-	glDeleteProgram(m_FBX_program_ID);
 }
 
 
@@ -45,7 +42,7 @@ bool FBXModel::Create()
 }
 
 // Used for FBX Skeleton and Animation
-void FBXModel::Update()
+GLvoid FBXModel::Update()
 {
 	// Grab the skeleton and animation we want to use
 	FBXSkeleton* skeleton = m_pFbx->getSkeletonByIndex(0);
@@ -64,69 +61,18 @@ void FBXModel::Update()
 	}
 }
 
-void FBXModel::Draw()
+GLvoid FBXModel::Draw(Camera* m_pCamState)
 {
-	glUseProgram(m_FBX_program_ID);
-
-	int loc = glGetUniformLocation(m_FBX_program_ID, "ProjectionView");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m_pCamState->getProjectionView()));
-
-	/*int light_dir_uniform = glGetUniformLocation(m_programID, "LightDir");
-	glUniform3f(light_dir_uniform, 0, 1, 0);*/
-
-	vec3 light(sin(glfwGetTime()), 1, cos(glfwGetTime()));
-	loc = glGetUniformLocation(m_FBX_program_ID, "LightDir");
-	glUniform3f(loc, light.x, light.y, light.z);
-
-	int light_colour_uniform = glGetUniformLocation(m_FBX_program_ID, "LightColour");
-	glUniform3f(light_colour_uniform, 1, 1, 1);
-
-	mat4 camera_matrix = m_pCamState->getTransform();
-	int camera_pos_uniform = glGetUniformLocation(m_FBX_program_ID, "CameraPos");
-	glUniform3f(camera_pos_uniform, camera_matrix[3][0], camera_matrix[3][1], camera_matrix[3][2]);
-
-	int specular_uniform = glGetUniformLocation(m_FBX_program_ID, "SpecPow");
-	glUniform1f(specular_uniform, 12);
-
-	// Scale the FBX
-	glm::mat4 m4WorldTransform(1);
-	GLfloat fScale = 0.003f;
-	m4WorldTransform = glm::scale(glm::vec3(fScale));
-	GLuint worldTransform = glGetUniformLocation(m_FBX_program_ID, "WorldTransform");
-	glUniformMatrix4fv(worldTransform, 1, GL_FALSE, glm::value_ptr(m4WorldTransform));
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_pRender->GetTextureByName("Pyro_D")); // m_texture); 
-	loc = glGetUniformLocation(m_FBX_program_ID, "diffuse");
-	glUniform1i(loc, 0);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_pRender->GetTextureByName("Pyro_N")); // m_normal);
-	loc = glGetUniformLocation(m_FBX_program_ID, "normal");
-	glUniform1i(loc, 1);
-
-	FBXSkeleton* skeleton = m_pFbx->getSkeletonByIndex(0);
-	skeleton->updateBones();
-
-	int bones_location = glGetUniformLocation(m_FBX_program_ID, "bones");
-	glUniformMatrix4fv(bones_location, skeleton->m_boneCount, GL_FALSE, (float*)skeleton->m_bones);
-
-	// bind our vertex array object and draw the mesh
-	for (unsigned int i = 0; i < m_pFbx->getMeshCount(); ++i) {
-		FBXMeshNode* mesh = m_pFbx->getMeshByIndex(i);
-		unsigned int* glData = (unsigned int*)mesh->m_userData;
-		glBindVertexArray(glData[0]);
-		glDrawElements(GL_TRIANGLES,
-			(unsigned int)mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
-	}
+	//RenderFBX(m_pCamState);
+	FBXAnimationDraw(m_pCamState);
 }
 
-void FBXModel::Destroy()
+GLvoid FBXModel::Destroy()
 {
 
 }
 
-void FBXModel::RenderUI()
+GLvoid FBXModel::RenderUI()
 {
 
 }
@@ -137,16 +83,16 @@ void FBXModel::RenderUI()
 /// <para>Initialises these variables to contain a VAO, VBO, IBO, based off the FBXMeshdata.</para>
 /// <para><param name="fbx" type ="FBXFile*"> P1: A fbx file.</param></para></summary>
 ///-----------------------------------------------------------------------------------------------------------
-void FBXModel::CreateOpenGLBuffers(FBXFile* fbx)
+GLvoid FBXModel::CreateOpenGLBuffers(FBXFile* fbx)
 {
 	// create the GL VAO/VBO/IBO data for each mesh
-	for (unsigned int i = 0; i < fbx->getMeshCount(); ++i)
+	for (GLuint i = 0; i < fbx->getMeshCount(); ++i)
 	{
 		FBXMeshNode* mesh = fbx->getMeshByIndex(i);
 		//FBXTexture* texture = fbx->getTextureByName("./data/soulspear/soulspear.obj");// , &imageWidth, &imageHeight, &imageFormat, STBI_default);
 
 		// storage for the opengl data in 3 unsigned int
-		unsigned int* glData = new unsigned int[3];
+		GLuint* glData = new GLuint[3];
 
 		glGenVertexArrays(1, &glData[0]);
 		glBindVertexArray(glData[0]);
@@ -161,7 +107,7 @@ void FBXModel::CreateOpenGLBuffers(FBXFile* fbx)
 			mesh->m_vertices.size() * sizeof(FBXVertex),
 			mesh->m_vertices.data(), GL_STATIC_DRAW);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-			mesh->m_indices.size() * sizeof(unsigned int),
+			mesh->m_indices.size() * sizeof(GLuint),
 			mesh->m_indices.data(), GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(0); //position
@@ -172,12 +118,12 @@ void FBXModel::CreateOpenGLBuffers(FBXFile* fbx)
 		glEnableVertexAttribArray(4); //weights
 		glEnableVertexAttribArray(5); //indices
 
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)FBXVertex::PositionOffset);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), (void*)FBXVertex::NormalOffset);
-		glVertexAttribPointer(2, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), (void*)FBXVertex::TangentOffset);
-		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)FBXVertex::TexCoord1Offset);
-		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)FBXVertex::WeightsOffset);
-		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)FBXVertex::IndicesOffset);
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)FBXVertex::PositionOffset);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex),  (GLvoid*)FBXVertex::NormalOffset);
+		glVertexAttribPointer(2, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex),  (GLvoid*)FBXVertex::TangentOffset);
+		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)FBXVertex::TexCoord1Offset);
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)FBXVertex::WeightsOffset);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)FBXVertex::IndicesOffset);
 
 
 		glBindVertexArray(0);
@@ -191,14 +137,14 @@ void FBXModel::CreateOpenGLBuffers(FBXFile* fbx)
 ///-----------------------------------------------------------------------------------------------------------
 /// <summary>Loop through and destroy all the OpenGL buffers for the FBXMeshNodes.</summary>
 ///-----------------------------------------------------------------------------------------------------------
-void FBXModel::CleanupOpenGLBuffers(FBXFile* fbx)
+GLvoid FBXModel::CleanupOpenGLBuffers(FBXFile* fbx)
 {
 	// clean up the vertex data attached to each mesh
-	for (unsigned int i = 0; i < fbx->getMeshCount(); ++i)
+	for (GLuint i = 0; i < fbx->getMeshCount(); ++i)
 	{
 		FBXMeshNode* mesh = fbx->getMeshByIndex(i);
 
-		unsigned int* glData = (unsigned int*)mesh->m_userData;
+		GLuint* glData = (GLuint*)mesh->m_userData;
 
 		glDeleteVertexArrays(1, &glData[0]);
 		glDeleteBuffers(1, &glData[1]);
@@ -208,14 +154,14 @@ void FBXModel::CleanupOpenGLBuffers(FBXFile* fbx)
 	}
 }
 
-void FBXModel::FBXLoader()
+GLvoid FBXModel::FBXLoader()
 {
 	/// ----------------------------------------------------------
 	/// Create shaders
 	/// ----------------------------------------------------------
 	/// Storing writing out our shader code into char arrays for processign by OpenGL.
 	/// ----------------------------------------------------------
-	const char* vsSource = "#version 410\n \
+	const GLchar* vsSource = "#version 410\n \
 							layout(location=0) in vec4 Position; \
 							layout(location=1) in vec4 Normal; \
 							layout(location=2) in vec2 TexCoord; \
@@ -226,7 +172,7 @@ void FBXModel::FBXLoader()
 							void main() { vNormal = Normal; vTexCoord = TexCoord; \
 							gl_Position = ProjectionView * WorldTransform * Position; }";
 
-	const char* fsSource = "#version 410\n \
+	const GLchar* fsSource = "#version 410\n \
 							in vec4 vNormal; \
 							in vec2 vTexCoord; \
 							out vec4 FragColor; \
@@ -237,12 +183,12 @@ void FBXModel::FBXLoader()
 	/// Compile shaders
 	/// ----------------------------------------------------------
 	//int success = GL_FALSE;
-	unsigned int iVertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(iVertexShader, 1, (const char**)&vsSource, 0);
+	GLuint iVertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(iVertexShader, 1, (const GLchar**)&vsSource, 0);
 	glCompileShader(iVertexShader);
 
-	unsigned int iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(iFragmentShader, 1, (const char**)&fsSource, 0);
+	GLuint iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(iFragmentShader, 1, (const GLchar**)&fsSource, 0);
 	glCompileShader(iFragmentShader);
 
 	m_program_ID = glCreateProgram();
@@ -273,12 +219,12 @@ void FBXModel::FBXLoader()
 /// <para>then we loop through the meshes and render them.</para>
 /// <para><param name="cam" type ="Camera*"> P1: A virtual camera.</param></para></summary>
 ///-----------------------------------------------------------------------------------------------------------
-void FBXModel::RenderFBX(Camera* cam)
+GLvoid FBXModel::RenderFBX(Camera* cam)
 {
 	glUseProgram(m_program_ID);
 
 	// bind the camera
-	int loc = glGetUniformLocation(m_program_ID, "ProjectionView");
+	GLuint loc = glGetUniformLocation(m_program_ID, "ProjectionView");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, &(cam->getProjectionView()[0][0])); //m_projectionViewMatrix
 
 	GLuint id = m_pRender->GetTextureByName("soulspear_d"); //TODO: soulspear
@@ -296,29 +242,29 @@ void FBXModel::RenderFBX(Camera* cam)
 	glUniform1i(loc, 0);
 
 	// bind our vertex array object and draw the mesh
-	for (unsigned int i = 0; i < m_pFbx->getMeshCount(); ++i)
+	for (GLuint i = 0; i < m_pFbx->getMeshCount(); ++i)
 	{
 		FBXMeshNode* mesh = m_pFbx->getMeshByIndex(i);
-		unsigned int* glData = (unsigned int*)mesh->m_userData;
+		GLuint* glData = (GLuint*)mesh->m_userData;
 
 		glBindVertexArray(glData[0]); //TODO: replace m_VAO with VAO
 									  //glBindVertexArray(Geom->GetVAO()); //TODO: replace m_VAO with VAO
 									  //unsigned int indexCount = (a_iRows - 1) * (a_iCols - 1) * 6; //TODO: m_iIndexCount = this formula
-		glDrawElements(GL_TRIANGLES, (unsigned int)mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, (GLuint)mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
 	}
 }
 
 /// -----------------------------
 // Skeleton/ bones vertex shader
 /// -----------------------------
-void FBXModel::FBXSkeletonLoader()
+GLvoid FBXModel::FBXSkeletonLoader()
 {
 	/// ----------------------------------------------------------
 	/// Create shaders 
 	/// ----------------------------------------------------------
 	/// Storing writing out our shader code into char arrays for processign by OpenGL.
 	/// ----------------------------------------------------------
-	const char* vsSource = "#version 410\n \
+	const GLchar* vsSource = "#version 410\n \
 							layout(location=0) in vec4 Position; \
 							layout(location=1) in vec4 Normal; \
 							layout(location=2) in vec4 Tangent; \
@@ -351,7 +297,7 @@ void FBXModel::FBXSkeletonLoader()
 							P += bones[index.w] * Position * Weights.w; \
 							gl_Position = ProjectionView * WorldTransform * P; }";
 
-	const char* fsSource = "#version 410\n \
+	const GLchar* fsSource = "#version 410\n \
 							in vec3 frag_normal; \
 							in vec3 frag_position; \
 							in vec2 frag_texcoord; \
@@ -382,28 +328,28 @@ void FBXModel::FBXSkeletonLoader()
 	/// ----------------------------------------------------------
 	/// Compile shaders
 	/// ----------------------------------------------------------
-	int success = GL_FALSE;
-	unsigned int iVertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(iVertexShader, 1, (const char**)&vsSource, 0);
+	GLint success = GL_FALSE;
+	GLuint iVertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(iVertexShader, 1, (const GLchar**)&vsSource, 0);
 	glCompileShader(iVertexShader);
 
-	unsigned int iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(iFragmentShader, 1, (const char**)&fsSource, 0);
+	GLuint iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(iFragmentShader, 1, (const GLchar**)&fsSource, 0);
 	glCompileShader(iFragmentShader);
 
-	m_FBX_program_ID = glCreateProgram();
-	glAttachShader(m_FBX_program_ID, iVertexShader);
-	glAttachShader(m_FBX_program_ID, iFragmentShader);
-	glLinkProgram(m_FBX_program_ID);
+	m_program_FBXAnimation_ID = glCreateProgram();
+	glAttachShader(m_program_FBXAnimation_ID, iVertexShader);
+	glAttachShader(m_program_FBXAnimation_ID, iFragmentShader);
+	glLinkProgram(m_program_FBXAnimation_ID);
 
-	glGetProgramiv(m_FBX_program_ID, GL_LINK_STATUS, &success);
+	glGetProgramiv(m_program_FBXAnimation_ID, GL_LINK_STATUS, &success);
 	if (success == GL_FALSE)
 	{
-		int infoLogLength = 0;
-		glGetProgramiv(m_FBX_program_ID, GL_INFO_LOG_LENGTH, &infoLogLength);
-		char* infoLog = new char[infoLogLength];
+		GLint infoLogLength = 0;
+		glGetProgramiv(m_program_FBXAnimation_ID, GL_INFO_LOG_LENGTH, &infoLogLength);
+		GLchar* infoLog = new GLchar[infoLogLength];
 
-		glGetProgramInfoLog(m_FBX_program_ID, infoLogLength, 0, infoLog);
+		glGetProgramInfoLog(m_program_FBXAnimation_ID, infoLogLength, 0, infoLog);
 		printf("Error: Failed to link shader program!\n");
 		printf("%s\n", infoLog);
 		delete[] infoLog;
@@ -414,7 +360,7 @@ void FBXModel::FBXSkeletonLoader()
 }
 
 // Render
-void FBXModel::FBXSkeletonRender()
+GLvoid FBXModel::FBXSkeletonRender()
 {
 	glEnableVertexAttribArray(0); //position
 	glEnableVertexAttribArray(1); //normals
@@ -423,10 +369,68 @@ void FBXModel::FBXSkeletonRender()
 	glEnableVertexAttribArray(4); //weights
 	glEnableVertexAttribArray(5); //indices
 
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)FBXVertex::PositionOffset);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), (void*)FBXVertex::NormalOffset);
-	glVertexAttribPointer(2, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), (void*)FBXVertex::TangentOffset);
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)FBXVertex::TexCoord1Offset);
-	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)FBXVertex::WeightsOffset);
-	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)FBXVertex::IndicesOffset);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)FBXVertex::PositionOffset);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex),  (GLvoid*)FBXVertex::NormalOffset);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex),  (GLvoid*)FBXVertex::TangentOffset);
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)FBXVertex::TexCoord1Offset);
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)FBXVertex::WeightsOffset);
+	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)FBXVertex::IndicesOffset);
+}
+
+GLvoid FBXModel::FBXAnimationDraw(Camera* m_pCamState)
+{
+	glUseProgram(m_program_FBXAnimation_ID);
+
+	GLuint loc = glGetUniformLocation(m_program_FBXAnimation_ID, "ProjectionView");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m_pCamState->getProjectionView()));
+
+	/*int light_dir_uniform = glGetUniformLocation(m_programID, "LightDir");
+	glUniform3f(light_dir_uniform, 0, 1, 0);*/
+
+	vec3 light(sin(glfwGetTime()), 1, cos(glfwGetTime()));
+	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "LightDir");
+	glUniform3f(loc, light.x, light.y, light.z);
+
+	GLuint light_colour_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "LightColour");
+	glUniform3f(light_colour_uniform, 1, 1, 1);
+
+	mat4 camera_matrix = m_pCamState->getTransform();
+	GLint camera_pos_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "CameraPos");
+	glUniform3f(camera_pos_uniform, camera_matrix[3][0], camera_matrix[3][1], camera_matrix[3][2]);
+
+	GLuint specular_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "SpecPow");
+	glUniform1f(specular_uniform, 12);
+
+	// Scale the FBX
+	glm::mat4 m4WorldTransform(1);
+	GLfloat fScale = 0.003f;
+	m4WorldTransform = glm::scale(glm::vec3(fScale));
+	GLuint worldTransform = glGetUniformLocation(m_program_FBXAnimation_ID, "WorldTransform");
+	glUniformMatrix4fv(worldTransform, 1, GL_FALSE, glm::value_ptr(m4WorldTransform));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_pRender->GetTextureByName("Pyro_D")); // m_texture); 
+	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "diffuse");
+	glUniform1i(loc, 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_pRender->GetTextureByName("Pyro_N")); // m_normal);
+	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "normal");
+	glUniform1i(loc, 1);
+
+	FBXSkeleton* skeleton = m_pFbx->getSkeletonByIndex(0);
+	skeleton->updateBones();
+
+	GLint bones_location = glGetUniformLocation(m_program_FBXAnimation_ID, "bones");
+	glUniformMatrix4fv(bones_location, skeleton->m_boneCount, GL_FALSE, (GLfloat*)skeleton->m_bones);
+
+	// bind our vertex array object and draw the mesh
+	for (GLuint i = 0; i < m_pFbx->getMeshCount(); ++i) 
+	{
+		FBXMeshNode* mesh = m_pFbx->getMeshByIndex(i);
+		GLuint* glData = (GLuint*)mesh->m_userData;
+		glBindVertexArray(glData[0]);
+		glDrawElements(GL_TRIANGLES,
+			(GLuint)mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
+	}
 }

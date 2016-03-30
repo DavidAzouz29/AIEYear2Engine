@@ -10,6 +10,7 @@
 /// viewed: 
 /// Invoke http://en.cppreference.com/w/cpp/utility/functional/invoke
 /// Vector Insert http://www.cplusplus.com/reference/vector/vector/insert/
+/// Error checking https://blog.nobel-joergensen.com/2013/01/29/debugging-opengl-using-glgeterror/
 /// 
 /// ***EDIT***
 /// - Render Targets Working	- David Azouz 7/03/16
@@ -27,17 +28,19 @@
 #include "TestApplication.h"
 #include "Entity\Entity.h"
 #include "Entity\FBXModel.h"
+#include "Entity\ParticleEmitter.h"
+#include "Entity\GPUParticleEmitter.h"
 #include "Camera\CameraStateMachine.h"
 #include "Camera\Camera.h"
 #include "Render.h"// | TODO: remove if Draw is removed?
 #include "Mesh.h"  // | TODO: remove if Draw is removed?
 #include "RenderTarget.h"
-#include "Entity\ParticleEmitter.h"
-#include "Entity\GPUParticleEmitter.h"
+#include "Helpers.h"
 #include "MathCollision.h"
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 
+#include <iostream>
 #include <Gizmos.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -47,9 +50,12 @@
 
 #define IM_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 
+//struct ParticleEmitterConfig;
+
 using glm::vec3;
 using glm::vec4;
 using glm::mat4;
+using namespace std;
 
 //--------------------------------------------------------------------------------------
 // Default Constructor with Initializer list
@@ -59,15 +65,47 @@ TestApplication::TestApplication() :
 	//m_pRenderApp(nullptr),
 	m_fPrevTime(0)
 {
+#pragma region CPU Particles Config(s)
+	GLuint uiAmount = 20; //TODO: 3000
+	ParticleEmitterConfig configA;
+	configA.particleCount = uiAmount; //1000 
+	configA.emitRate = (float)configA.particleCount / 2; //500
+	configA.startColor = glm::vec4(1.56f, 0, 1.25f, 0.8f); //glm::vec4(1, 0, 0, 1); <-RED
+	configA.endColor = glm::vec4(0, 0.07f, 0.3f, 1);  //vec4(0, 0, 1, 0.8f); //vec4(0, 0, 1, 0.8f);//vec4(1, 1, 0, 1);
+	configA.lifespanMin = 0.1f;
+	configA.lifespanMax = 5; //5
+	configA.startSize = 0.4f; // 1
+	configA.endSize = 0.1f;
+	configA.velocityMin = 0.1f;
+	configA.velocityMax = 1.0f;
+	configA.v3ParticlePosition = glm::vec3(-3, 5, 0);
+	
+	//if (!ParticleLoader(configA)) return -4;
+
+	ParticleEmitterConfig configB;
+	configB.particleCount = uiAmount; //5000
+	configB.emitRate = (float)configB.particleCount / 2; //500
+	configB.startColor = glm::vec4(1, 0, 1, 0.8f); //glm::vec4(1, 0, 0, 1); <-RED
+	configB.endColor = glm::vec4(0.3, 0, 0.07f, 1);  //vec4(0, 0, 1, 0.8f); //vec4(0, 0, 1, 0.8f);//vec4(1, 1, 0, 1);
+	configB.lifespanMin = 0.9f;
+	configB.lifespanMax = 3; //5
+	configB.startSize = 0.4f; // 1
+	configB.endSize = 0.2f;
+	configB.velocityMin = 0.1f;
+	configB.velocityMax = 2.0f;
+	configB.v3ParticlePosition = glm::vec3(3, 5, 0);
+#pragma endregion
+
+	m_pEntity = std::make_shared<Entity>();
 	//m_pRenderApp = std::make_shared<Render>();
 	// Adds our inherited classes to the vector.
 	//m_entities.push_back(std::make_shared<Render>());
 	m_entities.push_back(std::make_shared<FBXModel>());
-	m_entities.push_back(std::make_shared<ParticleEmitter>());
-	m_entities.push_back(std::make_shared<GPUParticleEmitter>());
+	/*m_entities.push_back(std::make_shared<ParticleEmitter>(configA));
+	m_entities.push_back(std::make_shared<ParticleEmitter>(configB));
+	m_entities.push_back(std::make_shared<GPUParticleEmitter>()); //*/
 
 	m_pMath = std::make_shared<MathCollision>();
-
 	//m_entities.resize(m_entities.size()); //TODO: remove?
 
 } //: m_pCamera(nullptr),
@@ -78,6 +116,8 @@ bool TestApplication::startup() {
 
 	// create a basic window
 	createWindow("AIE OpenGL Application", 1280, 720);
+	
+	TurnOnOpenGLDebugLogging();
 
 	// start the gizmo system that can draw basic shapes
 	Gizmos::create();
@@ -107,6 +147,8 @@ bool TestApplication::startup() {
 	// -----------------------
 	//Entity::CreateSingleton();
 
+	//m_pEntity = std::make_shared<Entity>();
+	m_pEntity->Create();
 	// Loops through each entity and calls their respected Create functions.
 	for (auto &pEntity : m_entities)
 	{
@@ -114,9 +156,11 @@ bool TestApplication::startup() {
 		//Entity::GetSingleton()->Create();
 	}
 	m_pRenderTarget = std::make_shared<RenderTarget>();
-
+	if (m_pRenderTarget->Create()) { return false; }
 	//////////////////////////////////////////////////////////////////////////
 	m_pickPosition = glm::vec3(0);
+
+	check_gl_error();
 
 	return true;
 }
@@ -142,6 +186,8 @@ GLvoid TestApplication::shutdown()
 
 bool TestApplication::Update(GLfloat deltaTime) 
 {
+	check_gl_error();
+
 	// close the application if the window closes
 	if (glfwWindowShouldClose(m_pWindow) ||
 		glfwGetKey(m_pWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -201,6 +247,7 @@ bool TestApplication::Update(GLfloat deltaTime)
 
 	//////////////////////////////////////////////////////////////////////////
 	// YOUR UPDATE CODE HERE
+	m_pEntity->Update();
 	for (auto &pEntity : m_entities)
 	{
 		pEntity->Update();
@@ -265,12 +312,20 @@ bool TestApplication::Update(GLfloat deltaTime)
 	}
 #pragma endregion
 
+	check_gl_error();
+
 	// return true, else the application closes
 	return true;
 }
 
 GLvoid TestApplication::Draw()
 {
+	check_gl_error();
+
+	// Clear ImGui
+	ImGui_ImplGlfwGL3_NewFrame();
+	check_gl_error();
+
 /*	// For the render target
 	glBindFramebuffer(GL_FRAMEBUFFER, m_pRenderApp->GetSharedPointer()->GetFBO());
 	//printf("%d\n", m_pRenderApp->GetSharedPointer());
@@ -306,10 +361,12 @@ GLvoid TestApplication::Draw()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glUseProgram(m_pRenderApp->GetProgramID()); */
 	DrawApp();
+	check_gl_error();
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
 	//Render ImGui over everything
 	ImGui::Render();
+	check_gl_error();
 }
 
 GLvoid TestApplication::DrawApp()
@@ -355,23 +412,11 @@ GLvoid TestApplication::DrawApp()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, 1280, 720);
 	// use our texture program
-
-	//glm::mat4 projView = m_pCameraStateMachine->GetCurrentCamera()->getProjectionView();
+	
 	glm::mat4 projView = m_pCamState->getProjectionView();
 
-	// Render Target
-	// bind the camera
-	GLint loc = glGetUniformLocation(m_render.GetProgramID(), "ProjectionView"); //m_program_ID
-	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projView));
-
-	// Set texture slots
-	glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, m_pRenderApp->GetSharedPointer()->GetFboTexture());
-	glBindTexture(GL_TEXTURE_2D, m_pRenderTarget->GetFboTexture());
-
-	// tell the shader where it is
-	GLint diffLoc = glGetUniformLocation(m_render.GetProgramID(), "diffuse"); // m_program_ID
-	glUniform1i(diffLoc, 0);
+	// For our RenderTarget/ Camera View on Render Target
+	m_pRenderTarget->RenderRenderTargetQuad(projView);
 
 	// Rendering mode
 	switch (m_eCurrentDrawState)
@@ -405,13 +450,13 @@ GLvoid TestApplication::DrawApp()
 	//pRender->DrawTexture(m_pCamState); //TODO: needed for Soulspear
 
 	// TODO:
+	m_pEntity->Draw(m_pCamState);
 	for (auto &pEntity : m_entities)
 	{
-		pEntity->Draw();
+		pEntity->Draw(m_pCamState);
 	}
 
-	glBindVertexArray(m_mesh.GetVAO()); // mesh Vertex Array Object
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+	m_pRenderTarget->BindDraw();
 
 	m_render.DrawTextureP(m_pCamState); // TODO: FBX Texture - Needed for Render Target
 	
@@ -450,6 +495,7 @@ GLvoid TestApplication::DrawApp()
 
 #pragma region ImGui
 #pragma region My Rendering Options
+	// Shows a demonstration on how to use elements of ImGui
 	ImGui::ShowTestWindow();
 	ImGui::Begin("My rendering options");
 		// Camera State
@@ -508,6 +554,7 @@ GLvoid TestApplication::DrawApp()
 
 		// GPU Particles
 		//m_pGPUEmitter.get()->RenderUI();
+		m_pEntity->RenderUI();
 		for (auto &pEntity : m_entities)
 		{
 			pEntity->RenderUI();
@@ -552,26 +599,26 @@ GLvoid TestApplication::DrawApp()
 /// ----------------------------------------------------------
 /* void TestApplication::FBXRender()
 {
-	glUseProgram(m_FBX_program_ID);
+	glUseProgram(m_program_FBXAnimation_ID);
 
-	int loc = glGetUniformLocation(m_FBX_program_ID, "ProjectionView");
+	int loc = glGetUniformLocation(m_program_FBXAnimation_ID, "ProjectionView");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m_pCameraStateMachine->GetCurrentCamera()->getProjectionView()));
 
 	/*int light_dir_uniform = glGetUniformLocation(m_programID, "LightDir");
 	glUniform3f(light_dir_uniform, 0, 1, 0); //* /
 
 	vec3 light(sin(glfwGetTime()), 1, cos(glfwGetTime()));
-	loc = glGetUniformLocation(m_FBX_program_ID, "LightDir");
+	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "LightDir");
 	glUniform3f(loc, light.x, light.y, light.z);
 
-	int light_colour_uniform = glGetUniformLocation(m_FBX_program_ID, "LightColour");
+	int light_colour_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "LightColour");
 	glUniform3f(light_colour_uniform, 1, 1, 1);
 
 	mat4 camera_matrix = m_pCameraStateMachine->GetCurrentCamera()->getTransform();
-	int camera_pos_uniform = glGetUniformLocation(m_FBX_program_ID, "CameraPos");
+	int camera_pos_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "CameraPos");
 	glUniform3f(camera_pos_uniform, camera_matrix[3][0], camera_matrix[3][1], camera_matrix[3][2]);
 
-	int specular_uniform = glGetUniformLocation(m_FBX_program_ID, "SpecPow");
+	int specular_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "SpecPow");
 	glUniform1f(specular_uniform, 12);
 
 	glActiveTexture(GL_TEXTURE0);
@@ -580,16 +627,16 @@ GLvoid TestApplication::DrawApp()
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, pRender->GetTextureByName("Pyro_N")); // m_normal);
 
-	loc = glGetUniformLocation(m_FBX_program_ID, "diffuse");
+	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "diffuse");
 	glUniform1i(loc, 0);
 
-	loc = glGetUniformLocation(m_FBX_program_ID, "normal");
+	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "normal");
 	glUniform1i(loc, 1);
 
 	FBXSkeleton* skeleton = m_pFbx->getSkeletonByIndex(0);
 	skeleton->updateBones();
 
-	int bones_location = glGetUniformLocation(m_FBX_program_ID, "bones");
+	int bones_location = glGetUniformLocation(m_program_FBXAnimation_ID, "bones");
 	glUniformMatrix4fv(bones_location, skeleton->m_boneCount, GL_FALSE, (float*)skeleton->m_bones);
 
 	// bind our vertex array object and draw the mesh

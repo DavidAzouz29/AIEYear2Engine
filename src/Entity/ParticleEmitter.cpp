@@ -6,13 +6,13 @@
 #include <assert.h>
 #include <memory>
 
-ParticleEmitter::ParticleEmitter() :
+ParticleEmitter::ParticleEmitter(ParticleEmitterConfig a_config) :
 	m_pPartiles(nullptr),
 	m_pVertices(nullptr),
 	m_uiFirstDeadIndex(-1),
 	m_v3particlePosition(0)
 {
-
+	m_config = a_config;
 }
 
 /*ParticleEmitter::~ParticleEmitter()
@@ -22,26 +22,26 @@ ParticleEmitter::ParticleEmitter() :
 bool ParticleEmitter::Create()
 {
 	///----------------------------------------------------------
-	m_pParticleEmitterA = std::make_shared<ParticleEmitter>();
-	m_pParticleEmitterB = std::make_shared<ParticleEmitter>();
+	//m_pParticleEmitterA = std::make_shared<ParticleEmitter>();
+	//m_pParticleEmitterB = std::make_shared<ParticleEmitter>();
 	///----------------------------------------------------------
 	GLuint uiAmount = 20; //TODO: 3000
-	ParticleEmitterConfig configA;
-	configA.particleCount = uiAmount; //1000 
-	configA.emitRate = (float)configA.particleCount / 2; //500
-	configA.startColor = glm::vec4(1.56f, 0, 1.25f, 0.8f); //glm::vec4(1, 0, 0, 1); <-RED
-	configA.endColor = glm::vec4(0, 0.07f, 0.3f, 1);  //vec4(0, 0, 1, 0.8f); //vec4(0, 0, 1, 0.8f);//vec4(1, 1, 0, 1);
-	configA.lifespanMin = 0.1f;
-	configA.lifespanMax = 5; //5
-	configA.startSize = 0.4f; // 1
-	configA.endSize = 0.1f;
-	configA.velocityMin = 0.1f;
-	configA.velocityMax = 1.0f;
-	configA.v3ParticlePosition = glm::vec3(-3, 5, 0);
+	//ParticleEmitterConfig configA;
+	m_config.particleCount = uiAmount; //1000 
+	m_config.emitRate = (float)m_config.particleCount / 2; //500
+	m_config.startColor = glm::vec4(1.56f, 0, 1.25f, 0.8f); //glm::vec4(1, 0, 0, 1); <-RED
+	m_config.endColor = glm::vec4(0, 0.07f, 0.3f, 1);  //vec4(0, 0, 1, 0.8f); //vec4(0, 0, 1, 0.8f);//vec4(1, 1, 0, 1);
+	m_config.lifespanMin = 0.1f;
+	m_config.lifespanMax = 5; //5
+	m_config.startSize = 0.4f; // 1
+	m_config.endSize = 0.1f;
+	m_config.velocityMin = 0.1f;
+	m_config.velocityMax = 1.0f;
+	m_config.v3ParticlePosition = glm::vec3(-3, 5, 0);
 
-	if (!m_pParticleEmitterA->ParticleLoader(configA)) return -4;
+	if (!ParticleLoader(m_config)) return true;
 
-	ParticleEmitterConfig configB;
+	/*ParticleEmitterConfig configB;
 	configB.particleCount = uiAmount; //5000
 	configB.emitRate = (float)configB.particleCount / 2; //500
 	configB.startColor = glm::vec4(1, 0, 1, 0.8f); //glm::vec4(1, 0, 0, 1); <-RED
@@ -54,10 +54,10 @@ bool ParticleEmitter::Create()
 	configB.velocityMax = 2.0f;
 	configB.v3ParticlePosition = glm::vec3(3, 5, 0);
 
-	if (!m_pParticleEmitterB->ParticleLoader(configB)) return -5;
+	if (ParticleLoader(configB)) return -5; //*/
 	return false;
 }
-bool ParticleEmitter::ParticleLoader(ParticleEmitterConfig config)
+bool ParticleEmitter::ParticleLoader(ParticleEmitterConfig a_config)
 {
 	assert(!isValid());
 
@@ -66,7 +66,7 @@ bool ParticleEmitter::ParticleLoader(ParticleEmitterConfig config)
 	/// ----------------------------------------------------------
 	/// Storing writing out our shader code into char arrays for processign by OpenGL.
 	/// ----------------------------------------------------------
-	const char* vsSource = "#version 410\n \
+	const GLchar* vsSource = "#version 410\n \
 							in vec4 Position; \
 							in vec4 Color; \
 							out vec4 vColor; \
@@ -78,7 +78,7 @@ bool ParticleEmitter::ParticleLoader(ParticleEmitterConfig config)
 
 	// RGB x 2 - 1 to move it from RGB to XYZ, or 
 	// XYZ x 0.5 + 0.5 to move it from XYZ to RGB.
-	const char* fsSource = "#version 410\n \
+	const GLchar* fsSource = "#version 410\n \
 							in vec4 vColor; \
 							void main() { \
 							gl_FragColor = vColor; }";
@@ -88,7 +88,7 @@ bool ParticleEmitter::ParticleLoader(ParticleEmitterConfig config)
 	//m_program = ResourceCreator::CreateProgram("./data/shaders/color.vert", "./data/shaders/vertexColor.frag");
 	if (!m_program.create(vsSource, fsSource)) return false;
 
-	m_config = config;
+	m_config = a_config;
 	m_fEmitTimer = 0;
 
 	m_pPartiles = new Particle[m_config.particleCount];
@@ -128,10 +128,10 @@ bool ParticleEmitter::ParticleLoader(ParticleEmitterConfig config)
 }
 GLvoid ParticleEmitter::Destroy()
 {
-	assert(isValid());
+	assert(!isValid());
 
-	delete[] m_pPartiles; 
-	delete[] m_pVertices; 
+	delete[] m_pPartiles;
+	delete[] m_pVertices;
 
 	m_pMesh->Destroy();
 }
@@ -182,7 +182,7 @@ GLvoid ParticleEmitter::Update(GLfloat a_deltaTime, const glm::mat4 a_m4camMatri
 		m_fEmitTimer -= invEmitRate;
 	}
 
-	int quadIndex = 0;
+	GLint quadIndex = 0;
 	for (GLuint i = 0; i < m_uiFirstDeadIndex; i++)
 	{
 		Particle* particle = &m_pPartiles[i];
@@ -198,13 +198,13 @@ GLvoid ParticleEmitter::Update(GLfloat a_deltaTime, const glm::mat4 a_m4camMatri
 
 		particle->position += particle->velocity * a_deltaTime;
 		
-		float timeNorm = particle->lifeTime / particle->lifeSpan;
+		GLfloat timeNorm = particle->lifeTime / particle->lifeSpan;
 		particle->size = glm::mix(m_config.startSize, m_config.endSize, timeNorm);
 		particle->color = glm::mix(m_config.startColor, m_config.endColor, timeNorm);
 
-		float halfSize = particle->size * 0.5f;
+		GLfloat halfSize = particle->size * 0.5f;
 
-		unsigned int vertexIndex = quadIndex * 4;
+		GLuint vertexIndex = quadIndex * 4;
 		m_pVertices[vertexIndex + 0].position = glm::vec4( halfSize,  halfSize, 0, 1);
 		m_pVertices[vertexIndex + 1].position = glm::vec4(-halfSize,  halfSize, 0, 1);
 		m_pVertices[vertexIndex + 2].position = glm::vec4(-halfSize, -halfSize, 0, 1);

@@ -5,6 +5,7 @@
 
 #include <gl_core_4_4.h>
 //#include <assert.h>
+#include <glm/mat4x4.hpp>
 
 //class Mesh;
 
@@ -20,6 +21,9 @@ public:
 	GLvoid RenderTargetLoader();
 	bool CreateFrame();
 	GLvoid CreateRenderTargetQuad();
+	GLvoid RenderRenderTargetQuad(const glm::mat4& a_projectionView);
+	//To be called after Draw
+	GLvoid BindDraw();
 
 	GLuint& GetFBO() { return m_FBO; }
 	GLuint& GetFboTexture() { return m_fboTexture; }

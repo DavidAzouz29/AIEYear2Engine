@@ -19,3 +19,6 @@ std::string ReadFile(const char* fileName);
 
 // Register the OpenGL debugging callback.
 void TurnOnOpenGLDebugLogging();
+
+void _check_gl_error(const char *file, int line);
+#define check_gl_error() _check_gl_error(__FILE__,__LINE__);

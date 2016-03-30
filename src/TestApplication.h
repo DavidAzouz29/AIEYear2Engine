@@ -52,6 +52,7 @@ private:
 	//Render* m_pRenderApp; //TODO: remove other
 	std::shared_ptr<MathCollision> m_pMath;
 	std::shared_ptr<RenderTarget> m_pRenderTarget;
+	std::shared_ptr<Entity> m_pEntity; // <- needed?
 	std::vector< std::shared_ptr<Entity> > m_entities;
 	Mesh m_mesh;
 	Render m_render;

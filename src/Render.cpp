@@ -75,7 +75,9 @@ bool Render::Create()
 	//glActiveTexture(GL_TEXTURE3);
 	//glBindTexture(GL_TEXTURE_2D, id); */
 
-	unsigned int id = TextureInit("./data/models/soulspear/soulspear_diffuse.tga");
+	TextureLoader();
+
+	GLuint id = TextureInit("./data/models/soulspear/soulspear_diffuse.tga");
 	AddTexture("soulspear_d", id);
 
 	id = TextureInit("./data/models/soulspear/soulspear_normal.tga");
@@ -92,6 +94,8 @@ bool Render::Create()
 
 	//m_pRender->RenderTexture(); //For the Render Target?
 
+	//For render target? //TODO
+	RenderTexture();
 	//=======================================================
 	//m_pRender.get()->RenderTargetLoader();
 	//RenderTargetLoader();
@@ -101,18 +105,18 @@ bool Render::Create()
 }
 
 //function to create a grid
-GLvoid Render::generateGrid(const unsigned int a_iRows, const unsigned int a_iCols)
+GLvoid Render::generateGrid(const GLuint a_iRows, const GLuint a_iCols)
 {
 	Vertex_PositionColor* aoVertices = new Vertex_PositionColor[a_iRows * a_iCols];
-	for (unsigned short r = 0; r < a_iRows; ++r)
+	for (GLushort r = 0; r < a_iRows; ++r)
 	{
-		for (unsigned short c = 0; c < a_iCols; ++c)
+		for (GLushort c = 0; c < a_iCols; ++c)
 		{
-			aoVertices[r * a_iCols + c].position = glm::vec4((float)c, 0.0f, (float)r, 1.0f);
+			aoVertices[r * a_iCols + c].position = glm::vec4((GLfloat)c, 0.0f, (GLfloat)r, 1.0f);
 
 			//create some arbitary colour based off something
 			//that might not be related to tiling a texture
-			glm::vec3 colour = glm::vec3(sinf((c / (float)(a_iCols - 1.0f)) * (r / (float)(a_iRows - 1.0f))));
+			glm::vec3 colour = glm::vec3(sinf((c / (GLfloat)(a_iCols - 1.0f)) * (r / (GLfloat)(a_iRows - 1.0f))));
 			aoVertices[r * a_iCols + c].color = glm::vec4(colour, 1.0f);
 		}
 	}
@@ -122,12 +126,12 @@ GLvoid Render::generateGrid(const unsigned int a_iRows, const unsigned int a_iCo
 	/// ----------------------------------------------------------
 	/// defining index count based off quad count (2 triangles per quad)
 	/// ----------------------------------------------------------
-	unsigned int* auiIndices = new unsigned int[(a_iRows - 1) * (a_iCols - 1) * 6];
+	GLuint* auiIndices = new GLuint[(a_iRows - 1) * (a_iCols - 1) * 6];
 	
-	unsigned int index = 0;
-	for (unsigned int r = 0; r < (a_iRows - 1); ++r)
+	GLuint index = 0;
+	for (GLuint r = 0; r < (a_iRows - 1); ++r)
 	{
-		for (unsigned int c = 0; c < (a_iCols - 1); ++c)
+		for (GLuint c = 0; c < (a_iCols - 1); ++c)
 		{
 			// triangle 1
 			auiIndices[index++] = r * a_iCols + c;
@@ -219,7 +223,7 @@ GLvoid Render::InitGeometry()
 	//uniform float time;
 	//uniform float heightScale;
 
-	const char* vsSource = "#version 410\n \
+	const GLchar* vsSource = "#version 410\n \
 							layout(location=0) in vec4 Position; \
 							layout(location=1) in vec4 Colour; \
 							out vec4 vColour; \
@@ -228,7 +232,7 @@ GLvoid Render::InitGeometry()
 							uniform float heightScale; \
 							void main() { vColour = Colour; vec4 P = Position; P.y += tan ( time + Position.x ) * heightScale; gl_Position = ProjectionView * P; }";
 
-	const char* fsSource = "#version 410\n \
+	const GLchar* fsSource = "#version 410\n \
 							in vec4 vColour; \
 							out vec4 FragColor; \
 							void main() { FragColor = vColour; }";
@@ -236,13 +240,13 @@ GLvoid Render::InitGeometry()
 	/// ----------------------------------------------------------
 	/// Compile shaders
 	/// ----------------------------------------------------------
-	int success = GL_FALSE;
-	unsigned int iVertexShader = glCreateShader(GL_VERTEX_SHADER);
-	unsigned int iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	GLint success = GL_FALSE;
+	GLuint iVertexShader = glCreateShader(GL_VERTEX_SHADER);
+	GLuint iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-	glShaderSource(iVertexShader, 1, (const char**)&vsSource, 0);
+	glShaderSource(iVertexShader, 1, (const GLchar**)&vsSource, 0);
 	glCompileShader(iVertexShader);
-	glShaderSource(iFragmentShader, 1, (const char**)&fsSource, 0);
+	glShaderSource(iFragmentShader, 1, (const GLchar**)&fsSource, 0);
 	glCompileShader(iFragmentShader);
 
 	m_programID = glCreateProgram();
@@ -253,9 +257,9 @@ GLvoid Render::InitGeometry()
 	glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
 	if (success == GL_FALSE)
 	{
-		int infoLogLength = 0;
+		GLint infoLogLength = 0;
 		glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &infoLogLength);
-		char* infoLog = new char[infoLogLength];
+		GLchar* infoLog = new GLchar[infoLogLength];
 
 		glGetProgramInfoLog(m_programID, infoLogLength, 0, infoLog);
 		printf("Error: Failed to link shader program!\n");
@@ -269,13 +273,13 @@ GLvoid Render::InitGeometry()
 
 GLvoid Render::DrawGeometry(Camera* cam)
 {
-	fTime = static_cast<float>(glfwGetTime());
+	fTime = static_cast<GLfloat>(glfwGetTime());
 	glUseProgram(m_programID);
-	unsigned int projectionViewUniform = glGetUniformLocation(m_programID, "ProjectionView");
+	GLuint projectionViewUniform = glGetUniformLocation(m_programID, "ProjectionView");
 	glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(cam->getProjectionView())); //m_projectionViewMatrix
 
-	unsigned int uiHeightScale = glGetUniformLocation(m_programID, "heightScale");
-	unsigned int uiTime = glGetUniformLocation(m_programID, "time");
+	GLuint uiHeightScale = glGetUniformLocation(m_programID, "heightScale");
+	GLuint uiTime = glGetUniformLocation(m_programID, "time");
 
 	glUniform1f(uiHeightScale, fHeightScale);
 	glUniform1f(uiTime, fTime);
@@ -377,18 +381,18 @@ void Render::RenderFBX(Camera* cam)
 /// ----------------------------------------------------------
 /// Texture
 /// ----------------------------------------------------------
-unsigned int Render::TextureInit(const char* name)
+GLuint Render::TextureInit(const GLchar* name)
 {
-	int imageWidth = 0, imageHeight = 0, imageFormat = 0;
+	GLint imageWidth = 0, imageHeight = 0, imageFormat = 0;
 
 	/// ----------------------------------------------------------
 	// This call will read in the default texel data for the crate.png.
 	// In the case the image stores RGB values at 515x512 resolution.
 	/// ----------------------------------------------------------
 	// Load diffuse map
-	unsigned char* data = stbi_load(name, &imageWidth, &imageHeight, &imageFormat, STBI_default);
+	GLubyte* data = stbi_load(name, &imageWidth, &imageHeight, &imageFormat, STBI_default);
 	/// ----------------------------------------------------------
-	unsigned int id;
+	GLuint id;
 	// Generate an OpenGL texture handle.
 	glGenTextures(1, &id);
 	// Bind the texture to the correct slot for the dimension, in this case 2-D.
@@ -404,7 +408,7 @@ unsigned int Render::TextureInit(const char* name)
 	// load normal map
 	data = stbi_load(name, &imageWidth, &imageHeight, &imageFormat, STBI_default);
 	/// ----------------------------------------------------------
-	unsigned int uiNormal;
+	GLuint uiNormal;
 	// Generate an OpenGL texture handle.
 	glGenTextures(1, &uiNormal);
 	// Bind the texture to the correct slot for the dimension, in this case 2-D.
@@ -419,6 +423,7 @@ unsigned int Render::TextureInit(const char* name)
 
 	return id;
 }
+
 GLvoid Render::TextureLoader()
 {
 	/// ----------------------------------------------------------
@@ -426,7 +431,7 @@ GLvoid Render::TextureLoader()
 	/// ----------------------------------------------------------
 	/// Storing writing out our shader code into char arrays for processign by OpenGL.
 	/// ----------------------------------------------------------
-	const char* vsSource = "#version 410\n \
+	const GLchar* vsSource = "#version 410\n \
 							layout(location=0) in vec4 Position; \
 							layout(location=1) in vec2 TexCoord; \
 							layout(location=2) in vec4 Normal; \
@@ -446,7 +451,7 @@ GLvoid Render::TextureLoader()
 
 	// RGB x 2 - 1 to move it from RGB to XYZ, or 
 	// XYZ x 0.5 + 0.5 to move it from XYZ to RGB.
-	const char* fsSource = "#version 410\n \
+	const GLchar* fsSource = "#version 410\n \
 							in vec2 vTexCoord; \
 							in vec3 vNormal; \
 							in vec3 vTangent; \
@@ -472,12 +477,12 @@ GLvoid Render::TextureLoader()
 	/// Compile shaders
 	/// ----------------------------------------------------------
 	//int success = GL_FALSE;
-	unsigned int iVertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(iVertexShader, 1, (const char**)&vsSource, 0);
+	GLuint iVertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(iVertexShader, 1, (const GLchar**)&vsSource, 0);
 	glCompileShader(iVertexShader);
 
-	unsigned int iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(iFragmentShader, 1, (const char**)&fsSource, 0);
+	GLuint iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(iFragmentShader, 1, (const GLchar**)&fsSource, 0);
 	glCompileShader(iFragmentShader);
 
 	m_programID = glCreateProgram();
@@ -504,10 +509,10 @@ GLvoid Render::TextureLoader()
 
 struct Vertex
 {
-	float x, y, z, w;
-	float nx, ny, nz, nw;
-	float tx, ty, tz, tw;
-	float s, t;
+	GLfloat x, y, z, w;
+	GLfloat nx, ny, nz, nw;
+	GLfloat tx, ty, tz, tw;
+	GLfloat s, t;
 };
 
 GLvoid Render::RenderTexture()
@@ -527,7 +532,7 @@ GLvoid Render::RenderTexture()
 		{  5, 0, -5, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0 },
 		{ -5, 0, -5, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0 }
 	};
-	unsigned int indexData[] = {
+	GLuint indexData[] = {
 		0, 1, 2,
 		0, 2, 3,
 	};
@@ -550,16 +555,16 @@ GLvoid Render::RenderTexture()
 	glGenBuffers(1, &m_mesh.GetIBO());
 	// 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_mesh.GetIBO());
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, indexData, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 6, indexData, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), ((char*)0) + 48);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), ((GLchar*)0) + 48);
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), ((char*)0) + 16);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), ((GLchar*)0) + 16);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), ((char*)0) + 32);
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), ((GLchar*)0) + 32);
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -576,7 +581,7 @@ GLvoid Render::DrawTexture(Camera* cam)
 	glUseProgram(m_programID);
 
 	// bind the camera
-	int loc = glGetUniformLocation(m_programID, "ProjectionView");
+	GLint loc = glGetUniformLocation(m_programID, "ProjectionView");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, &(cam->getProjectionView()[0][0]));
 
 	// unsigned int uiHeightScale = glGetUniformLocation(m_programID, "heightScale");
@@ -618,7 +623,7 @@ GLvoid Render::DrawTextureP(Camera* cam)
 	glUseProgram(m_programID);
 
 	// bind the camera
-	int loc = glGetUniformLocation(m_programID, "ProjectionView");
+	GLint loc = glGetUniformLocation(m_programID, "ProjectionView");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, &(cam->getProjectionView()[0][0]));
 
 	//glBindTexture(GL_TEXTURE_2D, m_textures["crate"]);
@@ -650,12 +655,12 @@ GLvoid Render::DrawTextureP(Camera* cam)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
-GLvoid Render::AddTexture(const char* name, const unsigned int id)
+GLvoid Render::AddTexture(const GLchar* name, const GLuint id)
 {
-	m_textures.insert(std::pair<const std::string, const unsigned int>(name, id));
+	m_textures.insert(std::pair<const std::string, const GLuint>(name, id));
 }
 
-unsigned int Render::GetTextureByName(const char* name)
+GLuint Render::GetTextureByName(const GLchar* name)
 {
 	//std::vector<std::string>::iterator iter = m_textures.begin();
 	return m_textures[name];

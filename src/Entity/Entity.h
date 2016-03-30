@@ -25,9 +25,9 @@ public:
 	Entity();
 	virtual ~Entity() {};
 
-	virtual bool	Create() { return false; } //TODO: GLboolean?
+	virtual bool	Create(); //TODO: GLboolean?
 	virtual GLvoid	Update()	{};
-	virtual GLvoid	Draw()		;
+	virtual GLvoid	Draw(Camera* m_pCamState);
 	// Items to be drawn to our Render Target.
 	GLvoid	DrawApp()			; //TODO: create a DrawApp for each class that inherits from Entity
 	virtual GLvoid	Destroy()	{};
@@ -57,8 +57,8 @@ protected:
 	std::shared_ptr<GPUParticleEmitter> m_pGPUEmitter; //*/
 	std::shared_ptr<Render> m_pRender; 
 	std::shared_ptr<Mesh> m_pMesh;
+	//std::shared_ptr<RenderTarget> m_pRenderTarget;
 	//std::shared_ptr<MathCollision> m_pMath;
-	Camera* m_pCamState;
 	//Render* m_pRender;
 
 	/// ----------------------------------------------------------
@@ -68,9 +68,9 @@ protected:
 	glm::vec4 m_v4StartColor;
 	glm::vec4 m_v4EndColor;
 
-	//TODO: ?
+	/* TODO: ?
 	///glm::mat4x2 m_m4Colors[2];
-	//glm::mat4 m_m4Colors;
+	//glm::mat4 m_m4Colors; */
 
 private:
 	//static Entity* ms_pSingleton;

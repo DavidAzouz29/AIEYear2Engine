@@ -24,73 +24,73 @@ public:
 	GLuint GetIndexCount() const { return m_indexCount; }
 	//--------------------------------
 
-	GLvoid SetIndexCount(unsigned int a_iIndexCount) { m_indexCount = a_iIndexCount; }
+	GLvoid SetIndexCount(GLuint a_iIndexCount) { m_indexCount = a_iIndexCount; }
 
 	//GLvoid CreateRenderTargetQuad();
 
 	// Setup OpenGL buffers and vertex attributes to be able to render these vertices.
 	template<typename T>
-	bool Create(T* pVertices, unsigned int vertexCount, unsigned int* pInidices, unsigned int indexCount);
+	bool Create(T* pVertices, GLuint vertexCount, GLuint* pInidices, GLuint indexCount);
 
 	GLvoid Destroy();
 
 private:
 	// Specialize this template to do custom vertex attribute setup for your struct.
 	template<typename T>
-	void SetupVertexAttributes() { assert(false); }
+	GLvoid SetupVertexAttributes() { assert(false); }
 
 	template<>
-	void SetupVertexAttributes<Vertex_PositionColor>() 
+	GLvoid SetupVertexAttributes<Vertex_PositionColor>()
 	{
 		// Position vertex attribute
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), (void*)(offsetof(Vertex_PositionColor, position)));
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), (GLvoid*)(offsetof(Vertex_PositionColor, position)));
 
 		// Color vertex attribute
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), (void*)(offsetof(Vertex_PositionColor, color)));
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), (GLvoid*)(offsetof(Vertex_PositionColor, color)));
 
 	}
 
 	template<>
-	void SetupVertexAttributes<Vertex_PositionTexCoord>() 
+	GLvoid SetupVertexAttributes<Vertex_PositionTexCoord>()
 	{ 
 		// Position vertex attribute
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionTexCoord), (void*)(offsetof(Vertex_PositionTexCoord, position)));
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionTexCoord), (GLvoid*)(offsetof(Vertex_PositionTexCoord, position)));
 
 		// Texcoord vertex attribute
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionTexCoord), (void*)(offsetof(Vertex_PositionTexCoord, uv)));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionTexCoord), (GLvoid*)(offsetof(Vertex_PositionTexCoord, uv)));
 
 	}
 
 	template<>
-	void SetupVertexAttributes<FBXVertex>()
+	GLvoid SetupVertexAttributes<FBXVertex>()
 	{
 		// Position vertex attribute
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)(offsetof(FBXVertex, position)));
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)(offsetof(FBXVertex, position)));
 
 		// Texcoord vertex attribute
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)(offsetof(FBXVertex, texCoord1)));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)(offsetof(FBXVertex, texCoord1)));
 
 		// Normal vertex attribute
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)(offsetof(FBXVertex, normal)));
+		glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)(offsetof(FBXVertex, normal)));
 
 		// Tangent vertex attribute
 		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)(offsetof(FBXVertex, tangent)));
+		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)(offsetof(FBXVertex, tangent)));
 
 		// Weights vertex attribute
 		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)(offsetof(FBXVertex, weights)));
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)(offsetof(FBXVertex, weights)));
 
 		// Indices vertex attribute
 		glEnableVertexAttribArray(5);
-		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (void*)(offsetof(FBXVertex, indices)));
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)(offsetof(FBXVertex, indices)));
 	}
 
 	GLuint m_indexCount;
@@ -118,7 +118,7 @@ private:
 template<typename T>
 bool Mesh::Create(T* pVertices, GLuint vertexCount, GLuint* pIndices, GLuint indexCount)
 {
-	assert(m_VAO == -1 && "Mesh has already been created.");
+	assert(m_VAO == (GLushort)-1 && "Mesh has already been created.");
 	assert(pVertices != nullptr);
 	assert(vertexCount != 0);
 	assert(pIndices != nullptr);
@@ -137,7 +137,7 @@ bool Mesh::Create(T* pVertices, GLuint vertexCount, GLuint* pIndices, GLuint ind
 	// Create the IBO
 	glGenBuffers(1, &m_IBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount*sizeof(unsigned int), pIndices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount*sizeof(GLuint), pIndices, GL_STATIC_DRAW);
 
 	// Unbind
 	glBindVertexArray(0);

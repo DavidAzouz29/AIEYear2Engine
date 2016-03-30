@@ -13,7 +13,7 @@ public:
 	GPUParticleEmitter();
 	virtual ~GPUParticleEmitter();
 
-	bool Create();
+	bool Create() override;
 
 	/// ----------------------------------------------------------
 	/// <summary> Initialise GPU Particle System
@@ -32,9 +32,9 @@ public:
 		const glm::vec4& a_v4EndColor);
 
 	GLvoid Draw(GLfloat a_ftime, const glm::mat4& a_m4CameraTransform,
-		const glm::mat4& a_m4ProectionView);
+		const glm::mat4& a_m4ProectionView); // override; TODO: 
 
-	GLvoid RenderUI();
+	GLvoid RenderUI() override;
 	GLuint LoadShader(GLuint a_iType, const GLchar* ac_cPath);
 
 protected:

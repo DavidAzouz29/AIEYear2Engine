@@ -26,7 +26,7 @@ public:
 	///			a_iRows: a set of rows
 	///			a_iCols: a set of columns
 	/// ----------------------------------------------------------
-	GLvoid generateGrid(const unsigned int a_iRows, const unsigned int a_iCols);
+	GLvoid generateGrid(const GLuint a_iRows, const GLuint a_iCols);
 
 	GLvoid InitGeometry();
 	GLvoid DrawGeometry(Camera* cam);
@@ -34,14 +34,14 @@ public:
 	///void FBXLoader();
 	//void RenderFBX(Camera* cam);
 
-	unsigned int TextureInit(const char* name);
+	GLuint TextureInit(const GLchar* name);
 	GLvoid TextureLoader();
 	GLvoid RenderTexture();
 	GLvoid DrawTexture(Camera* cam);
 	GLvoid DrawTextureP(Camera* cam);
-	GLvoid AddTexture(const char* name, const unsigned int id);
+	GLvoid AddTexture(const GLchar* name, const GLuint id);
 
-	unsigned int GetTextureByName(const char* name);
+	GLuint GetTextureByName(const GLchar* name);
 
 	//void RenderTargetLoader();
 
@@ -61,14 +61,14 @@ private:
 	/// Texture
 	/// ----------------------------------------------------------
 	// Store the OpenGL texture.
-	std::map<const std::string, const unsigned int> m_textures, m_normalmap;
+	std::map<const std::string, const GLuint> m_textures, m_normalmap;
 	/// ----------------------------------------------------------
 	/// RenderTarget
 	/// ----------------------------------------------------------
 	//GLuint m_fboTexture;
 
-	float fHeightScale;
-	float fTime;
+	GLfloat fHeightScale;
+	GLfloat fTime;
 
 	Mesh m_mesh;
 	//std::shared_ptr<Render> m_pRender;

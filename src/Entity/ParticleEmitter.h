@@ -10,7 +10,7 @@ struct Particle;
 
 struct ParticleEmitterConfig 
 {
-	ParticleEmitterConfig() : particleCount(-1) {}
+	ParticleEmitterConfig() : particleCount(USHRT_MAX) {}
 	
 	GLuint particleCount; // How many I have
 	
@@ -38,15 +38,15 @@ struct ParticleEmitterConfig
 class ParticleEmitter : public Entity
 {
 public:
-	ParticleEmitter();
+	ParticleEmitter(ParticleEmitterConfig a_config);
 	~ParticleEmitter() {}
 
-	bool isValid() { return m_config.particleCount != -1; }
-	bool Create();
-	bool ParticleLoader(ParticleEmitterConfig config);
-	GLvoid Update(GLfloat a_deltaTime, const glm::mat4 a_m4camMatrix);
-	GLvoid Draw(const glm::mat4& projView);
-	GLvoid Destroy();
+	bool isValid() { return m_config.particleCount == (GLushort)USHRT_MAX; } //TODO: breaking -1?
+	bool Create() override;
+	bool ParticleLoader(ParticleEmitterConfig a_config);
+	GLvoid Update(GLfloat a_deltaTime, const glm::mat4 a_m4camMatrix); // override; TODO: 
+	GLvoid Draw(const glm::mat4& projView); // override; TODO: 
+	GLvoid Destroy() override;
 
 	/// ----------------------------------------------------------
 	/// Safety for dangling pointer
@@ -68,9 +68,6 @@ private:
 
 	ParticleEmitterConfig m_config;
 	GLfloat m_fEmitTimer;
-
-	std::shared_ptr<ParticleEmitter> m_pParticleEmitterA;
-	std::shared_ptr<ParticleEmitter> m_pParticleEmitterB;
 
 	//Render m_render; 
 	//Geometry m_geometry; //
