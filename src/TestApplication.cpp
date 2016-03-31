@@ -96,7 +96,7 @@ TestApplication::TestApplication() :
 	configB.v3ParticlePosition = glm::vec3(3, 5, 0);
 #pragma endregion
 
-	m_pEntity = std::make_shared<Entity>();
+	//m_pEntity = std::make_unique<Entity>();
 	//m_pRenderApp = std::make_shared<Render>();
 	// Adds our inherited classes to the vector.
 	//m_entities.push_back(std::make_shared<Render>());
@@ -148,7 +148,6 @@ bool TestApplication::startup() {
 	//Entity::CreateSingleton();
 
 	//m_pEntity = std::make_shared<Entity>();
-	m_pEntity->Create();
 	// Loops through each entity and calls their respected Create functions.
 	for (auto &pEntity : m_entities)
 	{
@@ -247,7 +246,7 @@ bool TestApplication::Update(GLfloat deltaTime)
 
 	//////////////////////////////////////////////////////////////////////////
 	// YOUR UPDATE CODE HERE
-	m_pEntity->Update();
+	//m_pEntity->Update();
 	for (auto &pEntity : m_entities)
 	{
 		pEntity->Update();
@@ -450,7 +449,7 @@ GLvoid TestApplication::DrawApp()
 	//pRender->DrawTexture(m_pCamState); //TODO: needed for Soulspear
 
 	// TODO:
-	m_pEntity->Draw(m_pCamState);
+	//m_pEntity->Draw(m_pCamState);
 	for (auto &pEntity : m_entities)
 	{
 		pEntity->Draw(m_pCamState);
@@ -554,7 +553,7 @@ GLvoid TestApplication::DrawApp()
 
 		// GPU Particles
 		//m_pGPUEmitter.get()->RenderUI();
-		m_pEntity->RenderUI();
+		//m_pEntity->RenderUI();
 		for (auto &pEntity : m_entities)
 		{
 			pEntity->RenderUI();

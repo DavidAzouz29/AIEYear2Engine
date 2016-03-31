@@ -244,6 +244,10 @@ GLvoid ParticleEmitter::BillboardParticle(GLuint vertexIndex, const glm::mat4& b
 		glm::vec4(particle->position, 0);
 }
 
+/*::draw
+{
+	Draw(projView)
+} */
 GLvoid ParticleEmitter::Draw(const glm::mat4& projView)
 {
 	glBindBuffer(GL_ARRAY_BUFFER, m_pMesh->GetVBO());

@@ -25,13 +25,16 @@ public:
 	Entity();
 	virtual ~Entity() {};
 
-	virtual bool	Create(); //TODO: GLboolean?
+	// Is an abstract class
+	// cannot create instances of this class
+	// Pure virtual function
+	virtual bool	Create() = 0; //TODO: GLboolean?
 	virtual GLvoid	Update()	{};
-	virtual GLvoid	Draw(Camera* m_pCamState);
+	virtual GLvoid	Draw(Camera* m_pCamState);// = 0; //TODO: make pure
 	// Items to be drawn to our Render Target.
-	GLvoid	DrawApp()			; //TODO: create a DrawApp for each class that inherits from Entity
+	GLvoid	DrawApp()			; //TODO: create a DrawApp for each class that inherits from Entity - and remove from here
 	virtual GLvoid	Destroy()	{};
-	virtual GLvoid	RenderUI()	;
+	virtual GLvoid	RenderUI();// = 0;
 
 	const std::shared_ptr<Render>&	GetRender() const { return m_pRender; }
 

@@ -408,6 +408,8 @@ GLvoid FBXModel::FBXAnimationDraw(Camera* m_pCamState)
 	GLuint worldTransform = glGetUniformLocation(m_program_FBXAnimation_ID, "WorldTransform");
 	glUniformMatrix4fv(worldTransform, 1, GL_FALSE, glm::value_ptr(m4WorldTransform));
 
+	// -----------------------------------------------------
+	// Renders job
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_pRender->GetTextureByName("Pyro_D")); // m_texture); 
 	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "diffuse");
@@ -417,7 +419,10 @@ GLvoid FBXModel::FBXAnimationDraw(Camera* m_pCamState)
 	glBindTexture(GL_TEXTURE_2D, m_pRender->GetTextureByName("Pyro_N")); // m_normal);
 	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "normal");
 	glUniform1i(loc, 1);
+	// -----------------------------------------------------
 
+	// -----------------------------------------------------
+	// FBX Mesh Draw
 	FBXSkeleton* skeleton = m_pFbx->getSkeletonByIndex(0);
 	skeleton->updateBones();
 
@@ -433,4 +438,6 @@ GLvoid FBXModel::FBXAnimationDraw(Camera* m_pCamState)
 		glDrawElements(GL_TRIANGLES,
 			(GLuint)mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
 	}
+	// -----------------------------------------------------
+
 }

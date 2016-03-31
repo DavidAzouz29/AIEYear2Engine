@@ -18,6 +18,7 @@ public:
 	
 	bool Create();
 	GLvoid Destroy();
+	GLvoid Draw();
 	GLvoid RenderTargetLoader();
 	bool CreateFrame();
 	GLvoid CreateRenderTargetQuad();

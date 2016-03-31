@@ -39,6 +39,11 @@ GLvoid RenderTarget::Destroy()
 	m_fboDepth = USHRT_MAX; //(GLuint)-1; // TODO: Needed?
 }
 
+GLvoid RenderTarget::Draw()
+{
+
+}
+
 GLvoid RenderTarget::RenderTargetLoader()
 {
 	/// ----------------------------------------------------------

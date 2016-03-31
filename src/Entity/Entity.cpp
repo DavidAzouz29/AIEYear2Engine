@@ -45,32 +45,12 @@ Entity::Entity() :
 	m_pMesh = std::make_shared<Mesh>();
 }
 
-bool Entity::Create()
-{
-	// -----------------------
-#pragma region FBX
-	// -----------------------
-/*	m_pFbx = std::make_shared<FBXFile>();
-	//m_pFbx->load("./data/models/stanford/Bunny.fbx");
-	//m_pFbx->load("./data/models/soulspear/soulspear.fbx");
-	m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", FBXFile::UNITS_METER);
-	//m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", m_pFbx->UNITS_METER);
-	//FBXLoader(); // Needed if FBX without Animation
-	FBXSkeletonLoader();
-
-	CreateOpenGLBuffers(m_pFbx.get()); */
-#pragma endregion
-	///------------------------------------------------------
-	m_pRender->Create();
-	//m_pMesh->Create();
-	return false;
-} 
-
 
 /*GLvoid Entity::Update()
 {
 } */
 
+//TODO: remove
 GLvoid Entity::Draw(Camera* m_pCamState)
 {
 	// For the render target
