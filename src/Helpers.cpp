@@ -40,7 +40,6 @@ bool CheckLinkStatus(GLuint programId)
 	return true;
 }
 
-
 std::string ReadFile(const char* fileName)
 {
 	std::ifstream ifs(fileName, std::ios::in | std::ios::binary | std::ios::ate);
@@ -55,6 +54,39 @@ std::string ReadFile(const char* fileName)
 	return std::string(&bytes[0], (unsigned int)fileSize);
 }
 
+/// ----------------------------------------------------------
+/// <summary> Load Shader 
+/// <para>Vertex, Fragment, Geometry shader files.</para>
+/// <param><para>P1: Used to create a shader of 'type'.</para></param>
+/// <param><para>P2: File path.</para></param>
+/// <param><para>P2: File path.</para></param>
+/// </summary>
+/// ----------------------------------------------------------
+GLuint LoadShader(GLuint a_iType, const GLchar* ac_cPath)
+{
+	// "rb" - read binary
+	FILE* file = fopen(ac_cPath, "rb"); //TODO: fopen_s? - not reading files
+	if (file == nullptr)
+	{
+		return 0;
+	}
+
+	// read the shader source
+	fseek(file, 0, SEEK_END);
+	GLuint uiLength = ftell(file);
+	fseek(file, 0, SEEK_SET);
+	GLchar* cSource = new GLchar[uiLength + 1];
+	memset(cSource, 0, uiLength + 1);
+	fread(cSource, sizeof(GLchar), uiLength, file);
+	fclose(file);
+
+	GLuint uiShader = glCreateShader(a_iType);
+	glShaderSource(uiShader, 1, &cSource, 0);
+	glCompileShader(uiShader);
+	delete[] cSource;
+
+	return uiShader;
+}
 
 void APIENTRY openglCallbackFunction(GLenum source,
 	GLenum type,

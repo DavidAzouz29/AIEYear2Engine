@@ -51,7 +51,7 @@ Entity::Entity() :
 } */
 
 //TODO: remove
-GLvoid Entity::Draw(Camera* m_pCamState)
+GLvoid Entity::Draw(const Camera& m_pCamState)
 {
 	// For the render target
 	glBindFramebuffer(GL_FRAMEBUFFER, m_renderTarget.GetFBO());
@@ -81,7 +81,7 @@ GLvoid Entity::Draw(Camera* m_pCamState)
 		}
 	}
 
-	Gizmos::draw(m_pCamState->getProjectionView());
+	Gizmos::draw(m_pCamState.getProjectionView());
 	// draw
 	// unbind the FBO so that we can render to the back buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

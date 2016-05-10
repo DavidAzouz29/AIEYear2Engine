@@ -29,6 +29,8 @@
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 
+#include "GLFW/glfw3.h"
+
 #include <glm/ext.hpp>
 #include <cstdio>
 
@@ -265,13 +267,24 @@ GLvoid GPUParticleEmitter::CreateDrawShader()
 
 /// ----------------------------------------------------------
 /// <summary> Draw
+/// <para>Used to allow Draw to work in conjunction the Entity system.</para>
+/// <param><para>P1: Camera.</para></param>
+/// </summary>
+/// ----------------------------------------------------------
+GLvoid GPUParticleEmitter::Draw(const Camera& m_pCamState)
+{
+	DrawGPUParticle((GLfloat)glfwGetTime(), m_pCamState.getTransform(), m_pCamState.getProjectionView());
+}
+
+/// ----------------------------------------------------------
+/// <summary> Draw
 /// <para>Ping-Pongs between buffers to draw.</para>
 /// <param><para>P1: Time.</para></param>
 /// <param><para>P2: Camera Transform used for location.</para></param>
 /// <param><para>P3: Proj View.</para></param>
 /// </summary>
 /// ----------------------------------------------------------
-GLvoid GPUParticleEmitter::Draw(GLfloat a_ftime,
+GLvoid GPUParticleEmitter::DrawGPUParticle(GLfloat a_ftime,
 	const glm::mat4& a_m4CameraTransform,
 	const glm::mat4& a_m4ProectionView)
 {
@@ -354,38 +367,4 @@ GLvoid GPUParticleEmitter::RenderUI()
 			ImGui::TreePop();
 		}
 	}
-}
-
-/// ----------------------------------------------------------
-/// <summary> Load Shader 
-/// TODO: move to seperate header/ cpp to load any "file": 
-/// <para>Vertex, Fragment, Geometry shader files.</para>
-/// <param><para>P1: Used to create a shader of 'type'.</para></param>
-/// <param><para>P2: File path.</para></param>
-/// </summary>
-/// ----------------------------------------------------------
-GLuint GPUParticleEmitter::LoadShader(GLuint a_iType, const GLchar* ac_cPath)
-{
-	// "rb" - read binary
-	FILE* file = fopen(ac_cPath, "rb"); //TODO: fopen_s? - not reading files
-	if (file == nullptr)
-	{
-		return 0;
-	}
-
-	// read the shader source
-	fseek(file, 0, SEEK_END);
-	GLuint uiLength = ftell(file);
-	fseek(file, 0, SEEK_SET);
-	GLchar* cSource = new GLchar[uiLength + 1];
-	memset(cSource, 0, uiLength + 1);
-	fread(cSource, sizeof(GLchar), uiLength, file);
-	fclose(file);
-
-	GLuint uiShader = glCreateShader(a_iType);
-	glShaderSource(uiShader, 1, &cSource, 0);
-	glCompileShader(uiShader);
-	delete[] cSource;
-
-	return uiShader;
 }

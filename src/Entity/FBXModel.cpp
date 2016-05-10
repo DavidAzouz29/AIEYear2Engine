@@ -61,7 +61,7 @@ GLvoid FBXModel::Update()
 	}
 }
 
-GLvoid FBXModel::Draw(Camera* m_pCamState)
+GLvoid FBXModel::Draw(const Camera& m_pCamState)
 {
 	//RenderFBX(m_pCamState);
 	FBXAnimationDraw(m_pCamState);
@@ -377,12 +377,12 @@ GLvoid FBXModel::FBXSkeletonRender()
 	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)FBXVertex::IndicesOffset);
 }
 
-GLvoid FBXModel::FBXAnimationDraw(Camera* m_pCamState)
+GLvoid FBXModel::FBXAnimationDraw(const Camera& m_pCamState)
 {
 	glUseProgram(m_program_FBXAnimation_ID);
 
 	GLuint loc = glGetUniformLocation(m_program_FBXAnimation_ID, "ProjectionView");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m_pCamState->getProjectionView()));
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m_pCamState.getProjectionView()));
 
 	/*int light_dir_uniform = glGetUniformLocation(m_programID, "LightDir");
 	glUniform3f(light_dir_uniform, 0, 1, 0);*/
@@ -394,7 +394,7 @@ GLvoid FBXModel::FBXAnimationDraw(Camera* m_pCamState)
 	GLuint light_colour_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "LightColour");
 	glUniform3f(light_colour_uniform, 1, 1, 1);
 
-	mat4 camera_matrix = m_pCamState->getTransform();
+	mat4 camera_matrix = m_pCamState.getTransform();
 	GLint camera_pos_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "CameraPos");
 	glUniform3f(camera_pos_uniform, camera_matrix[3][0], camera_matrix[3][1], camera_matrix[3][2]);
 

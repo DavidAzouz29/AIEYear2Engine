@@ -40,6 +40,18 @@ private:
 	GLvoid SetupVertexAttributes() { assert(false); }
 
 	template<>
+	GLvoid SetupVertexAttributes<GLfloat>()
+	{
+		// Position vertex attribute
+		glEnableVertexAttribArray(0); //TODO: substitute 6 for another value
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, 0);
+
+		// Color vertex attribute
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, ((GLchar*)0) + 16);
+	}
+
+	template<>
 	GLvoid SetupVertexAttributes<Vertex_PositionColor>()
 	{
 		// Position vertex attribute
@@ -49,7 +61,6 @@ private:
 		// Color vertex attribute
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), (GLvoid*)(offsetof(Vertex_PositionColor, color)));
-
 	}
 
 	template<>
@@ -105,9 +116,9 @@ private:
 /// <summary> 
 /// <para>Bind the shader and send across the virtual camera's projection and view</para>
 /// <para>matrices combined, then we loop through the meshes and render them.</para>
-/// <para><param name="pVertices"	type ="T*">		 P1: Our Verts to .</param></para>
-/// <para><param name="vertexCount" type ="GLuint "> P2: Amount of Verts to .</param></para>
-/// <para><param name="pIndices"	type ="GLuint*"> P3: Indices to.</param></para>
+/// <para><param name="pVertices"	type ="T*">		 P1: Verts data.</param></para>
+/// <para><param name="vertexCount" type ="GLuint "> P2: How many Verts we have (allocate buffer).</param></para>
+/// <para><param name="pIndices"	type ="GLuint*"> P3: Index/ Indices data.</param></para>
 /// <para><param name="indexCount"	type ="GLuint "> P4: Used to determine size of buffer data.</param></para></summary>
 ///  _______  - 
 /// |	|	| -
@@ -128,6 +139,9 @@ bool Mesh::Create(T* pVertices, GLuint vertexCount, GLuint* pIndices, GLuint ind
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);
 
+	// ----------------------------------------------------------
+	// Generate GL Buffers
+	// ----------------------------------------------------------
 	glGenBuffers(1, &m_VBO); // Create the VBO
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO); // Make it active
 	glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(T), pVertices, GL_STATIC_DRAW); // Upload data

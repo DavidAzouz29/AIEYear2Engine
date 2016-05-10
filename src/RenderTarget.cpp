@@ -176,7 +176,10 @@ GLvoid RenderTarget::CreateRenderTargetQuad()
 		0, 2, 3,
 	};
 
-	// Add the following line to generate a VertexArrayObject
+	//TODO:
+	m_mesh.Create(vertexData, 6 * 4, indexData, 6);
+
+	/* Add the following line to generate a VertexArrayObject
 	glGenVertexArrays(1, &m_mesh.GetVAO());
 	glBindVertexArray(m_mesh.GetVAO());
 
@@ -202,7 +205,7 @@ GLvoid RenderTarget::CreateRenderTargetQuad()
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); */
 }
 
 GLvoid RenderTarget::RenderRenderTargetQuad(const glm::mat4& a_projectionView)

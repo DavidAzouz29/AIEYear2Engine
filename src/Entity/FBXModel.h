@@ -12,7 +12,7 @@ public:
 
 	bool Create() override;
 	GLvoid Update() override;
-	GLvoid Draw(Camera* m_pCamState) override;
+	GLvoid Draw(const Camera& m_pCamState) override;
 	GLvoid Destroy() override;
 	GLvoid RenderUI() override;
 
@@ -22,7 +22,7 @@ public:
 	GLvoid FBXSkeletonLoader();
 	GLvoid FBXSkeletonRender();
 	//GLvoid FBXUpdate();
-	GLvoid FBXAnimationDraw(Camera* m_pCamState);
+	GLvoid FBXAnimationDraw(const Camera& m_pCamState);
 	/// ----------------------------------------------------------
 
 private:

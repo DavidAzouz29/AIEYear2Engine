@@ -17,6 +17,9 @@ bool CheckLinkStatus(GLuint programId);
 // Returns an empty string on failure.
 std::string ReadFile(const char* fileName);
 
+// 
+GLuint LoadShader(GLuint a_iType, const GLchar* ac_cPath);
+
 // Register the OpenGL debugging callback.
 void TurnOnOpenGLDebugLogging();
 

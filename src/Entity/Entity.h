@@ -1,6 +1,7 @@
 #pragma once
 //#include "VertexData.h"
 #include "Camera\Camera.h"
+#include "Helpers.h"
 #include "RenderTarget.h"
 
 #include <gl_core_4_4.h>
@@ -30,7 +31,7 @@ public:
 	// Pure virtual function
 	virtual bool	Create() = 0; //TODO: GLboolean?
 	virtual GLvoid	Update()	{};
-	virtual GLvoid	Draw(Camera* m_pCamState);// = 0; //TODO: make pure
+	virtual GLvoid	Draw(const Camera& m_pCamState);// = 0; //TODO: make pure
 	// Items to be drawn to our Render Target.
 	GLvoid	DrawApp()			; //TODO: create a DrawApp for each class that inherits from Entity - and remove from here
 	virtual GLvoid	Destroy()	{};
@@ -87,6 +88,7 @@ private:
 
 	// TODO: Transform class?
 	// where our entity is in the world
+
 	glm::mat4 m_m4WorldTransform;
 };
 

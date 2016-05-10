@@ -45,7 +45,9 @@ public:
 	bool Create() override;
 	bool ParticleLoader(ParticleEmitterConfig a_config);
 	GLvoid Update(GLfloat a_deltaTime, const glm::mat4 a_m4camMatrix); // override; TODO: 
-	GLvoid Draw(const glm::mat4& projView); // override; TODO: 
+	//GLvoid Draw(const glm::mat4& projView) override;
+	//GLvoid Draw(const Camera* m_pCamState) override;
+	GLvoid Draw(const Camera& m_pCamState) override;
 	GLvoid Destroy() override;
 
 	/// ----------------------------------------------------------
@@ -59,6 +61,7 @@ private:
 	GLvoid BillboardParticle(GLuint vertexIndex, const glm::mat4& billboardMat, const Particle* particle);
 	
 	glm::vec3 m_v3particlePosition;
+	// TODO: glm::mat4 m_m4WorldTransform;
 
 	Particle* m_pPartiles; //could be a smart pointer
 	Vertex_PositionColor* m_pVertices; // GPU sides, verts that will render

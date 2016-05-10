@@ -244,17 +244,13 @@ GLvoid ParticleEmitter::BillboardParticle(GLuint vertexIndex, const glm::mat4& b
 		glm::vec4(particle->position, 0);
 }
 
-/*::draw
-{
-	Draw(projView)
-} */
-GLvoid ParticleEmitter::Draw(const glm::mat4& projView)
+GLvoid ParticleEmitter::Draw(const Camera& m_pCamState)
 {
 	glBindBuffer(GL_ARRAY_BUFFER, m_pMesh->GetVBO());
 	glBufferSubData(GL_ARRAY_BUFFER, 0, m_uiFirstDeadIndex * 4 * sizeof(Vertex_PositionColor), m_pVertices);
 
 	glUseProgram(m_program.getId());
-	m_program.setUniform("ProjectionView", projView);
+	m_program.setUniform("ProjectionView", m_pCamState.getProjectionView());
 	glBindVertexArray(m_pMesh->GetVAO());
 	glDrawElements(GL_TRIANGLES, m_uiFirstDeadIndex * 6, GL_UNSIGNED_INT, 0);
 }

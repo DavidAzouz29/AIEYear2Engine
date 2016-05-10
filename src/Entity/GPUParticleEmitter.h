@@ -7,6 +7,8 @@
 //#include <gl_core_4_4.h>
 #include <glm/mat4x4.hpp>
 
+class Camera;
+
 class GPUParticleEmitter : public Entity
 {
 public:
@@ -31,11 +33,12 @@ public:
 		const glm::vec4& a_v4StartColor,
 		const glm::vec4& a_v4EndColor);
 
-	GLvoid Draw(GLfloat a_ftime, const glm::mat4& a_m4CameraTransform,
-		const glm::mat4& a_m4ProectionView); // override; TODO: 
+	GLvoid Draw(const Camera& m_pCamState) override;
+
+	GLvoid DrawGPUParticle(GLfloat a_ftime, const glm::mat4& a_m4CameraTransform,
+		const glm::mat4& a_m4ProectionView);
 
 	GLvoid RenderUI() override;
-	GLuint LoadShader(GLuint a_iType, const GLchar* ac_cPath);
 
 protected:
 	///--------------------------------------------------
@@ -51,6 +54,7 @@ protected:
 	GLuint m_uiMaxParticles;
 
 	glm::vec3 m_v3Position;
+	// TODO: glm::mat4 m_m4WorldTransform;
 
 	GLfloat m_fLifespanMin;
 	GLfloat m_fLifespanMax;

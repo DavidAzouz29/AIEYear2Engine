@@ -254,7 +254,7 @@ bool TestApplication::Update(GLfloat deltaTime)
 	// FBX Skeleton and Animation
 	//FBXUpdate();
 
-	m_pCamState = m_pCameraStateMachine.get()->GetCurrentCamera();
+	// TODO: does this break things - m_pCamState = m_pCameraStateMachine.get()->GetCurrentCamera();
 	m_pMath->Update(m_pCamState);
 
 /*	m_pMath->Update(m_pCamState);
@@ -325,19 +325,22 @@ GLvoid TestApplication::Draw()
 	ImGui_ImplGlfwGL3_NewFrame();
 	check_gl_error();
 
-/*	// For the render target
-	glBindFramebuffer(GL_FRAMEBUFFER, m_pRenderApp->GetSharedPointer()->GetFBO());
+	// For the render target
+	//glBindFramebuffer(GL_FRAMEBUFFER, m_pRenderTarget->GetSharedPointer()->GetFBO());
+	glBindFramebuffer(GL_FRAMEBUFFER, m_pRenderTarget.get()->GetFBO());
 	//printf("%d\n", m_pRenderApp->GetSharedPointer());
 	glViewport(0, 0, 512, 512); // 265 lower quarter of the texture
 
 	// ----------------------------------------------------------
-	glClearColor(m_v3ClearColor.r, m_v3ClearColor.g, m_v3ClearColor.b, 1);
+	//glClearColor(m_v3ClearColor.r, m_v3ClearColor.g, m_v3ClearColor.b, 1);
+	glClearColor(0.75f, 0.75f, 0.75f, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Clear ImGui
-	ImGui_ImplGlfwGL3_NewFrame();
+	//ImGui_ImplGlfwGL3_NewFrame();
 	// ----------------------------------------------------------
-	glBindVertexArray(m_pRenderApp->GetSharedPointer()->GetVAO());
+	//glBindVertexArray(m_pRenderApp->GetSharedPointer()->GetVAO());
+	glBindVertexArray(m_pRenderTarget.get()->GetVAO());
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 	// Draw Captured Objects Here
@@ -358,7 +361,7 @@ GLvoid TestApplication::Draw()
 	// draw
 	// unbind the FBO so that we can render to the back buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glUseProgram(m_pRenderApp->GetProgramID()); */
+	glUseProgram(m_pRenderApp->GetProgramID()); //*/
 	DrawApp();
 	check_gl_error();
 
@@ -452,7 +455,7 @@ GLvoid TestApplication::DrawApp()
 	//m_pEntity->Draw(m_pCamState);
 	for (auto &pEntity : m_entities)
 	{
-		pEntity->Draw(m_pCamState);
+		pEntity->Draw(*m_pCamState);
 	}
 
 	m_pRenderTarget->BindDraw();
