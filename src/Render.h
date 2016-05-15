@@ -5,11 +5,12 @@
 #include "Mesh.h" //TOOD: needed?
 //#include "VertexData.h"
 
-#include <map>
+//#include <map> //TODO: remove once Texture class is working
 #include <memory>
 
 class Camera;
 //class Mesh;
+class Texture;
 
 class Render // : public Entity
 {
@@ -34,14 +35,18 @@ public:
 	///void FBXLoader();
 	//void RenderFBX(Camera* cam);
 
-	GLuint TextureInit(const GLchar* name);
+	/// ----------------------------------------------------------
+	/// Texture related
+	/// ----------------------------------------------------------
+	/*GLuint TextureInit(const GLchar* name);
 	GLvoid TextureLoader();
 	GLvoid RenderTexture();
 	GLvoid DrawTexture(Camera* cam);
 	GLvoid DrawTextureP(Camera* cam);
 	GLvoid AddTexture(const GLchar* name, const GLuint id);
 
-	GLuint GetTextureByName(const GLchar* name);
+	GLuint GetTextureByName(const GLchar* name); */
+	/// ----------------------------------------------------------
 
 	//void RenderTargetLoader();
 
@@ -61,7 +66,7 @@ private:
 	/// Texture
 	/// ----------------------------------------------------------
 	// Store the OpenGL texture.
-	std::map<const std::string, const GLuint> m_textures, m_normalmap;
+	//////////std::map<const std::string, const GLuint> m_textures, m_normalmap;
 	/// ----------------------------------------------------------
 	/// RenderTarget
 	/// ----------------------------------------------------------
@@ -73,5 +78,6 @@ private:
 	Mesh m_mesh;
 	//std::shared_ptr<Render> m_pRender;
 	//std::shared_ptr<Mesh> m_pMesh;
+	std::shared_ptr<Texture> m_pTexture;
 };
 

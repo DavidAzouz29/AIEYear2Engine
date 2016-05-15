@@ -4,7 +4,7 @@
 /// Date Created: 	8/02/16
 /// Date Modified: 	8/02/16
 ///----------------------------------------------------------
-/// Brief: A FlyCamera Class that enables movement/ navigation through the world
+/// Brief: A Render Class that enables 
 /// viewed: 
 /// GLfloat http://r3dux.org/2011/05/simple-opengl-keyboard-and-mouse-fps-controls/
 /// http://gamedev.stackexchange.com/questions/13436/glm-euler-angles-to-quaternion
@@ -14,11 +14,9 @@
 /// ***EDIT***
 /// - Camera	 	- David Azouz 2/02/16
 /// - Camera zoom 	- David Azouz 5/02/16
-/// - Return 0 added at end 	- David Azouz 6/02/16
+/// - Moved texture related content to the "Texture" class 	- David Azouz 13/05/16
 /// 
-/// TODO: Clean up
-/// Camera zoom with scroll
-/// search for TODO:
+/// TODO:
 /// DrawGeom(m_projectionViewMatrix or in this case m4ProjectionTrans
 /// FBXTexture
 ///
@@ -28,18 +26,19 @@
 /// ----------------------------------------------------------
 
 #include "Render.h"
-#include "Mesh.h"
 #include "Camera\Camera.h"
+#include "Mesh.h"
+#include "Texture.h"
 //#include "gl_core_4_4.h"
 //#include "VertexData.h"
 
 //#define STB_IMAGE_IMPLEMENTATION //TODO: delete me
-#include <stb_image.h>
+//#include <stb_image.h>
 #include <glm\glm.hpp>
 #include <glm\ext.hpp>
 #include <GLFW\glfw3.h>
 
-#include <cstdio>
+//#include <cstdio> //TODO: remove once Texture class is working
 
 
 Render::Render() :
@@ -59,6 +58,7 @@ Render::~Render()
 bool Render::Create()
 {
 	//m_pRender = std::make_shared<Render>(); //TODO: I need this somewhere
+	m_pTexture = std::make_shared<Texture>();
 	// -----------------------
 	// Creates Grid
 	// -----------------------
@@ -75,27 +75,28 @@ bool Render::Create()
 	//glActiveTexture(GL_TEXTURE3);
 	//glBindTexture(GL_TEXTURE_2D, id); */
 
-	TextureLoader();
+	//TextureLoader();
 
-	GLuint id = TextureInit("./data/models/soulspear/soulspear_diffuse.tga");
-	AddTexture("soulspear_d", id);
+	//TODO: remove?
+	GLuint id = m_pTexture->TextureInit("./data/models/soulspear/soulspear_diffuse.tga");
+	m_pTexture->AddTexture("soulspear_d", id);
 
-	id = TextureInit("./data/models/soulspear/soulspear_normal.tga");
-	AddTexture("soulspear_n", id);
+	id = m_pTexture->TextureInit("./data/models/soulspear/soulspear_normal.tga");
+	m_pTexture->AddTexture("soulspear_n", id);
 
-	id = TextureInit("./data/models/characters/Pyro/Pyro_D.tga");
-	AddTexture("Pyro_D", id);
+	id = m_pTexture->TextureInit("./data/models/characters/Pyro/Pyro_D.tga");
+	m_pTexture->AddTexture("Pyro_D", id);
 
-	id = TextureInit("./data/models/characters/Pyro/Pyro_N.tga");
-	AddTexture("Pyro_N", id);
+	id = m_pTexture->TextureInit("./data/models/characters/Pyro/Pyro_N.tga");
+	m_pTexture->AddTexture("Pyro_N", id);
 
-	id = TextureInit("./data/models/characters/Pyro/Pyro_S.tga");
-	AddTexture("Pyro_S", id);
+	id = m_pTexture->TextureInit("./data/models/characters/Pyro/Pyro_S.tga");
+	m_pTexture->AddTexture("Pyro_S", id);
 
 	//m_pRender->RenderTexture(); //For the Render Target?
 
 	//For render target? //TODO
-	RenderTexture();
+	//RenderTexture();
 	//=======================================================
 	//m_pRender.get()->RenderTargetLoader();
 	//RenderTargetLoader();
@@ -288,8 +289,11 @@ GLvoid Render::DrawGeometry(Camera* cam)
 							  //unsigned int indexCount = (a_iRows - 1) * (a_iCols - 1) * 6; //TODO: m_iIndexCount = this formula
 	glDrawElements(GL_TRIANGLES, m_mesh.GetIndexCount(), GL_UNSIGNED_INT, 0);
 }
-/*
-void Render::FBXLoader()
+
+/// ----------------------------------------------------------
+/// FBX Loader
+/// ----------------------------------------------------------
+/*void Render::FBXLoader()
 {
 	/// ----------------------------------------------------------
 	/// Create shaders
@@ -376,12 +380,13 @@ void Render::RenderFBX(Camera* cam)
 								  //unsigned int indexCount = (a_iRows - 1) * (a_iCols - 1) * 6; //TODO: m_iIndexCount = this formula
 		glDrawElements(GL_TRIANGLES, (unsigned int)mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
 	}
+/// ----------------------------------------------------------
 } */
 
 /// ----------------------------------------------------------
 /// Texture
 /// ----------------------------------------------------------
-GLuint Render::TextureInit(const GLchar* name)
+/*GLuint Render::TextureInit(const GLchar* name)
 {
 	GLint imageWidth = 0, imageHeight = 0, imageFormat = 0;
 
@@ -422,7 +427,7 @@ GLuint Render::TextureInit(const GLchar* name)
 	stbi_image_free(data); //TODO: delete texture.
 
 	return id;
-}
+} 
 
 GLvoid Render::TextureLoader()
 {
@@ -490,7 +495,7 @@ GLvoid Render::TextureLoader()
 	glAttachShader(m_programID, iFragmentShader);
 	glLinkProgram(m_programID);
 
-	/*glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
+	glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
 	if (success == GL_FALSE)
 	{
 	int infoLogLength = 0;
@@ -501,7 +506,7 @@ GLvoid Render::TextureLoader()
 	printf("Error: Failed to link shader program!\n");
 	printf("%s\n", infoLog);
 	delete[] infoLog;
-	}*/
+	}
 
 	glDeleteShader(iVertexShader);
 	glDeleteShader(iFragmentShader);
@@ -517,12 +522,12 @@ struct Vertex
 
 GLvoid Render::RenderTexture()
 {
-	/*float vertexData[] = {
+	/ *float vertexData[] = {
 		-5,0,5,1,0,1,
 		5,0,5,1,1,1,
 		5,0,-5,1,1,0,
 		-5,0,-5,1,0,0 }; */
-
+/*
 	// Recreates the textured quad, except that they now contain normal that point up (0,1,0)
 	// and tangents to point in the direction of the texture's S axis (or U axis) which is position X (1,0,0).
 	Vertex vertexData[] =
@@ -575,6 +580,8 @@ GLvoid Render::RenderTexture()
 	//m_pMesh->SetVAO(m_VAO);
 	//delete[] vertexData; //TODO: more clean up code?
 }
+
+//TODO: remove once Texture class is working
 GLvoid Render::DrawTexture(Camera* cam)
 {
 	// use our texture program
@@ -664,4 +671,4 @@ GLuint Render::GetTextureByName(const GLchar* name)
 {
 	//std::vector<std::string>::iterator iter = m_textures.begin();
 	return m_textures[name];
-}
+} */

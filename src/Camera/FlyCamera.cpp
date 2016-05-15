@@ -1,4 +1,24 @@
-// viewed: https://www.reddit.com/r/Unity3D/comments/1syswe/ps4_controller_map_for_unity/
+/// <summary>
+/// File Name:		FlyCamera.cpp
+/// Author: 		David Azouz
+/// Date Created: 	2/02/16
+/// Date Modified: 	13/05/16
+///----------------------------------------------------------
+/// Brief: A FlyCamera Class that enables movement/ navigation through the world
+/// viewed: https://www.reddit.com/r/Unity3D/comments/1syswe/ps4_controller_map_for_unity/
+///
+/// ***EDIT***
+/// - Camera	 	- David Azouz 2/02/16
+/// - Camera zoom 	- David Azouz 5/02/16
+/// - Return 0 added at end 	- David Azouz 6/02/16
+/// 
+/// TODO:
+///
+/// would have textures and shaders
+/// 
+/// </summary>
+/// ----------------------------------------------------------
+
 #define GLM_SWIZZLE
 
 #include "FlyCamera.h"

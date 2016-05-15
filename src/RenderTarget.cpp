@@ -8,17 +8,6 @@
 
 #include <glm/ext.hpp>
 
-RenderTarget::RenderTarget()
-{
-	m_FBO = USHRT_MAX;
-	m_fboTexture = USHRT_MAX;
-	m_fboDepth = USHRT_MAX; // UINT_MAX;?
-}
-
-RenderTarget::~RenderTarget()
-{
-}
-
 bool RenderTarget::Create()
 {
 	RenderTargetLoader();
@@ -34,9 +23,13 @@ GLvoid RenderTarget::Destroy()
 	//glDeleteBuffers(1, &m_VBO);
 	//glDeleteBuffers(1, &m_IBO);
 
-	m_FBO = USHRT_MAX; //(GLuint)-1;
-	m_fboTexture = USHRT_MAX; //(GLuint)-1; // TODO: Needed?
-	m_fboDepth = USHRT_MAX; //(GLuint)-1; // TODO: Needed?
+	GLuint texId = m_fboTexture.GetId();
+	glDeleteTextures(1, &texId);
+	glDeleteRenderbuffers(1, &m_fboDepth);
+
+	m_fboID = USHRT_MAX; //(GLuint)-1;
+	//m_fboTexture = USHRT_MAX; //(GLuint)-1; // TODO: Needed?
+	//m_fboDepth = USHRT_MAX; //(GLuint)-1; // TODO: Needed?
 }
 
 GLvoid RenderTarget::Draw()
@@ -111,34 +104,43 @@ GLvoid RenderTarget::RenderTargetLoader()
 bool RenderTarget::CreateFrame()
 {
 	// setup and bind a frambuffer
-	glGenFramebuffers(1, &m_FBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+	glGenFramebuffers(1, &m_fboID);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fboID);
 
 	// We attach render targets here!
 	// Create a texture and bind it
-	glGenTextures(1, &m_fboTexture);
-	glBindTexture(GL_TEXTURE_2D, m_fboTexture);
+	GLuint fboTextureId;
+	glGenTextures(1, &fboTextureId);
+	glBindTexture(GL_TEXTURE_2D, fboTextureId);
 
 	// specify texture format for storage
 	// Format of the texture: GL_RGBA8, GL_RGB8. GL_RGBA32F
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, 512, 512);
+	//glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, m_fboSize.x, m_fboSize.y); //512
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, m_fboSize.x, m_fboSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// attach it to the framebuffer as the first colour attachment
 	// the FBO MUST still be bound
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_fboTexture, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, fboTextureId, 0);
+
+	// Let the FBO know which attachment to render to
+	GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, drawBuffers);
+
+	// Save the texture to be used by following render passes.
+	m_fboTexture.SetId(fboTextureId);
 
 	/// setup and bind a 24bit depth buffer as a render buffer
 	glGenRenderbuffers(1, &m_fboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_fboDepth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, m_fboSize.x, m_fboSize.y); //512
 	// while the FBO is still bound
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_fboDepth);
 
 	// while the FBO is still bound
-	GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(1, drawBuffers);
+	/*GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, drawBuffers); */
 
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (status != GL_FRAMEBUFFER_COMPLETE)
@@ -147,7 +149,7 @@ bool RenderTarget::CreateFrame()
 	}
 
 	// unbind the FBO so that we can render to the back buffer
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return true;
 }
@@ -210,28 +212,29 @@ GLvoid RenderTarget::CreateRenderTargetQuad()
 
 GLvoid RenderTarget::RenderRenderTargetQuad(const glm::mat4& a_projectionView)
 {
-	glUseProgram(m_programID);
+	glUseProgram(m_fboID);
 
 	//glm::mat4 projView = m_pCameraStateMachine->GetCurrentCamera()->getProjectionView();
 
 	// Render Target
 	// bind the camera
-	GLint loc = glGetUniformLocation(m_programID, "ProjectionView"); //m_program_ID
+	GLint loc = glGetUniformLocation(m_fboID, "ProjectionView"); //m_program_ID
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(a_projectionView));
 
 	// Set texture slots
 	glActiveTexture(GL_TEXTURE0);
 	//glBindTexture(GL_TEXTURE_2D, m_pRenderApp->GetSharedPointer()->GetFboTexture());
-	glBindTexture(GL_TEXTURE_2D, GetFboTexture());
+	//glBindTexture(GL_TEXTURE_2D, GetFboTexture());
+	glBindTexture(GL_TEXTURE_2D, GetTexture());
 
 	// tell the shader where it is
-	GLint diffLoc = glGetUniformLocation(m_programID, "diffuse"); // m_program_ID, m_render.GetProgramID()
+	GLint diffLoc = glGetUniformLocation(m_fboID, "diffuse"); // m_program_ID, m_render.GetProgramID()
 	glUniform1i(diffLoc, 0);
 }
 
 GLvoid RenderTarget::BindDraw()
 {
-	glUseProgram(m_programID);
+	glUseProgram(m_fboID);
 
 	glBindVertexArray(m_mesh.GetVAO()); // mesh Vertex Array Object
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

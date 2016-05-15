@@ -7,7 +7,7 @@
 #include <assert.h>
 
 /*
-	A Mesh is a vertex array object, a vertex buffer object and a vertex index object.
+	A Mesh contains a vertex array object, a vertex buffer object and a vertex index object.
 */
 class Mesh
 {

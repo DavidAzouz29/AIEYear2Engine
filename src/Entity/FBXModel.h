@@ -36,7 +36,7 @@ private:
 	GLuint m_program_ID;
 
 	std::shared_ptr<FBXFile> m_pFbx;
-	GLuint m_program_FBXAnimation_ID;
+	GLuint m_program_FBXAnimation_ID; // another program ID used for animation
 
 };
 

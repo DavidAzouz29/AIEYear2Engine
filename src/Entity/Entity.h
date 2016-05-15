@@ -17,6 +17,7 @@ class GPUParticleEmitter;
 class FBXModel;
 class Render; //TODO: render?
 class Mesh;
+class Texture;
 //class MathCollision;
 class BoundingShape;
 
@@ -24,7 +25,9 @@ class Entity
 {
 public:
 	Entity();
-	virtual ~Entity() {};
+	// The 'default' keyword is a c++11 feature and should be used instead of {}.
+	// This way the class can remain aggregate and/ or trivial.
+	virtual ~Entity() = default;
 
 	// Is an abstract class
 	// cannot create instances of this class
@@ -61,6 +64,7 @@ protected:
 	std::shared_ptr<GPUParticleEmitter> m_pGPUEmitter; //*/
 	std::shared_ptr<Render> m_pRender; 
 	std::shared_ptr<Mesh> m_pMesh;
+	std::shared_ptr<Texture> m_pTexture; //TODO: remain here?
 	//std::shared_ptr<RenderTarget> m_pRenderTarget;
 	//std::shared_ptr<MathCollision> m_pMath;
 	//Render* m_pRender;

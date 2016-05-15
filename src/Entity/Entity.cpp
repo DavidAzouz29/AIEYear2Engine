@@ -50,7 +50,7 @@ Entity::Entity() :
 {
 } */
 
-//TODO: remove
+//TODO: remove and make pure - no contents
 GLvoid Entity::Draw(const Camera& m_pCamState)
 {
 	// For the render target

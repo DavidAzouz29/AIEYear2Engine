@@ -151,7 +151,11 @@ bool TestApplication::startup() {
 	// Loops through each entity and calls their respected Create functions.
 	for (auto &pEntity : m_entities)
 	{
-		pEntity->Create();
+		if (!pEntity->Create())
+		{
+			return false;
+		}
+
 		//Entity::GetSingleton()->Create();
 	}
 	m_pRenderTarget = std::make_shared<RenderTarget>();

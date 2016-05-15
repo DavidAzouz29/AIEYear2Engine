@@ -45,6 +45,7 @@
     <ClCompile Include="src\Render.cpp" />
     <ClCompile Include="src\TestApplication.cpp" />
     <ClCompile Include="src\Camera\TravelCamera.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\imgui-master\imgui.h" />
@@ -74,12 +75,15 @@
     <ClInclude Include="src\TestApplication.h" />
     <ClInclude Include="src\VertexData.h" />
     <ClInclude Include="src\Camera\TravelCamera.h" />
+    <ClInclude Include="src\Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\gpuParticle.frag" />
     <None Include="data\shaders\gpuParticle.geom" />
     <None Include="data\shaders\gpuParticle.vert" />
     <None Include="data\shaders\gpuParticleUpdate.vert" />
+    <None Include="data\shaders\texture.frag" />
+    <None Include="data\shaders\texture.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{63494F4E-79FA-48AD-AA6C-BDF1FF1619FD}</ProjectGuid>
