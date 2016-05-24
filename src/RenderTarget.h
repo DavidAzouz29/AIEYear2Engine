@@ -35,7 +35,7 @@ public:
 	GLvoid RenderTargetLoader();
 	bool CreateFrame();
 	GLvoid CreateRenderTargetQuad();
-	GLvoid RenderRenderTargetQuad(const glm::mat4& a_projectionView);
+	GLvoid RenderRenderTargetQuad(const glm::mat4& a_projectionView); // TODO: <- replace with cam
 	//To be called after Draw
 	GLvoid BindDraw();
 
@@ -46,7 +46,7 @@ public:
 	
 private:
 	GLuint m_fboID; //What was GLuint m_programID;
-	Texture m_fboTexture;
+	Texture m_fboTexture = -1;
 	GLuint m_fboDepth;
 	std::weak_ptr<Camera> m_pCamera;
 	glm::vec3 m_clearColor;

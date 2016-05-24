@@ -50,7 +50,7 @@ Texture::~Texture()
 //	glDeleteBuffers(2, m_vbo);
 
 	// delete the shaders
-	glDeleteProgram(m_programID);
+	glDeleteProgram(m_textureID);
 }
 
 bool Texture::Create()
@@ -197,10 +197,10 @@ GLvoid Texture::CreateTextureShader()
 	/// ----------------------------------------------------------
 	/// Compile shaders
 	/// ----------------------------------------------------------
-	m_programID = glCreateProgram();
-	glAttachShader(m_programID, vsSource);
-	glAttachShader(m_programID, fsSource);
-	glLinkProgram(m_programID);
+	m_textureID = glCreateProgram();
+	glAttachShader(m_textureID, vsSource);
+	glAttachShader(m_textureID, fsSource);
+	glLinkProgram(m_textureID);
 
 	//TODO: clean up - look at Render.cpp "TextureLoader" and GPuPa..Em...cpp for tips
 	/*int success = GL_FALSE;
@@ -220,14 +220,14 @@ GLvoid Texture::CreateTextureShader()
 	/// ----------------------------------------------------------
 	/// Error checking
 	/// ----------------------------------------------------------
-	glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
+	glGetProgramiv(m_textureID, GL_LINK_STATUS, &success);
 	if (success == GL_FALSE)
 	{
 		int infoLogLength = 0;
-		glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &infoLogLength);
+		glGetProgramiv(m_textureID, GL_INFO_LOG_LENGTH, &infoLogLength);
 		char* infoLog = new char[infoLogLength];
 
-		glGetProgramInfoLog(m_programID, infoLogLength, 0, infoLog);
+		glGetProgramInfoLog(m_textureID, infoLogLength, 0, infoLog);
 		printf("Error: Failed to link shader program!\n");
 		printf("%s\n", infoLog);
 		delete[] infoLog;
@@ -257,10 +257,10 @@ GLvoid Texture::Draw(const Camera& m_pCamState)
 GLvoid Texture::DrawTexture(const Camera& m_pCamState, GLuint a_uiTexture1, GLuint a_uiTexture2)
 {
 	// use our texture program
-	glUseProgram(m_programID);
+	glUseProgram(m_textureID);
 
 	// bind the camera
-	GLint loc = glGetUniformLocation(m_programID, "ProjectionView");
+	GLint loc = glGetUniformLocation(m_textureID, "ProjectionView");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, &(m_pCamState.getProjectionView()[0][0]));
 
 	/* unsigned int uiHeightScale = glGetUniformLocation(m_programID, "heightScale");
@@ -280,14 +280,14 @@ GLvoid Texture::DrawTexture(const Camera& m_pCamState, GLuint a_uiTexture1, GLui
 	//glBindTexture(GL_TEXTURE_2D, m_normalmap["soulspear_n"]);
 
 	// tell the shader where it is
-	loc = glGetUniformLocation(m_programID, "diffuse");
+	loc = glGetUniformLocation(m_textureID, "diffuse");
 	glUniform1i(loc, 0);
-	loc = glGetUniformLocation(m_programID, "normal");
+	loc = glGetUniformLocation(m_textureID, "normal");
 	glUniform1i(loc, 1);
 
 	// bind the light
 	glm::vec3 light(sin(glfwGetTime()), 1, cos(glfwGetTime()));
-	loc = glGetUniformLocation(m_programID, "LightDir");
+	loc = glGetUniformLocation(m_textureID, "LightDir");
 	glUniform3f(loc, light.x, light.y, light.z);
 
 	// draw

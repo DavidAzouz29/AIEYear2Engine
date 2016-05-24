@@ -76,19 +76,19 @@ GLvoid RenderTarget::RenderTargetLoader()
 	glShaderSource(iFragmentShader, 1, (const GLchar**)&fsSource, 0);
 	glCompileShader(iFragmentShader);
 
-	m_programID = glCreateProgram();
-	glAttachShader(m_programID, iVertexShader);
-	glAttachShader(m_programID, iFragmentShader);
-	glLinkProgram(m_programID);
+	m_fboID = glCreateProgram();
+	glAttachShader(m_fboID, iVertexShader);
+	glAttachShader(m_fboID, iFragmentShader);
+	glLinkProgram(m_fboID);
 
-	glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
+	glGetProgramiv(m_fboID, GL_LINK_STATUS, &success);
 	if (success == GL_FALSE)
 	{
 		GLint infoLogLength = 0;
-		glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &infoLogLength);
+		glGetProgramiv(m_fboID, GL_INFO_LOG_LENGTH, &infoLogLength);
 		GLchar* infoLog = new GLchar[infoLogLength];
 
-		glGetProgramInfoLog(m_programID, infoLogLength, 0, infoLog);
+		glGetProgramInfoLog(m_fboID, infoLogLength, 0, infoLog);
 		printf("Error: Failed to link shader program!\n");
 		printf("%s\n", infoLog);
 		delete[] infoLog;

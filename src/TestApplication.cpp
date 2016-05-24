@@ -366,6 +366,7 @@ GLvoid TestApplication::Draw()
 	// unbind the FBO so that we can render to the back buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glUseProgram(m_pRenderApp->GetProgramID()); //*/
+	//TODO: VV needed?
 	DrawApp();
 	check_gl_error();
 
@@ -467,8 +468,8 @@ GLvoid TestApplication::DrawApp()
 	m_render.DrawTextureP(m_pCamState); // TODO: FBX Texture - Needed for Render Target
 	
 	// Old draw items
-/*	//Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, m_v4EndColor);
-	//
+	Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, m_v4EndColor);
+/*	//
 	//m_pVertexColoredGrid->draw(projView);
 	//m_pSpriteSheetQuad->draw(projView);
 	//m_pFBXMesh->draw(projView);

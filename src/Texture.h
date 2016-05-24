@@ -17,6 +17,9 @@ public:
 	// Construct an invalid texture, call create later.
 	Texture() : Texture(-1) {}
 
+	// Takes ownership of the texture data, should be able to call destroy on any Texture object.
+	Texture(GLuint a_textureID) : m_textureID(a_textureID) {}
+
 	~Texture() = default;
 
 	bool Create();
@@ -30,13 +33,13 @@ public:
 	GLvoid AddTexture(const GLchar* name, const GLuint id);
 
 	GLuint GetTextureByName(const GLchar* name);
-	GLuint GetId() const { return m_textureId; }
+	GLuint GetId() const { return m_textureID; }
 
-	GLvoid SetId(GLuint a_textureId) { m_textureId = a_textureId; }
+	GLvoid SetId(GLuint a_textureId) { m_textureID = a_textureId; }
 
 private:
 
-	GLuint m_textureId; // m_programID;
+	GLuint m_textureID; // m_programID;
 
 	// Store the OpenGL texture.
 	std::map<const std::string, const GLuint> m_textures, m_normalmap;

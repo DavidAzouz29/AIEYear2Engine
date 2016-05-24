@@ -51,7 +51,7 @@ Entity::Entity() :
 } */
 
 //TODO: remove and make pure - no contents
-GLvoid Entity::Draw(const Camera& m_pCamState)
+/*GLvoid Entity::Draw(const Camera& m_pCamState)
 {
 	// For the render target
 	glBindFramebuffer(GL_FRAMEBUFFER, m_renderTarget.GetFBO());
