@@ -32,11 +32,6 @@ GLvoid RenderTarget::Destroy()
 	//m_fboDepth = USHRT_MAX; //(GLuint)-1; // TODO: Needed?
 }
 
-GLvoid RenderTarget::Draw()
-{
-
-}
-
 GLvoid RenderTarget::RenderTargetLoader()
 {
 	/// ----------------------------------------------------------
@@ -225,7 +220,7 @@ GLvoid RenderTarget::RenderRenderTargetQuad(const glm::mat4& a_projectionView)
 	glActiveTexture(GL_TEXTURE0);
 	//glBindTexture(GL_TEXTURE_2D, m_pRenderApp->GetSharedPointer()->GetFboTexture());
 	//glBindTexture(GL_TEXTURE_2D, GetFboTexture());
-	glBindTexture(GL_TEXTURE_2D, GetTexture());
+	glBindTexture(GL_TEXTURE_2D, GetTexture().GetId());
 
 	// tell the shader where it is
 	GLint diffLoc = glGetUniformLocation(m_fboID, "diffuse"); // m_program_ID, m_render.GetProgramID()

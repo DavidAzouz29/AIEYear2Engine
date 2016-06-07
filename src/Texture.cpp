@@ -34,7 +34,9 @@
 
 #include <cstdio>
 
+const Texture Texture::Invalid = Texture();
 
+/*
 Texture::Texture()
 {
 	Create();
@@ -51,7 +53,7 @@ Texture::~Texture()
 
 	// delete the shaders
 	glDeleteProgram(m_textureID);
-}
+} */
 
 bool Texture::Create()
 {
@@ -67,25 +69,49 @@ bool Texture::Create()
 	return false;
 }
 
+GLvoid Texture::Destroy()
+{
+	if (m_textureID != (GLuint)-1) 
+	{
+		glDeleteTextures(1, &m_textureID);
+		m_textureID = (GLuint)-1;
+	}
+}
+
 /// ----------------------------------------------------------
 /// Texture
 /// ----------------------------------------------------------
-GLuint Texture::TextureInit(const GLchar* name)
+/// Texture Initialize
+/// Param:
+///			a_path: path of a texture
+///	Usage: id = m_pTexture->TextureInit("./data/models/soulspear/soulspear_normal.tga");
+/// View AddTexture
+/// ----------------------------------------------------------
+GLuint Texture::TextureInit(const GLchar* a_path)
 {
-	GLint imageWidth = 0, imageHeight = 0, imageFormat = 0;
+	//GLint imageWidth = 0, imageHeight = 0, imageFormat = 0;
 
 	/// ----------------------------------------------------------
 	// This call will read in the default texel data for the crate.png.
 	// In the case the image stores RGB values at 515x512 resolution.
 	/// ----------------------------------------------------------
 	// Load diffuse map
-	GLubyte* data = stbi_load(name, &imageWidth, &imageHeight, &imageFormat, STBI_default);
+	//GLubyte* data = stbi_load(name, &imageWidth, &imageHeight, &imageFormat, STBI_default);
 	/// ----------------------------------------------------------
-	GLuint id;
-	// Generate an OpenGL texture handle.
-	glGenTextures(1, &id);
+	//assert(m_textureID == (GLuint)-1);
+
+	// Load diffuse map
+	GenTexture(a_path, m_textureID);
+	//TODO: normal isn't being used for anything
+	/*GLuint uiNormal;
+	// load normal map
+	GenTexture(a_path, uiNormal); */
+	
+	// TODO: V GenTexture - is this fine
+	/*// Generate an OpenGL texture handle.
+	glGenTextures(1, &m_textureID);
 	// Bind the texture to the correct slot for the dimension, in this case 2-D.
-	glBindTexture(GL_TEXTURE_2D, id);
+	glBindTexture(GL_TEXTURE_2D, m_textureID);
 	// Specify the data for the texture, including the format, resolution and variable type.
 	// Out data is an unsigned char, therefor it should be GL_UNSIGNED_BYTE.
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -108,9 +134,41 @@ GLuint Texture::TextureInit(const GLchar* name)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	stbi_image_free(data); //TODO: delete texture.
+	stbi_image_free(data); //TODO: delete texture. */
 
-	return id;
+	return m_textureID;
+}
+
+/// --------------------------------------------------------------------
+/// <summary>
+/// Generates a Texture map
+/// <para><param>P1: File Path.</param></para>
+/// <para><param>P2: a_TextureType: is it a texture, normal map, specular etc?</param></para>
+/// </summary>
+/// --------------------------------------------------------------------
+GLvoid Texture::GenTexture(const GLchar* a_path, GLuint a_TextureType)
+{
+	GLint imageWidth = 0, imageHeight = 0, imageFormat = 0;
+
+	/// ----------------------------------------------------------
+	// This call will read in the default texel data for the crate.png.
+	// In the case the image stores RGB values at 515x512 resolution.
+	/// ----------------------------------------------------------
+	GLubyte* data = stbi_load(a_path, &imageWidth, &imageHeight, &imageFormat, STBI_default);
+	/// ----------------------------------------------------------
+	assert(a_TextureType == (GLuint)-1);
+
+	// Generate an OpenGL texture handle.
+	glGenTextures(1, &a_TextureType);
+	// Bind the texture to the correct slot for the dimension, in this case 2-D.
+	glBindTexture(GL_TEXTURE_2D, a_TextureType);
+	// Specify the data for the texture, including the format, resolution and variable type.
+	// Out data is an unsigned char, therefor it should be GL_UNSIGNED_BYTE.
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	stbi_image_free(data); //TODO: delete texture.
 }
 
 struct Vertex
@@ -169,7 +227,7 @@ GLvoid Texture::CreateBuffers()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), ((GLchar*)0) + 48);
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), ((GLchar*)0) + 16);
-	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(3);
 	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), ((GLchar*)0) + 32);
 
 	glBindVertexArray(0);
@@ -246,6 +304,7 @@ GLvoid Texture::Draw(const Camera& m_pCamState)
 	DrawTexture(m_pCamState, m_textures["Pyro_D"], m_textures["Pyro_N"]);
 }
 
+/// --------------------------------------------------------------------
 /// <summary>
 /// Draws Textures 
 /// <para><param>P1: Cam</param></para>
@@ -254,6 +313,7 @@ GLvoid Texture::Draw(const Camera& m_pCamState)
 /// <para><param>P3: Texture 3 - generally the specular.</param></para>
 /// <example> m_textures["soulspear_d"] </example>
 /// </summary>
+/// --------------------------------------------------------------------
 GLvoid Texture::DrawTexture(const Camera& m_pCamState, GLuint a_uiTexture1, GLuint a_uiTexture2)
 {
 	// use our texture program
@@ -296,13 +356,32 @@ GLvoid Texture::DrawTexture(const Camera& m_pCamState, GLuint a_uiTexture1, GLui
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
+/// --------------------------------------------------------------------
+/// <summary>
+/// Adds a Texture to a map.
+/// <para><param>P1: name we specify.</param></para>
+/// <para><param>P2: the ID we generated from our 'TextureInit' func.</param></para>
+/// <example> m_pTexture->AddTexture("soulspear_n", id); </example>
+/// </summary>
+/// --------------------------------------------------------------------
 GLvoid Texture::AddTexture(const GLchar* name, const GLuint id)
 {
+	// pairs a name we specify with an id generated from the 'TextureInit' func.
+	// inserts that into a map.
 	m_textures.insert(std::pair<const std::string, const GLuint>(name, id));
 }
 
-GLuint Texture::GetTextureByName(const GLchar* name)
+GLuint Texture::GetTextureByName(const GLchar* a_name)
 {
-	//std::vector<std::string>::iterator iter = m_textures.begin();
-	return m_textures[name];
+	//TODO: ? std::vector<std::string>::iterator iter = m_textures.begin();
+	if (DoesTextureNameExist(a_name))
+	{
+		return USHRT_MAX;
+	}
+	return m_textures[a_name];
+}
+
+bool Texture::DoesTextureNameExist(const GLchar* a_name)
+{
+	return m_textures.find(a_name) != std::end(m_textures);
 }

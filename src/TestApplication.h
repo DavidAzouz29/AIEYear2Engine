@@ -3,6 +3,7 @@
 #include "BaseApplication.h"
 #include "Mesh.h"
 #include "Render.h"
+#include "Texture.h"
 
 #include <gl_core_4_4.h>
 #include <vector>
@@ -56,7 +57,9 @@ private:
 	std::vector< std::shared_ptr<Entity> > m_entities;
 	Mesh m_mesh;
 	Render m_render;
+	Texture m_texture;
 	Camera* m_pCamState;
+	//std::weak_ptr<Camera> m_pCamState; //TODO: cam state?
 
 	/// ----------------------------------------------------------
 	E_DRAW_STATE m_eCurrentDrawState;
@@ -64,4 +67,6 @@ private:
 	/// ----------------------------------------------------------
 	// this is an example position for camera picking
 	glm::vec3	m_pickPosition;
+
+	glm::vec4 m_v4EndColor;
 };

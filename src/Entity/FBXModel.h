@@ -7,7 +7,7 @@ class Camera;
 class FBXModel : public Entity
 {
 public:
-	FBXModel();
+	FBXModel() : m_timer(0) {}
 	virtual ~FBXModel();
 
 	bool Create() override;

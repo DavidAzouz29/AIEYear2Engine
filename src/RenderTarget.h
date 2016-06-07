@@ -11,6 +11,8 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp> //TODO: replace RRTQ with const Camera& a_cam;
+
+//#include <bitset> std::bitset<8> layers; //TODO: 
 #include <memory>
 
 class Camera;
@@ -19,19 +21,20 @@ class Camera;
 class RenderTarget
 {
 public:
-	RenderTarget(std::weak_ptr<Camera> a_pCamera, glm::vec3 a_v3ClearColor, glm::ivec2 a_iv2FboSize) :
+	//RenderTarget(std::weak_ptr<Camera> a_pCamera, glm::vec3 a_v3ClearColor, glm::ivec2 a_iv2FboSize) :
+	RenderTarget(Camera* a_pCamera, glm::ivec2 a_iv2FboSize) :
 		m_fboID(USHRT_MAX),
 		m_fboTexture(-1),
 		m_fboDepth(USHRT_MAX),
 		m_pCamera(a_pCamera),
-		m_clearColor(a_v3ClearColor),
+		//m_clearColor(a_v3ClearColor),
 		m_fboSize(a_iv2FboSize)
 	{}
 	
 	bool Create();
 	GLvoid Destroy();
 	
-	GLvoid Draw();
+	//GLvoid Draw() {};
 	GLvoid RenderTargetLoader();
 	bool CreateFrame();
 	GLvoid CreateRenderTargetQuad();
@@ -42,14 +45,16 @@ public:
 	GLuint& GetFBO() { return m_fboID; }
 	//GLuint& GetFboTexture() { return m_fboTexture; }
 	Texture GetTexture() const { return m_fboTexture; }
+	Mesh GetMesh() const { return m_mesh; }
 	GLuint& GetFboDepth() { return m_fboDepth; }
 	
 private:
 	GLuint m_fboID; //What was GLuint m_programID;
 	Texture m_fboTexture = -1;
 	GLuint m_fboDepth;
-	std::weak_ptr<Camera> m_pCamera;
-	glm::vec3 m_clearColor;
+	Camera* m_pCamera;
+	//std::weak_ptr<Camera> m_pCamera;
+	//glm::vec3 m_clearColor;
 	glm::ivec2 m_fboSize;
 
 	Mesh m_mesh; // TODO: solve - only needed in BindDraw GetVAO?

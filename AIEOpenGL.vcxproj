@@ -51,6 +51,7 @@
     <ClInclude Include="dep\imgui-master\imgui_impl_glfw_gl3.h" />
     <ClInclude Include="dep\imgui-master\imgui_internal.h" />
     <ClInclude Include="src\Renderable.h" />
+    <ClInclude Include="src\RenderableBatch.h" />
     <ClInclude Include="src\RenderTarget.h" />
     <ClInclude Include="src\Entity\FBXModel.h" />
     <ClInclude Include="src\Entity\Entity.h" />

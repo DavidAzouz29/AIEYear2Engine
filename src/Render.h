@@ -15,8 +15,11 @@ class Texture;
 class Render // : public Entity
 {
 public:
-	Render();
-	~Render();
+	Render() :
+		fHeightScale(2.0f),
+		fTime(0.0f)
+	{}
+	~Render() {};
 
 	bool Create();
 

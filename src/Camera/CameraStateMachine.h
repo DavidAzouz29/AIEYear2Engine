@@ -47,6 +47,7 @@ public:
 	GLvoid Update(GLfloat fDeltaTime);
 	GLvoid ChangeState(E_CAMERA_MODE_STATE eState);
 
+	//std::weak_ptr<Camera> GetCurrentCamera() const { return m_cameraStatesArray[m_eCurrentState]; }
 	Camera* GetCurrentCamera() const { return m_cameraStatesArray[m_eCurrentState].get(); }
 	E_CAMERA_MODE_STATE GetCurrentCameraMode() const { return m_eCurrentState; }
 

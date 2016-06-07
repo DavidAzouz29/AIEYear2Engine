@@ -7,6 +7,7 @@
 #include "FBXFile.h"
 #include "Camera\Camera.h"
 #include "Render.h"
+#include "Renderable.h"
 #include "Texture.h"
 
 #include <stb_image.h>
@@ -17,11 +18,6 @@
 
 using glm::vec3;
 using glm::mat4;
-
-FBXModel::FBXModel() : m_timer(0)
-{
-
-}
 
 // -----------------------
 // Clean up our FBX related resources
@@ -44,7 +40,7 @@ bool FBXModel::Create()
 
 	CreateOpenGLBuffers(m_pFbx.get());
 
-	return false;
+	return true;
 }
 
 // Used for FBX Skeleton and Animation
@@ -233,7 +229,7 @@ GLvoid FBXModel::RenderFBX(Camera* cam)
 	GLuint loc = glGetUniformLocation(m_program_ID, "ProjectionView");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, &(cam->getProjectionView()[0][0])); //m_projectionViewMatrix
 
-	GLuint id = m_pTexture->GetTextureByName("soulspear_d"); //TODO: soulspear
+	GLuint id = m_pRenderable->GetTextureByName("soulspear_d"); //TODO: soulspear
 															//const unsigned int id = m_pRender->GetTextureByName("Pyro_D");
 	glBindTexture(GL_TEXTURE_2D, id);
 
@@ -417,12 +413,12 @@ GLvoid FBXModel::FBXAnimationDraw(const Camera& m_pCamState)
 	// -----------------------------------------------------
 	// Renders job
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_pTexture->GetTextureByName("Pyro_D")); // m_texture); 
+	glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_D")); // m_texture); 
 	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "diffuse");
 	glUniform1i(loc, 0);
 
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_pTexture->GetTextureByName("Pyro_N")); // m_normal);
+	glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_N")); // m_normal);
 	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "normal");
 	glUniform1i(loc, 1);
 	// -----------------------------------------------------

@@ -1,5 +1,5 @@
 /// <summary>
-/// File Name:		Renderable.h
+/// File Name:		RenderableBatch.h
 /// Author: 		David Azouz
 /// Date Created: 	10/05/16
 /// Date Modified: 	24/05/16
@@ -44,34 +44,36 @@
 
 //class Mesh;
 
-struct Renderable
+struct RenderableBatch
 {
-	Renderable() = default;
-	//Renderable(const Program& a_program, const Mesh& a_mesh) :
-	Renderable(const GLuint& a_program_ID, const Mesh& a_mesh) :
-		Renderable(a_program_ID, a_mesh, std::vector<Sampler>())
+	RenderableBatch() = default;
+	RenderableBatch(const GLuint& a_program_ID, const Mesh& a_mesh, const GLint a_instances) :
+		RenderableBatch(a_program_ID, a_mesh, std::vector<Sampler>(), a_instances)
 	{}
 
-	//Renderable(const Program& a_program, const Mesh& a_mesh, const std::vector<Sampler> a_samplers) :
-	Renderable(const GLuint& a_program_ID, const Mesh& a_mesh, const std::vector<Sampler>& a_samplers) :
+	RenderableBatch(const GLuint& a_program_ID, const Mesh& a_mesh, const std::vector<Sampler>& a_samplers, const GLint a_instances) :
 		program_ID(a_program_ID),
 		mesh(a_mesh),
-		samplers(a_samplers)
+		samplers(a_samplers),
+		instances(a_instances)
 	{}
-
-	GLuint GetTextureByName(const GLchar* a_name)
-	{
-		for (auto &pSamplers : samplers)
-		{
-			GLuint name = pSamplers.tTexture.GetTextureByName(a_name);
-		}
-		return USHRT_MAX;
-	}
 
 	GLuint program_ID; //Program program;
 	Mesh mesh;
 	std::vector<Sampler> samplers;
 	GLenum renderMode = GL_FILL;
+	GLint instances; // how many instances we are drawing
+	std::vector<GLuint> instanceBuffers; // Plug in buffers
+
+	/* 
+	Need a way to define properties such as: 
+	func
+	glEnableVertexArrtibArray()
+	attribute location to bind to, 
+	vertex array (VAO), 
+
+	//pointer to bind it to, 
+	*/
 
 	//TODO: 
 	/*ref to mesh = Mesh* - maybe? [] - hold onto different submeshes - FBX models
@@ -82,10 +84,12 @@ struct Renderable
 
 	// TODO: replace all my draw calls with one of these?
 	// Draw multiple instances of a submesh in one call
+	// - 
 	// glDrawElementsBaseVertex();
 
 	// Allows drawing of 'N' instances of a SUBSET of indexed vertices in one call.
 	// pass in the visible instances.
+	// - 
 	//glDrawElementsInstancedBaseVertex();
 
 	// Buckets - draw items that are the same - sort into buckets

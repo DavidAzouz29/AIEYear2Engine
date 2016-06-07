@@ -40,8 +40,8 @@
 
 //#include <cstdio> //TODO: remove once Texture class is working
 
-
-Render::Render() :
+//TODO: delete me
+/*Render::Render() :
 	fHeightScale(2.0f),
 	fTime(0.0f)
 {
@@ -53,7 +53,7 @@ Render::~Render()
 	//CleanupOpenGLBuffers(m_fbx);
 
 	//glDeleteProgram(m_programID);
-}
+} */
 
 bool Render::Create()
 {
@@ -102,7 +102,7 @@ bool Render::Create()
 	//RenderTargetLoader();
 	//GetSharedPointer()->CreateRenderTargetQuad();
 	//=======================================================
-	return false;
+	return true;
 }
 
 //function to create a grid

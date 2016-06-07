@@ -1,5 +1,6 @@
 #include "ParticleEmitter.h"
 #include "Particle.h"
+#include "Renderable.h"
 //TODO: ResourceCreator.h
 
 //#include <gl_core_4_4.h>
@@ -120,7 +121,7 @@ bool ParticleEmitter::ParticleLoader(ParticleEmitterConfig a_config)
 	}
 
 	// Creates storage (OpenGL)
-	m_pMesh->Create(m_pVertices, vertCount, pIndexData, indexCount);
+	m_pRenderable->mesh.Create(m_pVertices, vertCount, pIndexData, indexCount);
 
 	delete pIndexData;
 
@@ -133,7 +134,7 @@ GLvoid ParticleEmitter::Destroy()
 	delete[] m_pPartiles;
 	delete[] m_pVertices;
 
-	m_pMesh->Destroy();
+	m_pRenderable->mesh.Destroy();
 }
 
 GLvoid ParticleEmitter::Emit()
@@ -246,11 +247,11 @@ GLvoid ParticleEmitter::BillboardParticle(GLuint vertexIndex, const glm::mat4& b
 
 GLvoid ParticleEmitter::Draw(const Camera& m_pCamState)
 {
-	glBindBuffer(GL_ARRAY_BUFFER, m_pMesh->GetVBO());
+	glBindBuffer(GL_ARRAY_BUFFER, m_pRenderable->mesh.GetVBO());
 	glBufferSubData(GL_ARRAY_BUFFER, 0, m_uiFirstDeadIndex * 4 * sizeof(Vertex_PositionColor), m_pVertices);
 
 	glUseProgram(m_program.getId());
 	m_program.setUniform("ProjectionView", m_pCamState.getProjectionView());
-	glBindVertexArray(m_pMesh->GetVAO());
+	glBindVertexArray(m_pRenderable->mesh.GetVAO());
 	glDrawElements(GL_TRIANGLES, m_uiFirstDeadIndex * 6, GL_UNSIGNED_INT, 0);
 }

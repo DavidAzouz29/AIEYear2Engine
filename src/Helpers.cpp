@@ -97,6 +97,7 @@ void APIENTRY openglCallbackFunction(GLenum source,
 	const void* userParam)
 {
 	std::cout << "---------------------opengl-callback-start------------" << std::endl;
+	//TODO: add/ remove breakpoint on line '101'
 	std::cout << "message: " << message << std::endl;
 	std::cout << "type: ";
 	switch (type) {

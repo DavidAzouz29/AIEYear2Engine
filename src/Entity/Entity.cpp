@@ -7,7 +7,7 @@
 /// Brief: An Entity Class that handles entities/ objects within our scene.
 /// viewed: 
 /// Singletons using smart pointers http://www.cplusplus.com/forum/general/37113/
-/// 
+/// (Entity) Design Pattern http://gameprogrammingpatterns.com/component.html
 /// ***EDIT***
 /// - Created: Classes inheriting from Entity	- David Azouz 18/03/16
 /// - Classes inheriting from Entity			- David Azouz /03/16 //TODO: date
@@ -33,17 +33,18 @@ using glm::vec4;
 //--------------------------------------------------------------------------------------
 // Default Constructor with Initializer list
 //--------------------------------------------------------------------------------------
-Entity::Entity() :
+/*Entity::Entity() :
 	m_v3ClearColor(glm::vec3(0.25f)),
 	m_v4StartColor(1, 0, 0, 1),
 	m_v4EndColor(1, 1, 0, 1),
 	/*m_m4Colors[0](m_v4StartColor),
-	m_m4Colors[1](m_v4EndColor), */
+	m_m4Colors[1](m_v4EndColor), * /
 	m_bDrawGizmoGrid(true)
 {
+//TODO: Create Render and Meshes
 	m_pRender = std::make_shared<Render>();
 	m_pMesh = std::make_shared<Mesh>();
-}
+} */
 
 
 /*GLvoid Entity::Update()

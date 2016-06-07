@@ -2,7 +2,7 @@
 //#include "VertexData.h"
 #include "Camera\Camera.h"
 #include "Helpers.h"
-#include "RenderTarget.h"
+//#include "RenderTarget.h"
 
 #include <gl_core_4_4.h>
 #include <glm/vec3.hpp>
@@ -16,6 +16,7 @@ class ParticleEmitter;
 class GPUParticleEmitter;
 class FBXModel;
 class Render; //TODO: render?
+struct Renderable;
 class Mesh;
 class Texture;
 //class MathCollision;
@@ -24,8 +25,16 @@ class BoundingShape;
 class Entity
 {
 public:
-	Entity();
-	// The 'default' keyword is a c++11 feature and should be used instead of {}.
+	//--------------------------------------------------------------------------------------
+	// Default Constructor with Initializer list
+	//--------------------------------------------------------------------------------------
+	Entity() :
+		m_v3ClearColor(glm::vec3(0.25f)),
+		m_v4StartColor(1, 0, 0, 1),
+		m_v4EndColor(1, 1, 0, 1),
+		m_bDrawGizmoGrid(true)
+	{}
+		// The 'default' keyword is a c++11 feature and should be used instead of {}.
 	// This way the class can remain aggregate and/ or trivial.
 	virtual ~Entity() = default;
 
@@ -34,13 +43,13 @@ public:
 	// Pure virtual function
 	virtual bool	Create() = 0; //TODO: GLboolean?
 	virtual GLvoid	Update()	{};
-	virtual GLvoid	Draw(const Camera& m_pCamState);// = 0; //TODO: make pure
+	virtual GLvoid	Draw(const Camera& m_pCamState) = 0; // pure func
 	// Items to be drawn to our Render Target.
 	GLvoid	DrawApp()			; //TODO: create a DrawApp for each class that inherits from Entity - and remove from here
 	virtual GLvoid	Destroy()	{};
 	virtual GLvoid	RenderUI();// = 0;
 
-	const std::shared_ptr<Render>&	GetRender() const { return m_pRender; }
+	const Renderable* GetRenderable() const { return m_pRenderable.get(); }
 
 	/// <summary> Function Pointer TODO: what do I do with this?
 	/// <param>P1: Program ID</param>
@@ -62,9 +71,17 @@ protected:
 	std::shared_ptr<ParticleEmitter> m_pParticleEmitterA;
 	std::shared_ptr<ParticleEmitter> m_pParticleEmitterB;
 	std::shared_ptr<GPUParticleEmitter> m_pGPUEmitter; //*/
-	std::shared_ptr<Render> m_pRender; 
-	std::shared_ptr<Mesh> m_pMesh;
-	std::shared_ptr<Texture> m_pTexture; //TODO: remain here?
+
+	//---------------------------------------
+	// Remove
+	//---------------------------------------
+	//std::shared_ptr<Render> m_pRender; 
+	//std::shared_ptr<Mesh> m_pMesh;
+	//std::shared_ptr<Texture> m_pTexture; //TODO: remain here?
+	//---------------------------------------
+
+	std::shared_ptr<Renderable> m_pRenderable;
+
 	//std::shared_ptr<RenderTarget> m_pRenderTarget;
 	//std::shared_ptr<MathCollision> m_pMath;
 	//Render* m_pRender;
@@ -87,7 +104,7 @@ private:
 	//GLvoid RenderGeometry();
 	/// ----------------------------------------------------------
 
-	RenderTarget m_renderTarget;
+	//RenderTarget m_renderTarget; //TODO: render target? renderTarget
 	bool m_bDrawGizmoGrid;
 
 	// TODO: Transform class?

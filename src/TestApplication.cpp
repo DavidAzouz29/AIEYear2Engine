@@ -6,6 +6,7 @@
 ///----------------------------------------------------------
 /// Brief: A TestApplication Class that Updates and Draws
 /// Source: https://github.com/DavidAzouz29/AIEYear2Engine
+/// John's Engine: https://github.com/johnsietsma/RefEngine/blob/102a07439ebf40182c4cab27df3001f0607234cc/Engine/src/Engine.cpp
 /// Lib and related files: https://drive.google.com/folderview?id=0B1wViLeuTDL8TF9feHl2RThFR0E&usp=sharing
 /// viewed: 
 /// Invoke http://en.cppreference.com/w/cpp/utility/functional/invoke
@@ -37,6 +38,8 @@
 #include "RenderTarget.h"
 #include "Helpers.h"
 #include "MathCollision.h"
+#include "Texture.h"
+
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 
@@ -63,7 +66,8 @@ using namespace std;
 TestApplication::TestApplication() : 
 	m_eCurrentDrawState(E_DRAW_STATE_FILL),
 	//m_pRenderApp(nullptr),
-	m_fPrevTime(0)
+	m_fPrevTime(0),
+	m_v4EndColor(1, 1, 0, 1)
 {
 #pragma region CPU Particles Config(s)
 	GLuint uiAmount = 20; //TODO: 3000
@@ -147,6 +151,11 @@ bool TestApplication::startup() {
 	// -----------------------
 	//Entity::CreateSingleton();
 
+	// Creates Textures through Render
+	if (!m_render.Create())
+	{
+		return false;
+	}
 	//m_pEntity = std::make_shared<Entity>();
 	// Loops through each entity and calls their respected Create functions.
 	for (auto &pEntity : m_entities)
@@ -158,8 +167,13 @@ bool TestApplication::startup() {
 
 		//Entity::GetSingleton()->Create();
 	}
-	m_pRenderTarget = std::make_shared<RenderTarget>();
-	if (m_pRenderTarget->Create()) { return false; }
+
+	glm::ivec2 iv2RenderTSize = glm::ivec2(512);
+	m_pRenderTarget = std::make_shared<RenderTarget>(m_pCamState, iv2RenderTSize); //TODO: fix fbo size
+	if (m_pRenderTarget->Create()) 
+	{ 
+		return false; 
+	}
 	//////////////////////////////////////////////////////////////////////////
 	m_pickPosition = glm::vec3(0);
 
@@ -344,7 +358,7 @@ GLvoid TestApplication::Draw()
 	//ImGui_ImplGlfwGL3_NewFrame();
 	// ----------------------------------------------------------
 	//glBindVertexArray(m_pRenderApp->GetSharedPointer()->GetVAO());
-	glBindVertexArray(m_pRenderTarget.get()->GetVAO());
+	glBindVertexArray(m_pRenderTarget.get()->GetMesh().GetVAO());
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 	// Draw Captured Objects Here
@@ -365,7 +379,8 @@ GLvoid TestApplication::Draw()
 	// draw
 	// unbind the FBO so that we can render to the back buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glUseProgram(m_pRenderApp->GetProgramID()); //*/
+	//glUseProgram(m_pRenderApp->GetProgramID()); //*/
+	glUseProgram(m_render.GetProgramID()); //*/
 	//TODO: VV needed?
 	DrawApp();
 	check_gl_error();
@@ -456,6 +471,8 @@ GLvoid TestApplication::DrawApp()
 	//pRender->DrawTexture(m_pCamera.get());
 	//pRender->DrawTexture(m_pCamState); //TODO: needed for Soulspear
 
+	//TODO: m_texture.DrawTexture(*m_pCamState, m_texture.GetTextureByName("soulspear_d"), m_texture.GetTextureByName("soulspear_n"));
+
 	// TODO:
 	//m_pEntity->Draw(m_pCamState);
 	for (auto &pEntity : m_entities)
@@ -465,8 +482,9 @@ GLvoid TestApplication::DrawApp()
 
 	m_pRenderTarget->BindDraw();
 
-	m_render.DrawTextureP(m_pCamState); // TODO: FBX Texture - Needed for Render Target
-	
+	//m_render.DrawTextureP(m_pCamState); // TODO: FBX Texture - Needed for Render Target
+	// TODO: m_texture.DrawTexture(*m_pCamState, m_texture.GetTextureByName("Pyro_D"), m_texture.GetTextureByName("Pyro_N"));
+
 	// Old draw items
 	Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, m_v4EndColor);
 /*	//

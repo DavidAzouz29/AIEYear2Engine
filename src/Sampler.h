@@ -27,11 +27,9 @@
 struct Sampler
 {
 	Sampler(Texture a_texture, GLuint a_textureID) :
-		tTexture(a_texture),
-		textureID(a_textureID)
+		tTexture(a_texture)
 	{}
 
-	Texture tTexture;
-	GLuint textureID; //programID
+	Texture tTexture; //
 };
 
