@@ -2,7 +2,11 @@
 // https://github.com/johnsietsma/RefEngine-Old/blob/master/RefEngine/graphics/Texture.h
 // https://github.com/johnsietsma/RefEngine/blob/f46a001e7194b57ac7777af8b56a4809366025b4/Engine/src/graphics/Texture.cpp
 
+/// Represents a texture owned by OpenGL.
+/// Holds Texture ID and the file path.
 /// TODO: texture class that FBX class has a copy of
+/// Split into TextureMan and Text classes
+
 #include "Mesh.h" //TODO: this shouldn't be here?
 #include "gl_core_4_4.h"
 
@@ -26,20 +30,20 @@ public:
 
 	bool Create();
 	// Destroys a Texture
-	GLvoid Destroy();
+	//GLvoid Destroy();
 
-	GLuint TextureInit(const GLchar* name);
-	GLvoid GenTexture(const GLchar* a_path, GLuint a_TextureType);
+	//GLuint TextureInit(const GLchar* name);
+	//GLvoid GenTexture(const GLchar* a_path, GLuint a_TextureType);
 
 	GLvoid CreateBuffers();			//RenderTexture();
 	GLvoid CreateTextureShader();	//GLvoid TextureLoader();
 	GLvoid Draw(const Camera& m_pCamState);
 	GLvoid DrawTexture(const Camera& m_pCamState, GLuint a_uiTexture1, GLuint a_uiTexture2);
 	//GLvoid DrawTextureP(Camera* cam);
-	GLvoid AddTexture(const GLchar* name, const GLuint id);
+	//GLvoid AddTexture(const GLchar* name, const GLuint id);
 
-	GLuint GetTextureByName(const GLchar* a_name);
-	bool DoesTextureNameExist(const GLchar* a_name);
+	//GLuint GetTextureByName(const GLchar* a_name);
+	//bool DoesTextureNameExist(const GLchar* a_name);
 	GLuint GetId() const { return m_textureID; }
 
 	GLvoid SetId(GLuint a_textureId) { m_textureID = a_textureId; }
@@ -48,8 +52,8 @@ private:
 
 	GLuint m_textureID; // m_programID;
 
-	// Store the OpenGL texture.
-	std::map<const std::string, const GLuint> m_textures, m_normalmap;
+	// Store the OpenGL texture. Texture Manager.
+	std::map<std::string, const GLuint> m_textures, m_normalmap;
 
 	Mesh m_mesh;
 };

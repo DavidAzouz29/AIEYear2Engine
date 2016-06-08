@@ -471,7 +471,7 @@ GLvoid TestApplication::DrawApp()
 	//pRender->DrawTexture(m_pCamera.get());
 	//pRender->DrawTexture(m_pCamState); //TODO: needed for Soulspear
 
-	//TODO: m_texture.DrawTexture(*m_pCamState, m_texture.GetTextureByName("soulspear_d"), m_texture.GetTextureByName("soulspear_n"));
+	m_texture.DrawTexture(*m_pCamState, m_texture.GetTextureByName("soulspear_d"), m_texture.GetTextureByName("soulspear_n"));
 
 	// TODO:
 	//m_pEntity->Draw(m_pCamState);
@@ -483,7 +483,7 @@ GLvoid TestApplication::DrawApp()
 	m_pRenderTarget->BindDraw();
 
 	//m_render.DrawTextureP(m_pCamState); // TODO: FBX Texture - Needed for Render Target
-	// TODO: m_texture.DrawTexture(*m_pCamState, m_texture.GetTextureByName("Pyro_D"), m_texture.GetTextureByName("Pyro_N"));
+	m_texture.DrawTexture(*m_pCamState, m_texture.GetTextureByName("Pyro_D"), m_texture.GetTextureByName("Pyro_N"));
 
 	// Old draw items
 	Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, m_v4EndColor);

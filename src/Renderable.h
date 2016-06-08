@@ -63,7 +63,11 @@ struct Renderable
 	{
 		for (auto &pSamplers : samplers)
 		{
-			GLuint name = pSamplers.tTexture.GetTextureByName(a_name);
+			GLuint texture = pSamplers.tTexture.GetTextureByName(a_name);
+			if (texture != USHRT_MAX) // TODO: compare against Texture.
+			{
+				return texture;
+			}
 		}
 		return USHRT_MAX;
 	}

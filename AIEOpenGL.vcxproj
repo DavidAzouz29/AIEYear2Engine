@@ -45,6 +45,7 @@
     <ClCompile Include="src\TestApplication.cpp" />
     <ClCompile Include="src\Camera\TravelCamera.cpp" />
     <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\imgui-master\imgui.h" />
@@ -77,6 +78,7 @@
     <ClInclude Include="src\VertexData.h" />
     <ClInclude Include="src\Camera\TravelCamera.h" />
     <ClInclude Include="src\Texture.h" />
+    <ClInclude Include="TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\gpuParticle.frag" />

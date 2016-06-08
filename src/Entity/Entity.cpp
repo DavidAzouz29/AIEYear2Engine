@@ -17,14 +17,14 @@
 /// </summary>
 /// ----------------------------------------------------------
 #include "Entity\Entity.h"
-#include "Render.h"
-#include "Mesh.h"
+//#include "Render.h"
+//#include "Mesh.h"
 //#include "RenderTarget.h"
-#include "MathCollision.h"
+//#include "MathCollision.h"
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 
-#include <Gizmos.h>
+//#include <Gizmos.h>
 #include <glm/ext.hpp>
 
 using glm::vec3;

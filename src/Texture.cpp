@@ -27,7 +27,6 @@
 #include "Helpers.h"
 #include "Mesh.h"
 
-#include <stb_image.h>
 //#include <glm\glm.hpp>
 //#include <glm\ext.hpp>
 #include <GLFW\glfw3.h>
@@ -67,108 +66,6 @@ bool Texture::Create()
 	GLvoid CreateBuffers(); //RenderTexture(); 	*/
 
 	return false;
-}
-
-GLvoid Texture::Destroy()
-{
-	if (m_textureID != (GLuint)-1) 
-	{
-		glDeleteTextures(1, &m_textureID);
-		m_textureID = (GLuint)-1;
-	}
-}
-
-/// ----------------------------------------------------------
-/// Texture
-/// ----------------------------------------------------------
-/// Texture Initialize
-/// Param:
-///			a_path: path of a texture
-///	Usage: id = m_pTexture->TextureInit("./data/models/soulspear/soulspear_normal.tga");
-/// View AddTexture
-/// ----------------------------------------------------------
-GLuint Texture::TextureInit(const GLchar* a_path)
-{
-	//GLint imageWidth = 0, imageHeight = 0, imageFormat = 0;
-
-	/// ----------------------------------------------------------
-	// This call will read in the default texel data for the crate.png.
-	// In the case the image stores RGB values at 515x512 resolution.
-	/// ----------------------------------------------------------
-	// Load diffuse map
-	//GLubyte* data = stbi_load(name, &imageWidth, &imageHeight, &imageFormat, STBI_default);
-	/// ----------------------------------------------------------
-	//assert(m_textureID == (GLuint)-1);
-
-	// Load diffuse map
-	GenTexture(a_path, m_textureID);
-	//TODO: normal isn't being used for anything
-	/*GLuint uiNormal;
-	// load normal map
-	GenTexture(a_path, uiNormal); */
-	
-	// TODO: V GenTexture - is this fine
-	/*// Generate an OpenGL texture handle.
-	glGenTextures(1, &m_textureID);
-	// Bind the texture to the correct slot for the dimension, in this case 2-D.
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	// Specify the data for the texture, including the format, resolution and variable type.
-	// Out data is an unsigned char, therefor it should be GL_UNSIGNED_BYTE.
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	stbi_image_free(data); //TODO: delete texture.
-
-	// load normal map
-	data = stbi_load(name, &imageWidth, &imageHeight, &imageFormat, STBI_default);
-	/// ----------------------------------------------------------
-	GLuint uiNormal;
-	// Generate an OpenGL texture handle.
-	glGenTextures(1, &uiNormal);
-	// Bind the texture to the correct slot for the dimension, in this case 2-D.
-	glBindTexture(GL_TEXTURE_2D, uiNormal);
-	// Specify the data for the texture, including the format, resolution and variable type.
-	// Out data is an unsigned char, therefor it should be GL_UNSIGNED_BYTE.
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	stbi_image_free(data); //TODO: delete texture. */
-
-	return m_textureID;
-}
-
-/// --------------------------------------------------------------------
-/// <summary>
-/// Generates a Texture map
-/// <para><param>P1: File Path.</param></para>
-/// <para><param>P2: a_TextureType: is it a texture, normal map, specular etc?</param></para>
-/// </summary>
-/// --------------------------------------------------------------------
-GLvoid Texture::GenTexture(const GLchar* a_path, GLuint a_TextureType)
-{
-	GLint imageWidth = 0, imageHeight = 0, imageFormat = 0;
-
-	/// ----------------------------------------------------------
-	// This call will read in the default texel data for the crate.png.
-	// In the case the image stores RGB values at 515x512 resolution.
-	/// ----------------------------------------------------------
-	GLubyte* data = stbi_load(a_path, &imageWidth, &imageHeight, &imageFormat, STBI_default);
-	/// ----------------------------------------------------------
-	assert(a_TextureType == (GLuint)-1);
-
-	// Generate an OpenGL texture handle.
-	glGenTextures(1, &a_TextureType);
-	// Bind the texture to the correct slot for the dimension, in this case 2-D.
-	glBindTexture(GL_TEXTURE_2D, a_TextureType);
-	// Specify the data for the texture, including the format, resolution and variable type.
-	// Out data is an unsigned char, therefor it should be GL_UNSIGNED_BYTE.
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	stbi_image_free(data); //TODO: delete texture.
 }
 
 struct Vertex
@@ -354,34 +251,4 @@ GLvoid Texture::DrawTexture(const Camera& m_pCamState, GLuint a_uiTexture1, GLui
 	glBindVertexArray(m_mesh.GetVAO()); //TODO: replace m_VAO with VAO
 	//glBindVertexArray(m_pMesh->GetVAO()); //TODO: replace m_VAO with VAO
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-}
-
-/// --------------------------------------------------------------------
-/// <summary>
-/// Adds a Texture to a map.
-/// <para><param>P1: name we specify.</param></para>
-/// <para><param>P2: the ID we generated from our 'TextureInit' func.</param></para>
-/// <example> m_pTexture->AddTexture("soulspear_n", id); </example>
-/// </summary>
-/// --------------------------------------------------------------------
-GLvoid Texture::AddTexture(const GLchar* name, const GLuint id)
-{
-	// pairs a name we specify with an id generated from the 'TextureInit' func.
-	// inserts that into a map.
-	m_textures.insert(std::pair<const std::string, const GLuint>(name, id));
-}
-
-GLuint Texture::GetTextureByName(const GLchar* a_name)
-{
-	//TODO: ? std::vector<std::string>::iterator iter = m_textures.begin();
-	if (DoesTextureNameExist(a_name))
-	{
-		return USHRT_MAX;
-	}
-	return m_textures[a_name];
-}
-
-bool Texture::DoesTextureNameExist(const GLchar* a_name)
-{
-	return m_textures.find(a_name) != std::end(m_textures);
 }

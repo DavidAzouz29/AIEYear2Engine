@@ -55,14 +55,11 @@ Render::~Render()
 	//glDeleteProgram(m_programID);
 } */
 
-bool Render::Create()
+/*bool Render::Create()
 {
 	//m_pRender = std::make_shared<Render>(); //TODO: I need this somewhere
-	m_pTexture = std::make_shared<Texture>();
-	// -----------------------
-	// Creates Grid
-	// -----------------------
-	GLint uiGrid = 21;
+	//m_pTexture = std::make_shared<Texture>();
+	
 	/*m_pRender->generateGrid(uiGrid, uiGrid);
 	//m_pRender->InitGeometry();
 	// -----------------------
@@ -73,7 +70,7 @@ bool Render::Create()
 	//m_pRender->AddTexture("crate", id);
 
 	//glActiveTexture(GL_TEXTURE3);
-	//glBindTexture(GL_TEXTURE_2D, id); */
+	//glBindTexture(GL_TEXTURE_2D, id); 
 
 	//TextureLoader();
 
@@ -91,7 +88,7 @@ bool Render::Create()
 	m_pTexture->AddTexture("Pyro_N", id);
 
 	id = m_pTexture->TextureInit("./data/models/characters/Pyro/Pyro_S.tga");
-	m_pTexture->AddTexture("Pyro_S", id);
+	m_pTexture->AddTexture("Pyro_S", id); 
 
 	//m_pRender->RenderTexture(); //For the Render Target?
 
@@ -103,7 +100,7 @@ bool Render::Create()
 	//GetSharedPointer()->CreateRenderTargetQuad();
 	//=======================================================
 	return true;
-}
+} */
 
 //function to create a grid
 GLvoid Render::generateGrid(const GLuint a_iRows, const GLuint a_iCols)

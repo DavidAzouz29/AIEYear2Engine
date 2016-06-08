@@ -79,8 +79,7 @@ private:
 	GLfloat fTime;
 
 	Mesh m_mesh;
-	//std::shared_ptr<Render> m_pRender;
-	//std::shared_ptr<Mesh> m_pMesh;
-	std::shared_ptr<Texture> m_pTexture;
+
+	//std::shared_ptr<Texture> m_pTexture;
 };
 
