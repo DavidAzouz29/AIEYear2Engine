@@ -35,6 +35,7 @@
 
 #include "Mesh.h"
 #include "Sampler.h"
+#include "TextureManager.h"
 
 #include "gl_core_4_4.h"
 
@@ -43,6 +44,7 @@
 #include <vector>
 
 //class Mesh;
+//class Texture;
 
 struct Renderable
 {
@@ -59,11 +61,11 @@ struct Renderable
 		samplers(a_samplers)
 	{}
 
-	GLuint GetTextureByName(const GLchar* a_name)
+	Texture GetTextureByName(const GLchar* a_name)
 	{
 		for (auto &pSamplers : samplers)
 		{
-			GLuint texture = pSamplers.tTexture.GetTextureByName(a_name);
+			Texture texture = pSamplers.tTexture.GetTextureByName(a_name);
 			if (texture != USHRT_MAX) // TODO: compare against Texture.
 			{
 				return texture;

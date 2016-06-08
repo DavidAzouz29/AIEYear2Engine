@@ -45,7 +45,7 @@
     <ClCompile Include="src\TestApplication.cpp" />
     <ClCompile Include="src\Camera\TravelCamera.cpp" />
     <ClCompile Include="src\Texture.cpp" />
-    <ClCompile Include="TextureManager.cpp" />
+    <ClCompile Include="src\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\imgui-master\imgui.h" />
@@ -78,7 +78,7 @@
     <ClInclude Include="src\VertexData.h" />
     <ClInclude Include="src\Camera\TravelCamera.h" />
     <ClInclude Include="src\Texture.h" />
-    <ClInclude Include="TextureManager.h" />
+    <ClInclude Include="src\TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\gpuParticle.frag" />
@@ -181,7 +181,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)dep\stb;$(ProjectDir)dep\FBXLoader;$(ProjectDir)dep\aieutilities-master\aie;$(ProjectDir)dep\glfw\include;$(ProjectDir)src\;$(ProjectDir)dep\imgui-master;$(ProjectDir)dep\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dep\stb;$(ProjectDir)dep\FBXLoader;$(ProjectDir)dep\aieutilities-master\aie;$(ProjectDir)dep\glfw\include;$(ProjectDir)src\;$(ProjectDir)dep\imgui-master;$(ProjectDir)dep\lodepng;$(ProjectDir)dep\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -39,6 +39,7 @@
 #include "Helpers.h"
 #include "MathCollision.h"
 #include "Texture.h"
+#include "TextureManager.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
@@ -114,7 +115,10 @@ TestApplication::TestApplication() :
 
 } //: m_pCamera(nullptr),
 
-TestApplication::~TestApplication() {}
+TestApplication::~TestApplication() 
+{
+	TextureManager::DestroySingleton();
+}
 
 bool TestApplication::startup() {
 
@@ -151,6 +155,7 @@ bool TestApplication::startup() {
 	// -----------------------
 	//Entity::CreateSingleton();
 
+	TextureManager::CreateSingleton();
 	// Creates Textures through Render
 	if (!m_render.Create())
 	{
@@ -471,7 +476,10 @@ GLvoid TestApplication::DrawApp()
 	//pRender->DrawTexture(m_pCamera.get());
 	//pRender->DrawTexture(m_pCamState); //TODO: needed for Soulspear
 
-	m_texture.DrawTexture(*m_pCamState, m_texture.GetTextureByName("soulspear_d"), m_texture.GetTextureByName("soulspear_n"));
+	m_texture.DrawTexture(*m_pCamState, 
+		TextureManager::GetSingleton()->GetTextureByName("s")
+	m_texture.GetTextureByName("soulspear_d"),
+		m_texture.GetTextureByName("soulspear_n"));
 
 	// TODO:
 	//m_pEntity->Draw(m_pCamState);

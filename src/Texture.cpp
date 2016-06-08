@@ -9,8 +9,8 @@
 /// Notes:
 /// RGB x 2 - 1 to move it from RGB to XYZ, or 
 /// XYZ x 0.5 + 0.5 to move it from XYZ to RGB.
-/// viewed: 
-/// 
+/// viewed: http://lodev.org/lodepng/
+/// https://github.com/richard-stern/SpaceCowboy/blob/6dd6520b484d4a31a814bc203ef3ab67d420cd70/AIE_GL/source/Texture.cpp
 ///
 /// ***EDIT***
 /// - Texture class created	 	- David Azouz 13/05/16
@@ -20,22 +20,23 @@
 /// TODO: texture class that FBX class has a copy of
 /// 
 /// </summary>
-/// ----------------------------------------------------------
+/// ----------------------------------------------------------S
 
 #include "Texture.h"
-#include "Camera.h"
+#include "Camera\Camera.h"
 #include "Helpers.h"
 #include "Mesh.h"
 
 //#include <glm\glm.hpp>
 //#include <glm\ext.hpp>
+#include "lodepng.h"
 #include <GLFW\glfw3.h>
+#include <stb_image.h>
 
 #include <cstdio>
 
 const Texture Texture::Invalid = Texture();
 
-/*
 Texture::Texture()
 {
 	Create();
@@ -44,15 +45,36 @@ Texture::Texture()
 	//CreateTextureShader();
 }
 
+Texture::Texture(const GLchar *filename)
+{
+	m_textureID = LoadTexture(filename, &m_width, &m_height);
+}
+
+Texture::Texture(GLuint width, GLuint height, GLuint *pixels)
+{
+	m_width = width;
+	m_height = height;
+
+	glGenTextures(1, &m_textureID);
+	glBindTexture(GL_TEXTURE_2D, m_textureID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 Texture::~Texture()
 {
-//	glDeleteVertexArrays(2, m_vao);
-//	glDeleteBuffers(2, m_vbo);
-
 	// delete the shaders
 	glDeleteProgram(m_textureID);
-} */
+}
 
 bool Texture::Create()
 {
@@ -66,6 +88,175 @@ bool Texture::Create()
 	GLvoid CreateBuffers(); //RenderTexture(); 	*/
 
 	return false;
+}
+
+/// ----------------------------------------------------------
+/// Texture
+/// ----------------------------------------------------------
+/// Texture Initialize
+/// Param:
+///			a_path: path of a texture
+///	Usage: id = m_pTexture->TextureInit("./data/models/soulspear/soulspear_normal.tga");
+/// View AddTexture
+/// ----------------------------------------------------------
+GLuint Texture::TextureInit(const GLchar* a_path)
+{
+	//GLint imageWidth = 0, imageHeight = 0, imageFormat = 0;
+
+	/// ----------------------------------------------------------
+	// This call will read in the default texel data for the crate.png.
+	// In the case the image stores RGB values at 515x512 resolution.
+	/// ----------------------------------------------------------
+	// Load diffuse map
+	//GLubyte* data = stbi_load(name, &imageWidth, &imageHeight, &imageFormat, STBI_default);
+	/// ----------------------------------------------------------
+	//assert(m_textureID == (GLuint)-1);
+
+	// Load diffuse map
+	GenTexture(a_path, m_textureID);
+	//TODO: normal isn't being used for anything
+	/*GLuint uiNormal;
+	// load normal map
+	GenTexture(a_path, uiNormal); */
+
+	// TODO: V GenTexture - is this fine
+	/*// Generate an OpenGL texture handle.
+	glGenTextures(1, &m_textureID);
+	// Bind the texture to the correct slot for the dimension, in this case 2-D.
+	glBindTexture(GL_TEXTURE_2D, m_textureID);
+	// Specify the data for the texture, including the format, resolution and variable type.
+	// Out data is an unsigned char, therefor it should be GL_UNSIGNED_BYTE.
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	stbi_image_free(data); //TODO: delete texture.
+
+	// load normal map
+	data = stbi_load(name, &imageWidth, &imageHeight, &imageFormat, STBI_default);
+	/// ----------------------------------------------------------
+	GLuint uiNormal;
+	// Generate an OpenGL texture handle.
+	glGenTextures(1, &uiNormal);
+	// Bind the texture to the correct slot for the dimension, in this case 2-D.
+	glBindTexture(GL_TEXTURE_2D, uiNormal);
+	// Specify the data for the texture, including the format, resolution and variable type.
+	// Out data is an unsigned char, therefor it should be GL_UNSIGNED_BYTE.
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	stbi_image_free(data); //TODO: delete texture. */
+
+	return m_textureID;
+}
+
+/// --------------------------------------------------------------------
+/// <summary>
+/// Generates a Texture map
+/// <para><param>P1: File Path.</param></para>
+/// <para><param>P2: a_TextureType: is it a texture, normal map, specular etc?</param></para>
+/// </summary>
+/// --------------------------------------------------------------------
+GLvoid Texture::GenTexture(const GLchar* a_path, GLuint a_TextureType)
+{
+	GLint imageWidth = 0, imageHeight = 0, imageFormat = 0;
+
+	/// ----------------------------------------------------------
+	// This call will read in the default texel data for the crate.png.
+	// In the case the image stores RGB values at 515x512 resolution.
+	/// ----------------------------------------------------------
+	GLubyte* data = stbi_load(a_path, &imageWidth, &imageHeight, &imageFormat, STBI_default);
+	/// ----------------------------------------------------------
+	assert(a_TextureType == (GLuint)-1);
+
+	// Generate an OpenGL texture handle.
+	glGenTextures(1, &a_TextureType);
+	// Bind the texture to the correct slot for the dimension, in this case 2-D.
+	glBindTexture(GL_TEXTURE_2D, a_TextureType);
+	// Specify the data for the texture, including the format, resolution and variable type.
+	// Out data is an unsigned char, therefor it should be GL_UNSIGNED_BYTE.
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	stbi_image_free(data); //TODO: delete texture.
+}
+
+// Load PNG images only
+// Returns an OpenGL texture ID
+// out_width and out_height are pointers, the function will return the textures width and height
+// through these paramaters if not NULL
+GLuint Texture::LoadTexture(const GLchar *filename, GLuint *out_width, GLuint *out_height)
+{
+	GLuint width = 0;
+	GLuint height = 0;
+	std::vector< GLubyte > pixels; //unsigned char
+	std::vector< GLubyte > flipped;
+
+	// populates "pixels" vector with pixel data formated as RGBA
+	// width and height are passed in as reference. If the function succeeds, 
+	// with and height should be populated with the loaded textures widht and height in pixels
+	lodepng::decode(pixels, width, height, filename);
+
+	if (out_width != NULL)	*out_width = width;
+	if (out_height != NULL)	*out_height = height;
+
+	// pixels are upside down in lodepng...
+	// this will invert the raw pixel data again
+	GLuint row_bytes = width * 4;
+	for (GLuint i = 0; i < height; i++)
+	{
+		// note that png is ordered top to
+		// bottom, but OpenGL expect it bottom to top
+		// so the order or swapped
+		//memcpy(*(&pixels[0])+(row_bytes * (height-1-i)), row_pointers[i], row_bytes);
+		for (GLuint j = 0; j < row_bytes; j++)
+		{
+			flipped.push_back(pixels[((height - i - 1) * row_bytes) + j]);
+		}
+	}
+
+	// TODO:
+	//-------------------------------------------------------------------------
+	// Procedrally genorate an "ERROR" texture
+	// and load it into memory for any textures that could not be found
+	//-------------------------------------------------------------------------
+
+	// create an openGL texture
+	//-------------------------------------------------------------------------
+
+	//unsigned int textureID = 0;
+	glGenTextures(1, &m_textureID); // genorate the texture and store the unique id in textureID
+
+	glBindTexture(GL_TEXTURE_2D, m_textureID); // make the genorated texture the current texture
+
+											 // send the pixel data to the current texture
+											 // NOTE: we need to tell openGL what the current format of the pixels is in RAM,
+											 //       we then need to tell it what format we want the pixels to be formatted in within video memory (openGL will do the conversion)
+											 //		 we also need to tell it the size of each color channel, which is GL_UNSIGNED_BYTE (one byte each for Red, Green, Blue and Alpha)
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &flipped[0]);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//-------------------------------------------------------------------------
+
+	// return the genorated texture ID
+	return m_textureID;
+}
+
+// unloads the texture from graphics memory
+// expects a valid openGL texture ID, as returned from the LoadTexture function
+GLvoid Texture::DeleteTexture(GLuint a_textureID)
+{
+	// yep, this is a lit easier than the Load texture function
+	glDeleteTextures(1, &a_textureID);
 }
 
 struct Vertex
@@ -211,7 +402,7 @@ GLvoid Texture::Draw(const Camera& m_pCamState)
 /// <example> m_textures["soulspear_d"] </example>
 /// </summary>
 /// --------------------------------------------------------------------
-GLvoid Texture::DrawTexture(const Camera& m_pCamState, GLuint a_uiTexture1, GLuint a_uiTexture2)
+/*GLvoid Texture::DrawTexture(const Camera& m_pCamState, GLuint a_uiTexture1, GLuint a_uiTexture2)
 {
 	// use our texture program
 	glUseProgram(m_textureID);
@@ -226,7 +417,7 @@ GLvoid Texture::DrawTexture(const Camera& m_pCamState, GLuint a_uiTexture1, GLui
 	// glUniform1f(uiHeightScale, fHeightScale);
 	// glUniform1f(uiTime, fTime);
 
-	//glBindTexture(GL_TEXTURE_2D, m_textures["crate"]); */
+	//glBindTexture(GL_TEXTURE_2D, m_textures["crate"]); * /
 
 	// Set texture slots
 	glActiveTexture(GL_TEXTURE0);
@@ -251,4 +442,9 @@ GLvoid Texture::DrawTexture(const Camera& m_pCamState, GLuint a_uiTexture1, GLui
 	glBindVertexArray(m_mesh.GetVAO()); //TODO: replace m_VAO with VAO
 	//glBindVertexArray(m_pMesh->GetVAO()); //TODO: replace m_VAO with VAO
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-}
+} 
+
+GLvoid Texture::DrawTexture(const Camera& m_pCamState, Texture a_uiTexture1, Texture a_uiTexture2)
+{
+
+} */

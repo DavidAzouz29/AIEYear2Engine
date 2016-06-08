@@ -18,6 +18,7 @@ class Entity;
 class MathCollision;
 class RenderTarget;
 //class Mesh; // TODO: needed?
+class TextureManager;
 
 /// <summary> 
 /// Enumeration to decide which method to draw our scene with.
@@ -58,6 +59,7 @@ private:
 	Mesh m_mesh;
 	Render m_render;
 	Texture m_texture;
+	//TextureManager 
 	Camera* m_pCamState;
 	//std::weak_ptr<Camera> m_pCamState; //TODO: cam state?
 
