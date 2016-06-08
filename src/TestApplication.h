@@ -36,7 +36,7 @@ class TestApplication : public BaseApplication {
 public:
 
 	TestApplication();
-	virtual ~TestApplication();
+	virtual ~TestApplication() = default;
 
 	virtual bool startup();
 	virtual GLvoid shutdown();
@@ -70,5 +70,15 @@ private:
 	// this is an example position for camera picking
 	glm::vec3	m_pickPosition;
 
+	// Colours used primarily for particles and 
+	// modification during runtime via ImGui.
+	glm::vec3 m_v3ClearColor;
+	glm::vec4 m_v4StartColor;
 	glm::vec4 m_v4EndColor;
+
+	bool m_bDrawGizmoGrid;
+
+	/* TODO: delete me?
+	///glm::mat4x2 m_m4Colors[2];
+	//glm::mat4 m_m4Colors; */
 };

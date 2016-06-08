@@ -37,23 +37,23 @@
 
 const Texture Texture::Invalid = Texture();
 
-Texture::Texture()
+/*Texture::Texture()
 {
 	Create();
 	//TODO: remove Create() and add these?
 	//CreateBuffers();
 	//CreateTextureShader();
-}
+} */
 
 Texture::Texture(const GLchar *filename)
 {
 	m_textureID = LoadTexture(filename, &m_width, &m_height);
 }
 
-Texture::Texture(GLuint width, GLuint height, GLuint *pixels)
+Texture::Texture(GLuint a_width, GLuint a_height, GLuint *a_pPixels)
 {
-	m_width = width;
-	m_height = height;
+	m_width = a_width;
+	m_height = a_height;
 
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
@@ -64,7 +64,7 @@ Texture::Texture(GLuint width, GLuint height, GLuint *pixels)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, a_pPixels);
 
 
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -231,10 +231,10 @@ GLuint Texture::LoadTexture(const GLchar *filename, GLuint *out_width, GLuint *o
 
 	glBindTexture(GL_TEXTURE_2D, m_textureID); // make the genorated texture the current texture
 
-											 // send the pixel data to the current texture
-											 // NOTE: we need to tell openGL what the current format of the pixels is in RAM,
-											 //       we then need to tell it what format we want the pixels to be formatted in within video memory (openGL will do the conversion)
-											 //		 we also need to tell it the size of each color channel, which is GL_UNSIGNED_BYTE (one byte each for Red, Green, Blue and Alpha)
+	// send the pixel data to the current texture
+	// NOTE: we need to tell openGL what the current format of the pixels is in RAM,
+	//       we then need to tell it what format we want the pixels to be formatted in within video memory (openGL will do the conversion)
+	//		 we also need to tell it the size of each color channel, which is GL_UNSIGNED_BYTE (one byte each for Red, Green, Blue and Alpha)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &flipped[0]);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

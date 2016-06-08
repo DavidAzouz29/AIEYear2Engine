@@ -34,7 +34,7 @@ class AABB// : public BoundingShape
 {
 public:
 	AABB() { Reset(); }
-	~AABB() {}
+	~AABB() = default;
 
 	void Reset();
 
@@ -47,7 +47,7 @@ class BoundingSphere// : public BoundingShape
 {
 public:
 	BoundingSphere();// : v3Centre(0), fRadius(0) {}
-	~BoundingSphere() {}
+	~BoundingSphere() = default;
 
 	void Fit(const std::vector<glm::vec3>& a_v3Points);
 

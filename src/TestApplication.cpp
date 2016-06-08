@@ -68,7 +68,10 @@ TestApplication::TestApplication() :
 	m_eCurrentDrawState(E_DRAW_STATE_FILL),
 	//m_pRenderApp(nullptr),
 	m_fPrevTime(0),
-	m_v4EndColor(1, 1, 0, 1)
+	m_v3ClearColor(glm::vec3(0.25f)),
+	m_v4StartColor(1, 0, 0, 1),
+	m_v4EndColor(1, 1, 0, 1),
+	m_bDrawGizmoGrid(true)
 {
 #pragma region CPU Particles Config(s)
 	GLuint uiAmount = 20; //TODO: 3000
@@ -115,10 +118,10 @@ TestApplication::TestApplication() :
 
 } //: m_pCamera(nullptr),
 
-TestApplication::~TestApplication() 
+/*TestApplication::~TestApplication() 
 {
-	TextureManager::DestroySingleton();
-}
+	//TextureManager::DestroySingleton();
+} */
 
 bool TestApplication::startup() {
 
@@ -439,7 +442,7 @@ GLvoid TestApplication::DrawApp()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, 1280, 720);
 	// use our texture program
-	
+
 	glm::mat4 projView = m_pCamState->getProjectionView();
 
 	// For our RenderTarget/ Camera View on Render Target
@@ -476,10 +479,9 @@ GLvoid TestApplication::DrawApp()
 	//pRender->DrawTexture(m_pCamera.get());
 	//pRender->DrawTexture(m_pCamState); //TODO: needed for Soulspear
 
-	m_texture.DrawTexture(*m_pCamState, 
-		TextureManager::GetSingleton()->GetTextureByName("s")
-	m_texture.GetTextureByName("soulspear_d"),
-		m_texture.GetTextureByName("soulspear_n"));
+	m_texture.DrawTexture(*m_pCamState,
+		TextureManager::GetSingleton()->GetTextureByName("soulspear_d"),  //m_texture.GetTextureByName("soulspear_d"),
+		TextureManager::GetSingleton()->GetTextureByName("soulspear_n")); //m_texture.GetTextureByName("soulspear_n"));
 
 	// TODO:
 	//m_pEntity->Draw(m_pCamState);
@@ -491,32 +493,34 @@ GLvoid TestApplication::DrawApp()
 	m_pRenderTarget->BindDraw();
 
 	//m_render.DrawTextureP(m_pCamState); // TODO: FBX Texture - Needed for Render Target
-	m_texture.DrawTexture(*m_pCamState, m_texture.GetTextureByName("Pyro_D"), m_texture.GetTextureByName("Pyro_N"));
+	m_texture.DrawTexture(*m_pCamState,
+		TextureManager::GetSingleton()->GetTextureByName("Pyro_D"),  //m_texture.GetTextureByName("Pyro_D"), 
+		TextureManager::GetSingleton()->GetTextureByName("Pyro_N"));  //m_texture.GetTextureByName("Pyro_N"));
 
 	// Old draw items
 	Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, m_v4EndColor);
-/*	//
-	//m_pVertexColoredGrid->draw(projView);
-	//m_pSpriteSheetQuad->draw(projView);
-	//m_pFBXMesh->draw(projView);
+	/*	//
+		//m_pVertexColoredGrid->draw(projView);
+		//m_pSpriteSheetQuad->draw(projView);
+		//m_pFBXMesh->draw(projView);
 
-	// FBX
-	////RenderFBX(m_pCamState); // Need this for FBX
-	//FBXDraw(); //TODO: this
-	////FBXSkeletonRender();
+		// FBX
+		////RenderFBX(m_pCamState); // Need this for FBX
+		//FBXDraw(); //TODO: this
+		////FBXSkeletonRender();
 
-	// Particles
-//	m_pParticleEmitterA->draw(projView);
-//	m_pParticleEmitterB->draw(projView);
+		// Particles
+	//	m_pParticleEmitterA->draw(projView);
+	//	m_pParticleEmitterB->draw(projView);
 
-	// GPU Particles
-	m_pGPUEmitter.get()->Draw((GLfloat)glfwGetTime(),
-		m_pCamState->getTransform(),
-		m_pCamState->getProjectionView()); */
-	//////////////////////////////////////////////////////////////////////////
+		// GPU Particles
+		m_pGPUEmitter.get()->Draw((GLfloat)glfwGetTime(),
+			m_pCamState->getTransform(),
+			m_pCamState->getProjectionView()); */
+			//////////////////////////////////////////////////////////////////////////
 
-	//draw our meshes, or gizmos, to the render target
-	// display the 3D gizmos
+			//draw our meshes, or gizmos, to the render target
+			// display the 3D gizmos
 	Gizmos::draw(projView);
 
 	// get a orthographic projection matrix and draw 2D gizmos
@@ -531,68 +535,88 @@ GLvoid TestApplication::DrawApp()
 	// Shows a demonstration on how to use elements of ImGui
 	ImGui::ShowTestWindow();
 	ImGui::Begin("My rendering options");
-		// Camera State
-		ImGui::TextWrapped("Camera Mode");
-
-		//static int selected_camera = -1;
-		static E_CAMERA_MODE_STATE selected_camera = m_pCameraStateMachine->GetCurrentCameraMode();
-		//const char* c_camera = "Camera"; //TODO:
-		const GLchar* names[] = { "Static ", "Fly ", "Orbit ", "Travel ", "Location "};
-
-		if (ImGui::Button("Select.."))
-			ImGui::OpenPopup("select");
-		ImGui::SameLine();
-		ImGui::Text(selected_camera == (E_CAMERA_MODE_STATE)-1 ? "<None>" : names[(GLint)selected_camera]);
-		if (ImGui::BeginPopup("select"))
-		{
-			ImGui::Text("Modes: ");
-			ImGui::Separator();
-			for (GLint i = 0; i < IM_ARRAYSIZE(names); i++)
-			{
-				if (ImGui::Selectable(names[i]))
-				{
-					selected_camera = (E_CAMERA_MODE_STATE)i;
-					m_pCameraStateMachine->ChangeState(selected_camera);
-				}
-			}
-			ImGui::EndPopup();
-		}
-
-		///-----------------------------------------------------------------------------------------------------------
-		//static int e = 0; // E_CAMERA_MODE_STATE 
-		//TODO: Make radio buttons select state
-		static GLint iCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
-		//for (GLushort i = 0; i < IM_ARRAYSIZE(names); i++) { //TODO: is this doable?
-		// replace numbers in names to be names[i] and    V here
-		ImGui::RadioButton(names[0], &iCurrentCameraMode, 0); ImGui::SameLine();
-		ImGui::RadioButton(names[1], &iCurrentCameraMode, 1); ImGui::SameLine();
-		ImGui::RadioButton(names[2], &iCurrentCameraMode, 2); ImGui::SameLine();
-		ImGui::RadioButton(names[3], &iCurrentCameraMode, 3); ImGui::SameLine();
-		ImGui::RadioButton(names[4], &iCurrentCameraMode, 4);
-		//}
-		if (ImGui::Button("Camera State"))
-		{
-			E_CAMERA_MODE_STATE eCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
-			eCurrentCameraMode = (E_CAMERA_MODE_STATE)(eCurrentCameraMode + 1);
-			if (eCurrentCameraMode > E_CAMERA_MODE_STATE_COUNT - 1)
-			{
-				eCurrentCameraMode = (E_CAMERA_MODE_STATE)0;
-			}
-			m_pCameraStateMachine->ChangeState((E_CAMERA_MODE_STATE)(eCurrentCameraMode));
-		}
-
-		// Each Camera specific UI attributes
-		m_pCamState->RenderUI();
+	if (ImGui::CollapsingHeader("Entity"))
+	{
+		ImGui::ColorEdit3("clear color", glm::value_ptr(m_v3ClearColor));
+		ImGui::ColorEdit3("Particle Start Colour", glm::value_ptr(m_v4StartColor));
+		ImGui::ColorEdit3("Particle End Colour", glm::value_ptr(m_v4EndColor));
+		ImGui::Checkbox("Should render Gizmo grid", &m_bDrawGizmoGrid);
 		ImGui::Separator();
 
-		// GPU Particles
-		//m_pGPUEmitter.get()->RenderUI();
-		//m_pEntity->RenderUI();
-		for (auto &pEntity : m_entities)
+		// Locations in Grid format
+		if (ImGui::TreeNode("Locations"))
 		{
-			pEntity->RenderUI();
-			ImGui::Separator();
+			// If button 'A' is pressed...
+			if (ImGui::Button("Dingo", ImVec2(40, 40)))
+			{
+				printf("Helllooo Dingo");
+			}
 		}
+		ImGui::TreePop();
+	}
+
+	// Camera State
+	ImGui::TextWrapped("Camera Mode");
+
+	//static int selected_camera = -1;
+	static E_CAMERA_MODE_STATE selected_camera = m_pCameraStateMachine->GetCurrentCameraMode();
+	//const char* c_camera = "Camera"; //TODO:
+	const GLchar* names[] = { "Static ", "Fly ", "Orbit ", "Travel ", "Location " };
+
+	if (ImGui::Button("Select.."))
+		ImGui::OpenPopup("select");
+	ImGui::SameLine();
+	ImGui::Text(selected_camera == (E_CAMERA_MODE_STATE)-1 ? "<None>" : names[(GLint)selected_camera]);
+	if (ImGui::BeginPopup("select"))
+	{
+		ImGui::Text("Modes: ");
+		ImGui::Separator();
+		for (GLint i = 0; i < IM_ARRAYSIZE(names); i++)
+		{
+			if (ImGui::Selectable(names[i]))
+			{
+				selected_camera = (E_CAMERA_MODE_STATE)i;
+				m_pCameraStateMachine->ChangeState(selected_camera);
+			}
+		}
+		ImGui::EndPopup();
+	}
+
+	///-----------------------------------------------------------------------------------------------------------
+	//static int e = 0; // E_CAMERA_MODE_STATE 
+	//TODO: Make radio buttons select state
+	static GLint iCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
+	//for (GLushort i = 0; i < IM_ARRAYSIZE(names); i++) { //TODO: is this doable?
+	// replace numbers in names to be names[i] and    V here
+	ImGui::RadioButton(names[0], &iCurrentCameraMode, 0); ImGui::SameLine();
+	ImGui::RadioButton(names[1], &iCurrentCameraMode, 1); ImGui::SameLine();
+	ImGui::RadioButton(names[2], &iCurrentCameraMode, 2); ImGui::SameLine();
+	ImGui::RadioButton(names[3], &iCurrentCameraMode, 3); ImGui::SameLine();
+	ImGui::RadioButton(names[4], &iCurrentCameraMode, 4);
+	//}
+	if (ImGui::Button("Camera State"))
+	{
+		E_CAMERA_MODE_STATE eCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
+		eCurrentCameraMode = (E_CAMERA_MODE_STATE)(eCurrentCameraMode + 1);
+		if (eCurrentCameraMode > E_CAMERA_MODE_STATE_COUNT - 1)
+		{
+			eCurrentCameraMode = (E_CAMERA_MODE_STATE)0;
+		}
+		m_pCameraStateMachine->ChangeState((E_CAMERA_MODE_STATE)(eCurrentCameraMode));
+	}
+
+	// Each Camera specific UI attributes
+	m_pCamState->RenderUI();
+	ImGui::Separator();
+
+	// GPU Particles
+	//m_pGPUEmitter.get()->RenderUI();
+	//m_pEntity->RenderUI();
+	for (auto &pEntity : m_entities)
+	{
+		pEntity->RenderUI();
+		ImGui::Separator();
+	}
 
 	ImGui::End();
 #pragma endregion
@@ -603,7 +627,7 @@ GLvoid TestApplication::DrawApp()
 	static bool show_app_fixed_overlay = true;
 	if (glfwGetKey(m_pWindow, GLFW_KEY_F1))
 	{
-		show_app_fixed_overlay = !show_app_fixed_overlay;		
+		show_app_fixed_overlay = !show_app_fixed_overlay;
 	}
 	if (show_app_fixed_overlay)
 	{

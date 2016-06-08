@@ -39,7 +39,7 @@ class ParticleEmitter : public Entity
 {
 public:
 	ParticleEmitter(ParticleEmitterConfig a_config);
-	~ParticleEmitter() {}
+	~ParticleEmitter() = default;
 
 	bool isValid() { return m_config.particleCount == (GLushort)USHRT_MAX; } //TODO: breaking -1?
 	bool Create() override;

@@ -11,6 +11,7 @@
 /// https://github.com/richard-stern/SpaceCowboy/blob/6dd6520b484d4a31a814bc203ef3ab67d420cd70/Project1/TextureManager.h
 /// http://www.cplusplus.com/reference/map/map/erase/
 /// http://docs.w3cub.com/cpp/container/map/emplace/
+/// Singletons using smart pointers http://www.cplusplus.com/forum/general/37113/
 /// ***EDIT***
 /// - Texture class created	 	- David Azouz 8/06/16
 /// - Singleton  	- David Azouz 8/06/16
@@ -33,9 +34,13 @@ class Texture;
 class TextureManager
 {
 public:
-	static TextureManager *GetSingleton() { return m_pSingleton; }
-	static void CreateSingleton() { m_pSingleton = new TextureManager(); }
-	static void DestroySingleton() { delete m_pSingleton; }
+	//-----------------------------------
+	// Singleton
+	//-----------------------------------
+	static std::shared_ptr<TextureManager> GetSingleton() { return ms_pSingleton; }
+	static void CreateSingleton() { ms_pSingleton = std::make_shared<TextureManager>(); }
+	// TODO: since it's a shared ptr - the singleton doesn't need to be deleted?
+	//static void DestroySingleton() { delete ms_pSingleton; } 
 
 	std::shared_ptr<Texture> LoadTexture(char* szFileName);
 
@@ -53,7 +58,7 @@ public:
 private:
 	TextureManager();
 	~TextureManager();
-	static TextureManager* m_pSingleton;
+	static std::shared_ptr<TextureManager> ms_pSingleton;
 
 	// A way to track 
 	std::map<std::string, std::weak_ptr<Texture>> m_textures;

@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <string>
 
-TextureManager* TextureManager::m_pSingleton = nullptr;
+std::shared_ptr<TextureManager> TextureManager::ms_pSingleton = nullptr;
 
 TextureManager::TextureManager()
 {
@@ -71,6 +71,16 @@ std::shared_ptr<Texture> TextureManager::LoadTexture(GLchar* szFileName)
 	}
 }
 
+/// --------------------------------------------------------------------
+/// <summary>
+/// Adds a Texture to a map.
+/// the './data/' is within LoadTexture ^above.
+/// <para><param>P1: name we specify.</param></para>
+/// <para><param>P2: the ID we generated from our 'TextureInit' func.</param></para>
+/// <example> id = TextureInit("models/soulspear/soulspear_diffuse.tga"); </example>
+/// </summary>
+/// --------------------------------------------------------------------
+//"models/soulspear/soulspear_diffuse.tga"
 bool TextureManager::Create()
 {
 	GLuint id = 0;

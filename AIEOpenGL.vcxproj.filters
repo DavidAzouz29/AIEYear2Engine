@@ -72,9 +72,6 @@
     <ClCompile Include="src\Camera\TravelCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Entity\Entity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Entity\FBXModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

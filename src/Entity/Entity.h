@@ -1,3 +1,23 @@
+/// <summary>
+/// File Name:		Entity.h
+/// Author: 		David Azouz
+/// Date Created: 	18/03/16
+/// Date Modified: 	8/06/16
+///----------------------------------------------------------
+/// Brief: An Entity Class that handles entities/ objects within our scene.
+/// viewed: 
+/// (Entity) Design Pattern http://gameprogrammingpatterns.com/component.html
+/// ***EDIT***
+/// - Created: Classes inheriting from Entity	- David Azouz 18/03/16
+/// - Classes inheriting from Entity			- David Azouz /03/16 //TODO: date
+/// - Classes made pure: Draw and RenderUI		- David Azouz 8/06/16
+/// - Entity.cpp made obsolete					- David Azouz 8/06/16
+/// 
+/// TODO:
+/// 
+/// </summary>
+/// ----------------------------------------------------------
+
 #pragma once
 //#include "VertexData.h"
 #include "Camera\Camera.h"
@@ -26,16 +46,12 @@ class Entity
 {
 public:
 	//--------------------------------------------------------------------------------------
-	// Default Constructor with Initializer list
+	// Default Constructor
 	//--------------------------------------------------------------------------------------
-	Entity() :
-		m_v3ClearColor(glm::vec3(0.25f)),
-		m_v4StartColor(1, 0, 0, 1),
-		m_v4EndColor(1, 1, 0, 1),
-		m_bDrawGizmoGrid(true)
-	{}
-		// The 'default' keyword is a c++11 feature and should be used instead of {}.
+	// The 'default' keyword is a c++11 feature and should be used instead of {}.
 	// This way the class can remain aggregate and/ or trivial.
+	//--------------------------------------------------------------------------------------
+	Entity() = default;
 	virtual ~Entity() = default;
 
 	// Is an abstract class
@@ -47,7 +63,7 @@ public:
 	// Items to be drawn to our Render Target.
 	GLvoid	DrawApp()			; //TODO: create a DrawApp for each class that inherits from Entity - and remove from here
 	virtual GLvoid	Destroy()	{};
-	virtual GLvoid	RenderUI();// = 0;
+	virtual GLvoid	RenderUI() = 0;
 
 	const Renderable* GetRenderable() const { return m_pRenderable.get(); }
 
@@ -73,13 +89,15 @@ protected:
 	std::shared_ptr<GPUParticleEmitter> m_pGPUEmitter; //*/
 
 	//---------------------------------------
-	// Remove
+	// TODO: Remove
 	//---------------------------------------
 	//std::shared_ptr<Render> m_pRender; 
 	//std::shared_ptr<Mesh> m_pMesh;
 	//std::shared_ptr<Texture> m_pTexture; //TODO: remain here?
 	//---------------------------------------
 
+	// Each class/ entity contains a randerable component 
+	// which contains a Mesh, ability to render, and a Sampler/ Texture (id)
 	std::shared_ptr<Renderable> m_pRenderable;
 
 	//std::shared_ptr<RenderTarget> m_pRenderTarget;
@@ -87,15 +105,6 @@ protected:
 	//Render* m_pRender;
 
 	/// ----------------------------------------------------------
-	/// TODO: not every class should have a start and end colour?
-	/// Particles would need a start and end.
-	glm::vec3 m_v3ClearColor;
-	glm::vec4 m_v4StartColor;
-	glm::vec4 m_v4EndColor;
-
-	/* TODO: ?
-	///glm::mat4x2 m_m4Colors[2];
-	//glm::mat4 m_m4Colors; */
 
 private:
 	//static Entity* ms_pSingleton;
@@ -105,7 +114,6 @@ private:
 	/// ----------------------------------------------------------
 
 	//RenderTarget m_renderTarget; //TODO: render target? renderTarget
-	bool m_bDrawGizmoGrid;
 
 	// TODO: Transform class?
 	// where our entity is in the world

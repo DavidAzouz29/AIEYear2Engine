@@ -61,19 +61,34 @@ struct Renderable
 		samplers(a_samplers)
 	{}
 
-	Texture GetTextureByName(const GLchar* a_name)
+	//TODO: 
+	/*Texture GetTextureByName(const GLchar* a_name)
 	{
 		for (auto &pSamplers : samplers)
 		{
 			Texture texture = pSamplers.tTexture.GetTextureByName(a_name);
-			if (texture != USHRT_MAX) // TODO: compare against Texture.
+			if (texture != texture.GetId()) // TODO: compare against Texture.
 			{
 				return texture;
 			}
 		}
 		return USHRT_MAX;
 	}
+	*/
+	Texture GetTextureByName(const GLchar* a_name)
+	{
+		Texture* texture = TextureManager::GetSingleton()->GetTextureByName(a_name).get();
+		for (auto &pSamplers : samplers)
+		{
+			// Compares against Texture in Renderable/ that we have.
+			if (texture->GetId() != pSamplers.tTexture.GetId()) 
+			{
+				return *texture;
+			}
 
+			return USHRT_MAX; //TODO: should this be here?
+		}
+	}
 	GLuint program_ID; //Program program;
 	Mesh mesh;
 	std::vector<Sampler> samplers;

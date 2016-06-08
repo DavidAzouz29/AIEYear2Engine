@@ -98,44 +98,4 @@ GLvoid Entity::DrawApp()
 {
 } */
 
-GLvoid Entity::RenderUI()
-{
-	ImGui::ColorEdit3("clear color", glm::value_ptr(m_v3ClearColor));
-	ImGui::ColorEdit3("Particle Start Colour", glm::value_ptr(m_v4StartColor));
-	ImGui::ColorEdit3("Particle End Colour", glm::value_ptr(m_v4EndColor));
-	ImGui::Checkbox("Should render Gizmo grid", &m_bDrawGizmoGrid);
-	ImGui::Separator();
 
-	if (ImGui::CollapsingHeader("Entity"))
-	{
-		// Locations in Grid format
-		if (ImGui::TreeNode("Locations"))
-		{
-			// If button 'A' is pressed...
-			if (ImGui::Button("Dingo", ImVec2(40, 40)))
-			{
-				printf("Helllooo Dingo");
-			}
-		}
-		ImGui::TreePop();
-	}
-
-	if (ImGui::Button("Pause"))
-	{
-		printf("Helllooo Pause");
-	}
-
-	/*	ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (float)INT_MAX);
-		ImGui::DragFloat("Timer", &m_fTimer, 0.1f, 0.01f, MAX_LOCATIONS * m_fLengthTime + m_fLengthTime);
-		ImGui::DragFloat("Start Time", &m_fStartTime, 0.1f, 0.01f, (float)INT_MAX);
-		ImGui::DragFloat("End Time", &m_fEndTime, 0.1f, 0.01f, (float)INT_MAX);
-		ImGui::DragFloat("Length of time", &m_fLengthTime, 0.1f, 0.01f, MAX_LOCATIONS * m_fLengthTime);
-		ImGui::DragInt("Iterations", &m_iIter, 0.1f, m_iIter, MAX_LOCATIONS);
-		ImGui::DragFloat("Lerped Interpolant", &m_fTravelLerp, 0.1f, 0.01f, 1.0f);
-		ImGui::Separator();
-		ImGui::DragFloat4("Camera Location", m_transform[3].data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 1", glm::value_ptr(v4Location1), 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 2", glm::value_ptr(v4Location2), 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 3", v4Location3.data, 1.1f, -(float)INT_MAX, (float)INT_MAX);
-		ImGui::DragFloat4("Location 4", v4Location4.data, 1.1f, -(float)INT_MAX, (float)INT_MAX); */
-}

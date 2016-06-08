@@ -9,7 +9,7 @@ using glm::vec4;
 class TravelCamera : public Camera
 {
 public:
-	TravelCamera() {};
+	TravelCamera() = default;
 	TravelCamera(vec4 a_v4Perspective);
 	virtual ~TravelCamera();
 

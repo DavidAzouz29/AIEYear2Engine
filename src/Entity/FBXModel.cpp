@@ -229,8 +229,8 @@ GLvoid FBXModel::RenderFBX(Camera* cam)
 	GLuint loc = glGetUniformLocation(m_program_ID, "ProjectionView");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, &(cam->getProjectionView()[0][0])); //m_projectionViewMatrix
 
-	GLuint id = m_pRenderable->GetTextureByName("soulspear_d"); //TODO: soulspear
-															//const unsigned int id = m_pRender->GetTextureByName("Pyro_D");
+	GLuint id = m_pRenderable->GetTextureByName("soulspear_d").GetId(); //TODO: soulspear
+	//const unsigned int id = m_pRender->GetTextureByName("Pyro_D");
 	glBindTexture(GL_TEXTURE_2D, id);
 
 	// Scale the FBX
@@ -413,12 +413,12 @@ GLvoid FBXModel::FBXAnimationDraw(const Camera& m_pCamState)
 	// -----------------------------------------------------
 	// Renders job
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_D")); // m_texture); 
+	glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_D").GetId()); // m_texture); 
 	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "diffuse");
 	glUniform1i(loc, 0);
 
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_N")); // m_normal);
+	glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_N").GetId()); // m_normal);
 	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "normal");
 	glUniform1i(loc, 1);
 	// -----------------------------------------------------

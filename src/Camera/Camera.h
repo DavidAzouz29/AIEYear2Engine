@@ -12,15 +12,15 @@ class Camera
 {
 public:
 
-	Camera() {};
+	Camera() = default;
 	Camera(GLfloat a_fFovY, GLfloat a_fAspectRatio, GLfloat a_fNear, GLfloat a_fFar);
 	Camera(glm::vec4 a_v4Perspective);
-	virtual ~Camera() {};
+	virtual ~Camera() = default;
 
 	virtual GLvoid Enter();
 	virtual GLvoid Update(GLfloat deltaTime) {};
 	virtual GLvoid RenderUI();
-	virtual GLvoid Exit() {}; //= 0;?
+	virtual GLvoid Exit() {}; //TODO: = 0;?
 
 	GLvoid	setSpeed(GLfloat speed)		{ m_speed = speed; }
 	GLvoid	setRotation(GLfloat a_fRotation)	{ m_fRotation = a_fRotation; }

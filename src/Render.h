@@ -19,7 +19,7 @@ public:
 		fHeightScale(2.0f),
 		fTime(0.0f)
 	{}
-	~Render() {};
+	~Render() = default;
 
 	bool Create();
 
