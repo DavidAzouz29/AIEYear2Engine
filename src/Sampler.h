@@ -11,7 +11,8 @@
 /// https://github.com/johnsietsma/RefEngine/blob/f46a001e7194b57ac7777af8b56a4809366025b4/Engine/src/graphics/Sampler.h
 /// 
 /// ***EDIT***
-/// - Sampler class 	 	- David Azouz 24/05/16
+/// - Sampler class 	 		- David Azouz 24/05/16
+/// - Texture adjustments made 	- David Azouz 9/06/16
 /// 
 /// TODO:
 /// 
@@ -24,12 +25,16 @@
 
 #include "gl_core_4_4.h"
 
+#include <memory>
+
 struct Sampler
 {
-	Sampler(Texture a_texture, GLuint a_textureID) :
-		tTexture(a_texture)
-	{}
+	Sampler(const std::shared_ptr<Texture>& a_texture);
+	~Sampler();
 
-	Texture tTexture; //
+	std::shared_ptr<Texture> tTexture; //
+
+private:
+	GLuint m_samplerID;
 };
 

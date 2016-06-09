@@ -61,7 +61,7 @@ public:
 	virtual GLvoid	Update()	{};
 	virtual GLvoid	Draw(const Camera& m_pCamState) = 0; // pure func
 	// Items to be drawn to our Render Target.
-	GLvoid	DrawApp()			; //TODO: create a DrawApp for each class that inherits from Entity - and remove from here
+	GLvoid	DrawApp(); //TODO: create a DrawApp for each class that inherits from Entity - and remove from here
 	virtual GLvoid	Destroy()	{};
 	virtual GLvoid	RenderUI() = 0;
 

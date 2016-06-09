@@ -23,6 +23,7 @@
     <ClCompile Include="dep\imgui-master\imgui_demo.cpp" />
     <ClCompile Include="dep\imgui-master\imgui_draw.cpp" />
     <ClCompile Include="dep\imgui-master\imgui_impl_glfw_gl3.cpp" />
+    <ClCompile Include="src\Renderable.cpp" />
     <ClCompile Include="src\RenderTarget.cpp" />
     <ClCompile Include="src\Entity\FBXModel.cpp" />
     <ClCompile Include="src\Camera\LocationCamera.cpp" />
@@ -41,6 +42,7 @@
     <ClCompile Include="src\Entity\ParticleEmitter.cpp" />
     <ClCompile Include="src\Program.cpp" />
     <ClCompile Include="src\Render.cpp" />
+    <ClCompile Include="src\Sampler.cpp" />
     <ClCompile Include="src\TestApplication.cpp" />
     <ClCompile Include="src\Camera\TravelCamera.cpp" />
     <ClCompile Include="src\Texture.cpp" />

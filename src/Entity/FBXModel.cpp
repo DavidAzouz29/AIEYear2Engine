@@ -19,6 +19,13 @@
 using glm::vec3;
 using glm::mat4;
 
+// TOOD: FBXModel - give a path or file
+
+FBXModel::FBXModel(const GLchar* szFileName) : m_timer(0)
+{
+	LoadFBXTextures(m_pFbx.get());
+}
+
 // -----------------------
 // Clean up our FBX related resources
 // -----------------------
@@ -26,7 +33,6 @@ FBXModel::~FBXModel()
 {
 	CleanupOpenGLBuffers(m_pFbx.get());
 }
-
 
 bool FBXModel::Create()
 {
@@ -79,18 +85,29 @@ GLvoid FBXModel::RenderUI()
 
 }
 
+
+GLvoid FBXModel::LoadFBXTextures(FBXFile* fbx)
+{
+	//Loops through our FBO Textures and
+	//add them to our sampler vector.
+	for (GLuint i = 0; i < fbx->getTextureCount(); ++i)
+	{
+		m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture(fbx->getTextureByIndex(i)->path.c_str()));
+	}
+}
+
 ///-----------------------------------------------------------------------------------------------------------
 /// <summary> 
 /// <para>Loop through the meshes in the scene and add 3 uint variables to their m_userData.</para>
 /// <para>Initialises these variables to contain a VAO, VBO, IBO, based off the FBXMeshdata.</para>
 /// <para><param name="fbx" type ="FBXFile*"> P1: A fbx file.</param></para></summary>
 ///-----------------------------------------------------------------------------------------------------------
-GLvoid FBXModel::CreateOpenGLBuffers(FBXFile* fbx)
+GLvoid FBXModel::CreateOpenGLBuffers(FBXFile* a_fbx)
 {
 	// create the GL VAO/VBO/IBO data for each mesh
-	for (GLuint i = 0; i < fbx->getMeshCount(); ++i)
+	for (GLuint i = 0; i < a_fbx->getMeshCount(); ++i)
 	{
-		FBXMeshNode* mesh = fbx->getMeshByIndex(i);
+		FBXMeshNode* mesh = a_fbx->getMeshByIndex(i);
 		//FBXTexture* texture = fbx->getTextureByName("./data/soulspear/soulspear.obj");// , &imageWidth, &imageHeight, &imageFormat, STBI_default);
 
 		// storage for the opengl data in 3 unsigned int

@@ -102,33 +102,24 @@ bool RenderTarget::CreateFrame()
 	glGenFramebuffers(1, &m_fboID);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fboID);
 
-	// We attach render targets here!
-	// Create a texture and bind it
-	GLuint fboTextureId;
-	glGenTextures(1, &fboTextureId);
-	glBindTexture(GL_TEXTURE_2D, fboTextureId);
-
-	// specify texture format for storage
-	// Format of the texture: GL_RGBA8, GL_RGB8. GL_RGBA32F
-	//glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, m_fboSize.x, m_fboSize.y); //512
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, m_fboSize.x, m_fboSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	// Construct the FBO texture.
+	m_fboTexture = Texture(m_fboSize.x, m_fboSize.y, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// attach it to the framebuffer as the first colour attachment
 	// the FBO MUST still be bound
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, fboTextureId, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_fboTexture.GetId(), 0);
 
 	// Let the FBO know which attachment to render to
 	GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, drawBuffers);
-
-	// Save the texture to be used by following render passes.
-	m_fboTexture.SetId(fboTextureId);
-
+	
 	/// setup and bind a 24bit depth buffer as a render buffer
 	glGenRenderbuffers(1, &m_fboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_fboDepth);
+
+	// TODO: render buffer / renderbuffer is unrelated ot a texture?
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, m_fboSize.x, m_fboSize.y); //512
 	// while the FBO is still bound
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_fboDepth);

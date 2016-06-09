@@ -7,7 +7,7 @@ class Camera;
 class FBXModel : public Entity
 {
 public:
-	FBXModel() : m_timer(0) {}
+	FBXModel(const GLchar* szFileName);
 	virtual ~FBXModel();
 
 	bool Create() override;
@@ -15,6 +15,8 @@ public:
 	GLvoid Draw(const Camera& m_pCamState) override;
 	GLvoid Destroy() override;
 	GLvoid RenderUI() override;
+
+	GLvoid LoadFBXTextures(FBXFile* fbx);
 
 	/// ----------------------------------------------------------
 	GLvoid FBXLoader();

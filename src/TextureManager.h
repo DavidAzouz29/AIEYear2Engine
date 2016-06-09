@@ -12,10 +12,11 @@
 /// http://www.cplusplus.com/reference/map/map/erase/
 /// http://docs.w3cub.com/cpp/container/map/emplace/
 /// Singletons using smart pointers http://www.cplusplus.com/forum/general/37113/
+/// Meyer Singleton
 /// ***EDIT***
-/// - Texture class created	 	- David Azouz 8/06/16
-/// - Singleton  	- David Azouz 8/06/16
-/// -  	- David Azouz /06/16
+/// - Texture class created	 		- David Azouz 8/06/16
+/// - Singleton  					- David Azouz 8/06/16
+/// - texture map fixed/ clean up	- David Azouz 9/06/16
 /// 
 /// TODO: texture class that FBX class has a copy of
 /// 
@@ -26,7 +27,7 @@
 #include "gl_core_4_4.h"
 
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <memory>
 
 class Texture;
@@ -35,34 +36,22 @@ class TextureManager
 {
 public:
 	//-----------------------------------
-	// Singleton
+	// Singleton: Meyer 
 	//-----------------------------------
-	static std::shared_ptr<TextureManager> GetSingleton() { return ms_pSingleton; }
-	static void CreateSingleton() { ms_pSingleton = std::make_shared<TextureManager>(); }
-	// TODO: since it's a shared ptr - the singleton doesn't need to be deleted?
-	//static void DestroySingleton() { delete ms_pSingleton; } 
-
-	std::shared_ptr<Texture> LoadTexture(char* szFileName);
+	// Made once. 
+	// Thread safe
+	//-----------------------------------
+	static TextureManager& GetSingleton() { static TextureManager a_TextMan; return a_TextMan; }
 
 	bool Create();
+	std::shared_ptr<Texture> LoadTexture(const GLchar* szFileName);
 
-	//GLvoid Destroy();
-
-	std::shared_ptr<Texture> AddTexture(const GLchar* name);
 	std::shared_ptr<Texture> GetTextureByName(const GLchar* a_name);
 	bool DoesTextureNameExist(const GLchar* a_name);
 
-	GLuint TextureInit(const GLchar* a_path);
-	GLvoid GenTexture(const GLchar* a_path, GLuint a_TextureType);
+	//GLuint TextureInit(const GLchar* a_path);
 
 private:
-	TextureManager();
-	~TextureManager();
-	static std::shared_ptr<TextureManager> ms_pSingleton;
-
 	// A way to track 
-	std::map<std::string, std::weak_ptr<Texture>> m_textures;
-	//std::map<std::string, const GLuint> m_textures;
-	//std::map<std::string, std::weak_ptr<Texture>>* m_pTextureList;
+	std::unordered_map<std::string, std::weak_ptr<Texture>> m_textures;
 };
-
