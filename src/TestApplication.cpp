@@ -103,12 +103,13 @@ TestApplication::TestApplication() :
 	configB.velocityMax = 2.0f;
 	configB.v3ParticlePosition = glm::vec3(3, 5, 0);
 #pragma endregion
-
+	
 	//m_pEntity = std::make_unique<Entity>();
 	//m_pRenderApp = std::make_shared<Render>();
 	// Adds our inherited classes to the vector.
 	//m_entities.push_back(std::make_shared<Render>());
-	m_entities.push_back(std::make_shared<FBXModel>());
+	m_entities.push_back(std::make_shared<FBXModel>("./data/models/soulspear/soulspear.fbx"));
+	m_entities.push_back(std::make_shared<FBXModel>("./data/models/characters/Pyro/pyro.fbx"));
 	/*m_entities.push_back(std::make_shared<ParticleEmitter>(configA));
 	m_entities.push_back(std::make_shared<ParticleEmitter>(configB));
 	m_entities.push_back(std::make_shared<GPUParticleEmitter>()); //*/
@@ -158,11 +159,6 @@ bool TestApplication::startup() {
 	// -----------------------
 	//Entity::CreateSingleton();
 
-	// Creates Textures through Render
-	if (!m_render.Create())
-	{
-		return false;
-	}
 	//m_pEntity = std::make_shared<Entity>();
 	// Loops through each entity and calls their respected Create functions.
 	for (auto &pEntity : m_entities)
@@ -175,6 +171,9 @@ bool TestApplication::startup() {
 		//Entity::GetSingleton()->Create();
 	}
 
+	// ----------------------------------------------------------
+	// Render Target(s)
+	// ----------------------------------------------------------
 	glm::ivec2 iv2RenderTSize = glm::ivec2(512);
 	m_pRenderTarget = std::make_shared<RenderTarget>(m_pCamState, iv2RenderTSize); //TODO: fix fbo size
 	if (m_pRenderTarget->Create()) 

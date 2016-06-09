@@ -7,6 +7,7 @@ class Camera;
 class FBXModel : public Entity
 {
 public:
+	//FBXModel() = default;
 	FBXModel(const GLchar* szFileName);
 	virtual ~FBXModel();
 

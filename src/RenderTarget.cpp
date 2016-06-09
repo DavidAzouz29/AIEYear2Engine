@@ -119,10 +119,13 @@ bool RenderTarget::CreateFrame()
 	glGenRenderbuffers(1, &m_fboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_fboDepth);
 
-	// TODO: render buffer / renderbuffer is unrelated ot a texture?
+	// -----------------------------------------------------
+	// TODO: render buffer / renderbuffer is unrelated to a texture?
+	// -----------------------------------------------------
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, m_fboSize.x, m_fboSize.y); //512
 	// while the FBO is still bound
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_fboDepth);
+	// -----------------------------------------------------
 
 	// while the FBO is still bound
 	/*GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };

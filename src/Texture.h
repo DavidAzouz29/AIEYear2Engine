@@ -22,17 +22,15 @@ public:
 	const static Texture Invalid;
 
 	// Construct an invalid texture, call create later.
-	Texture() : Texture(-1) {}
+	Texture() : Texture(USHRT_MAX) {} //-1
 	
-	//Texture() = default;
-
 	// overloaded constructor
 	// loads a texture given the filename...
 	// program will crash if texture was unable to be found.
 	Texture(const GLchar *filename);
 
 	// lodepng
-	Texture(const GLchar *filename, GLuint *out_width, GLuint *out_height);
+	//Texture(const GLchar *filename, GLuint *out_width, GLuint *out_height);
 
 	// overloaded constructor
 	// loads a texture given the filename...

@@ -24,7 +24,7 @@ public:
 	//RenderTarget(std::weak_ptr<Camera> a_pCamera, glm::vec3 a_v3ClearColor, glm::ivec2 a_iv2FboSize) :
 	RenderTarget(Camera* a_pCamera, glm::ivec2 a_iv2FboSize) :
 		m_fboID(USHRT_MAX),
-		m_fboTexture(-1),
+		m_fboTexture(nullptr),
 		m_fboDepth(USHRT_MAX),
 		m_pCamera(a_pCamera),
 		//m_clearColor(a_v3ClearColor),
@@ -44,13 +44,13 @@ public:
 
 	GLuint& GetFBO() { return m_fboID; }
 	//GLuint& GetFboTexture() { return m_fboTexture; }
-	Texture GetTexture() const { return m_fboTexture; }
+	const Texture& GetTexture() const { return m_fboTexture; }
 	Mesh GetMesh() const { return m_mesh; }
 	GLuint& GetFboDepth() { return m_fboDepth; }
 	
 private:
 	GLuint m_fboID; //What was GLuint m_programID;
-	Texture m_fboTexture = -1;
+	Texture m_fboTexture; //-1;
 	GLuint m_fboDepth;
 	Camera* m_pCamera;
 	//std::weak_ptr<Camera> m_pCamera;

@@ -194,7 +194,7 @@ Texture::~Texture()
 }
 
 // Move assignment operator
-// Texture passed in is oging to be destroyed
+// Texture passed in is going to be destroyed
 Texture& Texture::operator=(Texture&& a_copy)
 {
 	//if we're not self assigning
@@ -208,7 +208,7 @@ Texture& Texture::operator=(Texture&& a_copy)
 		//TODO: move
 		m_textureID = a_copy.m_textureID;
 		sPath = a_copy.sPath;
-		//
+		// invalidating the old data.
 		a_copy.m_textureID = Invalid.m_textureID;
 		a_copy.sPath = Invalid.sPath;
 	}

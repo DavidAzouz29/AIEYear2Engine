@@ -17,6 +17,7 @@ GLvoid Renderable::Draw(const Camera& a_pCamState)
 
 }
 
+// TODO: find by name i.e. "soulspear_n"
 std::shared_ptr<Texture> Renderable::GetTextureByPath(const GLchar* a_path)
 {
 	for (auto &pSamplers : samplers)

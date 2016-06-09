@@ -15,13 +15,13 @@
 /// --------------------------------------------------------------------
 /// <summary>
 /// Adds a Texture to a map.
-/// the './data/' is within LoadTexture ^above.
+/// the './data/' is within LoadTexture V_below_V.
 /// <para><param>P1: name we specify.</param></para>
 /// <para><param>P2: the ID we generated from our 'TextureInit' func.</param></para>
 /// <example> id = TextureInit("models/soulspear/soulspear_diffuse.tga"); </example>
 /// </summary> //"models/soulspear/soulspear_diffuse.tga"
 /// --------------------------------------------------------------------
-bool TextureManager::Create()
+/*bool TextureManager::Create()
 {
 	GLuint id = 0;
 	// TODO: split into path and filename
@@ -44,7 +44,7 @@ bool TextureManager::Create()
 	//AddTexture("Pyro_S", id);
 
 	return true;
-}
+} */
 
 /// --------------------------------------------------------------------
 /// <summary>
@@ -55,13 +55,17 @@ bool TextureManager::Create()
 /// --------------------------------------------------------------------
 std::shared_ptr<Texture> TextureManager::LoadTexture(const GLchar* szFileName)
 {
-	std::string filename = "./data/";
-	filename += szFileName;
+	//---------------------------------
+	// if you want to add to the filename
+	//---------------------------------
+	//std::string filename = "./data/";
+	//filename += szFileName;
+	//---------------------------------
 
 	//strcat_s(filename, 100, "./Images/");
 	//strcat_s(filename, 100, szFileName);
 
-	auto it = m_textures.find(filename);
+	auto it = m_textures.find(szFileName); //filename
 
 	// if not at the end
 	if (it != m_textures.end())
@@ -73,7 +77,7 @@ std::shared_ptr<Texture> TextureManager::LoadTexture(const GLchar* szFileName)
 		if (texture == nullptr)
 		{
 			// point to a new instance
-			texture = std::make_shared<Texture>(filename.c_str());
+			texture = std::make_shared<Texture>(szFileName); //filename.c_str()
 			it->second = texture;
 		}
 		// return what's valid
@@ -81,10 +85,9 @@ std::shared_ptr<Texture> TextureManager::LoadTexture(const GLchar* szFileName)
 	}
 
 	// if we have reached the end/ hasn't been loaded before
-	std::shared_ptr<Texture> pNewTexture = std::make_shared<Texture>(filename.c_str());
-	m_textures.emplace(filename, pNewTexture);
+	std::shared_ptr<Texture> pNewTexture = std::make_shared<Texture>(szFileName); //filename.c_str()
+	m_textures.emplace(szFileName, pNewTexture);
 	return pNewTexture;
-	// TODO: utilise this? AddTexture(filename.c_str(), pNewTexture);
 }
 
 // Returns a flag (nullptr) value to determine whether a Texture has been loaded.
@@ -97,8 +100,8 @@ std::shared_ptr<Texture> TextureManager::GetTextureByName(const GLchar* a_name)
 	// ...if the texture exists...
 	if (texture != m_textures.end())
 	{
-		// if the texture is discarded:
-		// 
+		// return the texture...
+		// if the texture is discarded: return a nullptr
 		return texture->second.lock();
 	}
 	else
@@ -108,7 +111,7 @@ std::shared_ptr<Texture> TextureManager::GetTextureByName(const GLchar* a_name)
 }
 
 /// --------------------------------------------------------------------
-/// <summary>
+/// <summary> //TODO: needs to be added to
 /// Checks if a texture exists in our (map).
 /// if not: returns the end of the (map).
 /// </summary>

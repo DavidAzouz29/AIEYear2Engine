@@ -23,7 +23,11 @@ using glm::mat4;
 
 FBXModel::FBXModel(const GLchar* szFileName) : m_timer(0)
 {
+	m_pFbx = std::make_shared<FBXFile>();
+	m_pFbx->load(szFileName, FBXFile::UNITS_METER);
 	LoadFBXTextures(m_pFbx.get());
+	// goes through all loaded textures and creates their GL versions
+	m_pFbx->initialiseOpenGLTextures(); //TODO: required?
 }
 
 // -----------------------
@@ -34,13 +38,12 @@ FBXModel::~FBXModel()
 	CleanupOpenGLBuffers(m_pFbx.get());
 }
 
+// So far only used for FBX Skeleton/ animation
 bool FBXModel::Create()
 {
-	m_pFbx = std::make_shared<FBXFile>();
 	//m_pFbx->load("./data/models/stanford/Bunny.fbx");
 	//m_pFbx->load("./data/models/soulspear/soulspear.fbx");
-	m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", FBXFile::UNITS_METER);
-	//m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", m_pFbx->UNITS_METER);
+	//m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", FBXFile::UNITS_METER);
 	//FBXLoader(); // Needed if FBX without Animation
 	FBXSkeletonLoader();
 
@@ -58,7 +61,7 @@ GLvoid FBXModel::Update()
 
 	m_timer = (GLfloat)glfwGetTime(); //currentTime 
 
-									  // Evaluate the animation to update bones
+	// Evaluate the animation to update bones
 	skeleton->evaluate(animation, m_timer);
 
 	for (GLuint uiBone_index = 0;
@@ -85,7 +88,7 @@ GLvoid FBXModel::RenderUI()
 
 }
 
-
+// Loads Textures already placed on a FBX //TODO: correct comment?
 GLvoid FBXModel::LoadFBXTextures(FBXFile* fbx)
 {
 	//Loops through our FBO Textures and
@@ -246,7 +249,9 @@ GLvoid FBXModel::RenderFBX(Camera* cam)
 	GLuint loc = glGetUniformLocation(m_program_ID, "ProjectionView");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, &(cam->getProjectionView()[0][0])); //m_projectionViewMatrix
 
-	GLuint id = m_pRenderable->GetTextureByName("soulspear_d").GetId(); //TODO: soulspear
+	//GLuint id = m_pRenderable->GetTextureByName("soulspear_d").GetId(); //TODO: soulspear
+	GLuint id = m_pRenderable->GetTextureByPath("./data/models/soulspear/soulspear_diffuse.tga")->GetId(); //TODO: soulspear
+	
 	//const unsigned int id = m_pRender->GetTextureByName("Pyro_D");
 	glBindTexture(GL_TEXTURE_2D, id);
 
@@ -430,12 +435,14 @@ GLvoid FBXModel::FBXAnimationDraw(const Camera& m_pCamState)
 	// -----------------------------------------------------
 	// Renders job
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_D").GetId()); // m_texture); 
+	//glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_D").GetId()); // m_texture); 
+	glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByPath("./data/models/characters/Pyro/Pyro_D.tga")->GetId()); // m_texture); 
 	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "diffuse");
 	glUniform1i(loc, 0);
 
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_N").GetId()); // m_normal);
+	//glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_N").GetId()); // m_normal);
+	glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByPath("./data/models/characters/Pyro/Pyro_N.tga")->GetId()); // m_normal);
 	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "normal");
 	glUniform1i(loc, 1);
 	// -----------------------------------------------------
