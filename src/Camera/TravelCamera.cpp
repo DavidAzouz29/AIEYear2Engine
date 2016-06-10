@@ -40,10 +40,6 @@ TravelCamera::TravelCamera(glm::vec4 a_v4Perspective) :
 	m_v4LocationArray[3] = v4Location4;
 }
 
-TravelCamera::~TravelCamera()
-{
-}
-
 /// ----------------------------------------------------------
 /// Enter: Used to reset values upon entering or return.
 /// ----------------------------------------------------------
@@ -218,9 +214,9 @@ GLvoid TravelCamera::RenderUI()
 		ImGui::DragFloat("Lerped Interpolant", &m_fTravelLerp, 0.1f, 0.01f, 1.0f);
 		ImGui::Separator();
 		ImGui::DragFloat4("Camera Location", m_transform[3].data, 1.1f, -(GLfloat)INT_MAX,  (GLfloat)INT_MAX);
-		ImGui::DragFloat4("Location 1", glm::value_ptr(v4Location1), 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
-		ImGui::DragFloat4("Location 2", glm::value_ptr(v4Location2), 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
-		ImGui::DragFloat4("Location 3", v4Location3.data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
-		ImGui::DragFloat4("Location 4", v4Location4.data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
+		ImGui::DragFloat4("Location 1", glm::value_ptr(m_v4LocationArray[0]), 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
+		ImGui::DragFloat4("Location 2", glm::value_ptr(m_v4LocationArray[1]), 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
+		ImGui::DragFloat4("Location 3", glm::value_ptr(m_v4LocationArray[2]), 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
+		ImGui::DragFloat4("Location 4", glm::value_ptr(m_v4LocationArray[3]), 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
 	}
 }

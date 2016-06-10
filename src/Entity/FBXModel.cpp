@@ -23,11 +23,15 @@ using glm::mat4;
 
 FBXModel::FBXModel(const GLchar* szFileName) : m_timer(0)
 {
+	//TODO: move to create
 	m_pFbx = std::make_shared<FBXFile>();
-	m_pFbx->load(szFileName, FBXFile::UNITS_METER);
+	if (!m_pFbx->load(szFileName, FBXFile::UNITS_METER))
+	{
+		printf("Fail to load FBX.");
+	}
 	LoadFBXTextures(m_pFbx.get());
 	// goes through all loaded textures and creates their GL versions
-	m_pFbx->initialiseOpenGLTextures(); //TODO: required?
+	m_pFbx->initialiseOpenGLTextures();
 }
 
 // -----------------------
@@ -55,6 +59,11 @@ bool FBXModel::Create()
 // Used for FBX Skeleton and Animation
 GLvoid FBXModel::Update()
 {
+	//if no skeleton - don't update
+	if (m_pFbx->getSkeletonCount() == 0)
+	{
+		return;
+	}
 	// Grab the skeleton and animation we want to use
 	FBXSkeleton* skeleton = m_pFbx->getSkeletonByIndex(0);
 	FBXAnimation* animation = m_pFbx->getAnimationByIndex(0);
@@ -239,15 +248,15 @@ GLvoid FBXModel::FBXLoader()
 /// <summary> 
 /// <para>Bind the shader and send across the virtual camera's projection and view matrices combined,</para>
 /// <para>then we loop through the meshes and render them.</para>
-/// <para><param name="cam" type ="Camera*"> P1: A virtual camera.</param></para></summary>
+/// <para><param name="cam" type ="Camera&"> P1: A virtual camera.</param></para></summary>
 ///-----------------------------------------------------------------------------------------------------------
-GLvoid FBXModel::RenderFBX(Camera* cam)
+GLvoid FBXModel::RenderFBX(const Camera& a_pCamState)
 {
 	glUseProgram(m_program_ID);
 
 	// bind the camera
 	GLuint loc = glGetUniformLocation(m_program_ID, "ProjectionView");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, &(cam->getProjectionView()[0][0])); //m_projectionViewMatrix
+	glUniformMatrix4fv(loc, 1, GL_FALSE, &a_pCamState.getProjectionView()[0][0]); //m_projectionViewMatrix
 
 	//GLuint id = m_pRenderable->GetTextureByName("soulspear_d").GetId(); //TODO: soulspear
 	GLuint id = m_pRenderable->GetTextureByPath("./data/models/soulspear/soulspear_diffuse.tga")->GetId(); //TODO: soulspear
@@ -272,8 +281,8 @@ GLvoid FBXModel::RenderFBX(Camera* cam)
 		GLuint* glData = (GLuint*)mesh->m_userData;
 
 		glBindVertexArray(glData[0]); //TODO: replace m_VAO with VAO
-									  //glBindVertexArray(Geom->GetVAO()); //TODO: replace m_VAO with VAO
-									  //unsigned int indexCount = (a_iRows - 1) * (a_iCols - 1) * 6; //TODO: m_iIndexCount = this formula
+		//glBindVertexArray(Geom->GetVAO()); //TODO: replace m_VAO with VAO
+		//unsigned int indexCount = (a_iRows - 1) * (a_iCols - 1) * 6; //TODO: m_iIndexCount = this formula
 		glDrawElements(GL_TRIANGLES, (GLuint)mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
 	}
 }
@@ -401,12 +410,12 @@ GLvoid FBXModel::FBXSkeletonRender()
 	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)FBXVertex::IndicesOffset);
 }
 
-GLvoid FBXModel::FBXAnimationDraw(const Camera& m_pCamState)
+GLvoid FBXModel::FBXAnimationDraw(const Camera& a_pCamState)
 {
 	glUseProgram(m_program_FBXAnimation_ID);
 
 	GLuint loc = glGetUniformLocation(m_program_FBXAnimation_ID, "ProjectionView");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m_pCamState.getProjectionView()));
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(a_pCamState.getProjectionView()));
 
 	/*int light_dir_uniform = glGetUniformLocation(m_programID, "LightDir");
 	glUniform3f(light_dir_uniform, 0, 1, 0);*/
@@ -418,7 +427,7 @@ GLvoid FBXModel::FBXAnimationDraw(const Camera& m_pCamState)
 	GLuint light_colour_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "LightColour");
 	glUniform3f(light_colour_uniform, 1, 1, 1);
 
-	mat4 camera_matrix = m_pCamState.getTransform();
+	mat4 camera_matrix = a_pCamState.getTransform();
 	GLint camera_pos_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "CameraPos");
 	glUniform3f(camera_pos_uniform, camera_matrix[3][0], camera_matrix[3][1], camera_matrix[3][2]);
 
@@ -434,29 +443,56 @@ GLvoid FBXModel::FBXAnimationDraw(const Camera& m_pCamState)
 
 	// -----------------------------------------------------
 	// Renders job
-	glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_D").GetId()); // m_texture); 
-	glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByPath("./data/models/characters/Pyro/Pyro_D.tga")->GetId()); // m_texture); 
-	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "diffuse");
-	glUniform1i(loc, 0);
-
-	glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_N").GetId()); // m_normal);
-	glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByPath("./data/models/characters/Pyro/Pyro_N.tga")->GetId()); // m_normal);
-	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "normal");
-	glUniform1i(loc, 1);
+	if (m_pRenderable->samplers.size() != 0)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		// TODO: delete me: glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_D").GetId()); // m_texture);
+		// Hacky condition for the Pyro/ characters
+		// if we're not loading a character...
+		if (m_pRenderable->samplers.size() <= 3)
+		{
+			//... take the first texture from our samplers
+			glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers.begin()->tTexture->GetId()); // m_texture); 
+		}
+		else
+		{
+			//Pyro_D "./data/models/characters/Pyro/Pyro_D.tga"
+			glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers[3].tTexture->GetId()); // m_texture); 
+		}
+		loc = glGetUniformLocation(m_program_FBXAnimation_ID, "diffuse");
+		glUniform1i(loc, 0);
+	}
+	else if (m_pRenderable->samplers.size() >= 1)
+	{
+		glActiveTexture(GL_TEXTURE1);
+		//TODO: delete me: glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_N").GetId()); // m_normal);
+		//glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByPath("./data/models/characters/Pyro/Pyro_N.tga")->GetId()); // m_normal);
+		// Hacky condition for the Pyro/ characters
+		if (!m_pRenderable->samplers.size() >= 5)
+		{
+			glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers[2].tTexture->GetId()); // m_texture); 
+		}
+		else
+		{
+			glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers[4].tTexture->GetId()); // m_texture); 
+		}
+		loc = glGetUniformLocation(m_program_FBXAnimation_ID, "normal");
+		glUniform1i(loc, 1);
+	}
 	// -----------------------------------------------------
 
 	// -----------------------------------------------------
 	// FBX Mesh Draw
-	FBXSkeleton* skeleton = m_pFbx->getSkeletonByIndex(0);
-	skeleton->updateBones();
+	if (m_pFbx->getSkeletonCount() != 0)
+	{
+		FBXSkeleton* skeleton = m_pFbx->getSkeletonByIndex(0);
+		skeleton->updateBones();
 
-	GLint bones_location = glGetUniformLocation(m_program_FBXAnimation_ID, "bones");
-	glUniformMatrix4fv(bones_location, skeleton->m_boneCount, GL_FALSE, (GLfloat*)skeleton->m_bones);
-
+		GLint bones_location = glGetUniformLocation(m_program_FBXAnimation_ID, "bones");
+		glUniformMatrix4fv(bones_location, skeleton->m_boneCount, GL_FALSE, (GLfloat*)skeleton->m_bones);
+	}
 	// bind our vertex array object and draw the mesh
-	for (GLuint i = 0; i < m_pFbx->getMeshCount(); ++i) 
+	for (GLuint i = 0; i < m_pFbx->getMeshCount(); ++i)
 	{
 		FBXMeshNode* mesh = m_pFbx->getMeshByIndex(i);
 		GLuint* glData = (GLuint*)mesh->m_userData;
@@ -465,5 +501,4 @@ GLvoid FBXModel::FBXAnimationDraw(const Camera& m_pCamState)
 			(GLuint)mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
 	}
 	// -----------------------------------------------------
-
 }

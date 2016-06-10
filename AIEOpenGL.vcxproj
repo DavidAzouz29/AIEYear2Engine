@@ -23,6 +23,8 @@
     <ClCompile Include="dep\imgui-master\imgui_demo.cpp" />
     <ClCompile Include="dep\imgui-master\imgui_draw.cpp" />
     <ClCompile Include="dep\imgui-master\imgui_impl_glfw_gl3.cpp" />
+    <ClCompile Include="src\Camera\StaticCamera.cpp" />
+    <ClCompile Include="src\Grid.cpp" />
     <ClCompile Include="src\Renderable.cpp" />
     <ClCompile Include="src\RenderTarget.cpp" />
     <ClCompile Include="src\Entity\FBXModel.cpp" />
@@ -52,6 +54,8 @@
     <ClInclude Include="dep\imgui-master\imgui.h" />
     <ClInclude Include="dep\imgui-master\imgui_impl_glfw_gl3.h" />
     <ClInclude Include="dep\imgui-master\imgui_internal.h" />
+    <ClInclude Include="src\Camera\StaticCamera.h" />
+    <ClInclude Include="src\Grid.h" />
     <ClInclude Include="src\Renderable.h" />
     <ClInclude Include="src\RenderableBatch.h" />
     <ClInclude Include="src\RenderTarget.h" />

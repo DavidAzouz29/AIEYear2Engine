@@ -17,11 +17,6 @@ OrbitCamera::OrbitCamera(glm::vec4 a_v4Perspective) : m_isClockwise(true), m_has
 	setPerspective(m_v4Perspective.x, m_v4Perspective.y, m_v4Perspective.z, m_v4Perspective.w);
 }
 
-
-OrbitCamera::~OrbitCamera()
-{
-}
-
 GLvoid OrbitCamera::Update(GLfloat fDeltaTime)
 {
 	GLfloat frameSpeed = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;

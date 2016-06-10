@@ -215,3 +215,105 @@ Texture& Texture::operator=(Texture&& a_copy)
 
 	return *this;
 }
+
+//TODO: Texture Shader
+/*
+	/// ----------------------------------------------------------
+	/// Create shaders
+	/// ----------------------------------------------------------
+	/// Storing writing out our shader code into char arrays for processign by OpenGL.
+	/// ----------------------------------------------------------
+	const char* vsSource = "#version 410\n \
+							layout(location=0) in vec4 Position; \
+							layout(location=1) in vec2 TexCoord; \
+							out vec2 vTexCoord; \
+							uniform mat4 ProjectionView; \
+							void main() { vTexCoord = TexCoord; \
+							gl_Position = ProjectionView * Position; }";
+
+	const char* fsSource = "#version 410\n \
+							in vec2 vTexCoord; \
+							out vec4 FragColor; \
+							uniform sampler2D diffuse; \
+							void main() { FragColor = texture(diffuse,vTexCoord); }";
+
+	/// ----------------------------------------------------------
+	/// Compile shaders
+	/// ----------------------------------------------------------
+	//int success = GL_FALSE;
+	unsigned int iVertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(iVertexShader, 1, (const char**)&vsSource, 0);
+	glCompileShader(iVertexShader);
+
+	unsigned int iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(iFragmentShader, 1, (const char**)&fsSource, 0);
+	glCompileShader(iFragmentShader);
+
+	m_programID = glCreateProgram();
+	glAttachShader(m_programID, iVertexShader);
+	glAttachShader(m_programID, iFragmentShader);
+	glLinkProgram(m_programID);
+
+	/*glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
+	if (success == GL_FALSE)
+	{
+	int infoLogLength = 0;
+	glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &infoLogLength);
+	char* infoLog = new char[infoLogLength];
+
+	glGetProgramInfoLog(m_programID, infoLogLength, 0, infoLog);
+	printf("Error: Failed to link shader program!\n");
+	printf("%s\n", infoLog);
+	delete[] infoLog;
+	} //* /
+
+	glDeleteShader(iVertexShader);
+	glDeleteShader(iFragmentShader);
+*/
+
+//TODO: Render Texture
+/*
+	float vertexData[] = {
+		-5,0,5,1,0,1,
+		5,0,5,1,1,1,
+		5,0,-5,1,1,0,
+		-5,0,-5,1,0,0 };
+
+	unsigned int indexData[] = {
+		0, 1, 2,
+		0, 2, 3,
+	};
+
+	// Add the following line to generate a VertexArrayObject
+	glGenVertexArrays(1, &m_VAO);
+	glBindVertexArray(m_VAO);
+
+	// ----------------------------------------------------------
+	// Generate our GL Buffers
+	// Let's move these so that they are all generated together
+	// ----------------------------------------------------------
+	glGenBuffers(1, &m_VBO);
+	//... Code Segment here to bind and fill VBO + IBO
+	//
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, vertexData, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &m_IBO);
+	// 
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, indexData, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, ((char*)0)+16);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	//
+	//Render::VAO = m_VAO
+	//Gem->SetVAO(m_VAO);
+	//delete[] vertexData; //TODO: more clean up code?
+*/

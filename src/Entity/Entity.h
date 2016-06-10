@@ -22,6 +22,7 @@
 //#include "VertexData.h"
 #include "Camera\Camera.h"
 #include "Helpers.h"
+#include "Renderable.h"
 //#include "RenderTarget.h"
 
 #include <gl_core_4_4.h>
@@ -36,7 +37,6 @@ class ParticleEmitter;
 class GPUParticleEmitter;
 class FBXModel;
 class Render; //TODO: render?
-struct Renderable;
 class Mesh;
 class Texture;
 //class MathCollision;
@@ -51,7 +51,7 @@ public:
 	// The 'default' keyword is a c++11 feature and should be used instead of {}.
 	// This way the class can remain aggregate and/ or trivial.
 	//--------------------------------------------------------------------------------------
-	Entity() = default;
+	Entity() : m_pRenderable(std::make_shared<Renderable>()) {}
 	virtual ~Entity() = default;
 
 	// Is an abstract class

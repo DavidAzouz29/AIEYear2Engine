@@ -5,12 +5,12 @@ class OrbitCamera : public Camera
 {
 public:
 	OrbitCamera(glm::vec4 a_v4Perspective);
-	virtual ~OrbitCamera();
+	virtual ~OrbitCamera() = default;
 
 	//void Enter() {};
 	GLvoid Update(GLfloat fDeltaTime) override;
 	GLvoid RenderUI() override;
-	//GLvoid Exit() {};
+	GLvoid Exit() override {}
 
 private:
 	bool m_isClockwise;

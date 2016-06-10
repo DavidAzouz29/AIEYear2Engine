@@ -13,7 +13,7 @@ bool RenderTarget::Create()
 	RenderTargetLoader();
 	CreateRenderTargetQuad();
 
-	return false;
+	return true;
 }
 
 GLvoid RenderTarget::Destroy()

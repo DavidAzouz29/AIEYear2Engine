@@ -56,10 +56,6 @@ LocationCamera::LocationCamera(glm::vec4 a_v4Perspective) : m_iIterIndex(0)
 	m_v4LocationArray[3] = v4Location4;
 }
 
-LocationCamera::~LocationCamera()
-{
-}
-
 GLvoid LocationCamera::Update(GLfloat fDeltaTime)
 {
 	GLfloat frameSpeed = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? fDeltaTime * m_speed * 2 : fDeltaTime * m_speed;

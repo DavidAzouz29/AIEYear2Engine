@@ -21,11 +21,11 @@ public:
 
 	/// ----------------------------------------------------------
 	GLvoid FBXLoader();
-	GLvoid RenderFBX(Camera* cam);
+	GLvoid RenderFBX(const Camera& a_pCamState);
 	GLvoid FBXSkeletonLoader();
 	GLvoid FBXSkeletonRender();
 	//GLvoid FBXUpdate();
-	GLvoid FBXAnimationDraw(const Camera& m_pCamState);
+	GLvoid FBXAnimationDraw(const Camera& a_pCamState);
 	/// ----------------------------------------------------------
 
 private:

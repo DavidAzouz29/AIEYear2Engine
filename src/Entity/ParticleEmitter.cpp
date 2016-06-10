@@ -3,6 +3,11 @@
 #include "Renderable.h"
 //TODO: ResourceCreator.h
 
+#include "imgui.h"
+#include <GLFW/glfw3.h>
+//#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 //#include <gl_core_4_4.h>
 #include <assert.h>
 #include <memory>
@@ -11,14 +16,12 @@ ParticleEmitter::ParticleEmitter(ParticleEmitterConfig a_config) :
 	m_pPartiles(nullptr),
 	m_pVertices(nullptr),
 	m_uiFirstDeadIndex(-1),
-	m_v3particlePosition(0)
+	m_v3particlePosition(0),
+	m_v4StartColor(1, 0, 0, 1),
+	m_v4EndColor(1, 1, 0, 1)
 {
 	m_config = a_config;
 }
-
-/*ParticleEmitter::~ParticleEmitter()
-{
-}*/
 
 bool ParticleEmitter::Create()
 {
@@ -56,7 +59,7 @@ bool ParticleEmitter::Create()
 	configB.v3ParticlePosition = glm::vec3(3, 5, 0);
 
 	if (ParticleLoader(configB)) return -5; //*/
-	return false;
+	return true;
 }
 bool ParticleEmitter::ParticleLoader(ParticleEmitterConfig a_config)
 {
@@ -136,6 +139,16 @@ GLvoid ParticleEmitter::Destroy()
 
 	m_pRenderable->mesh.Destroy();
 }
+
+GLvoid ParticleEmitter::RenderUI()
+{
+	if (ImGui::CollapsingHeader("Particle Emitter"))
+	{
+		ImGui::ColorEdit3("Particle Start Colour", glm::value_ptr(m_v4StartColor));
+		ImGui::ColorEdit3("Particle End Colour", glm::value_ptr(m_v4EndColor));
+	}
+}
+
 
 GLvoid ParticleEmitter::Emit()
 {

@@ -1,7 +1,6 @@
 
 #define GLM_SWIZZLE
 #include "Camera.h"
-#include "imgui.h"
 
 #include <GLFW/glfw3.h>
 #include <glm/ext.hpp>
@@ -117,16 +116,4 @@ glm::vec3 Camera::pickAgainstPlane(GLfloat x, GLfloat y, const glm::vec4& plane)
 	GLfloat d = (plane.w - glm::dot(m_transform[3].xyz(), plane.xyz()) / glm::dot(dir, plane.xyz()));
 
 	return m_transform[3].xyz() + dir * d;
-}
-
-GLvoid Camera::RenderUI()
-{
-	//std::string sLocationName = "Location "; //TODO: get camera mode? names[] from TestApp
-
-	if (ImGui::CollapsingHeader("Camera"))
-	{
-		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (GLfloat)INT_MAX);
-		ImGui::InputFloat4("Camera Location", m_transform[3].data);
-		ImGui::DragFloat4("Camera Location", m_transform[3].data, 1.1f, 0.01f, (GLfloat)INT_MAX);
-	}
 }

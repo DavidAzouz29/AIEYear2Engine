@@ -17,11 +17,12 @@
 /// ----------------------------------------------------------
 
 #include "CameraStateMachine.h"
-#include "Camera.h"
+//#include "Camera.h"
 #include "FlyCamera.h"
 #include "OrbitCamera.h"
 #include "TravelCamera.h"
 #include "LocationCamera.h"
+#include "StaticCamera.h"
 
 #include <memory> //shared_ptr
 
@@ -33,7 +34,7 @@ CameraStateMachine::CameraStateMachine(glm::vec4 a_v4Perspective) :
 		E_CAMERA_MODE_STATE_FLYCAMERA;
 	}
 
-	m_cameraStatesArray[E_CAMERA_MODE_STATE_STATIC] = std::make_shared<Camera>(a_v4Perspective);
+	m_cameraStatesArray[E_CAMERA_MODE_STATE_STATIC] = std::make_shared<StaticCamera>(a_v4Perspective);
 	m_cameraStatesArray[E_CAMERA_MODE_STATE_FLYCAMERA] = std::make_shared<FlyCamera>(a_v4Perspective);
 	m_cameraStatesArray[E_CAMERA_MODE_STATE_ORBIT] = std::make_shared<OrbitCamera>(a_v4Perspective);
 	m_cameraStatesArray[E_CAMERA_MODE_STATE_TRAVEL] = std::make_shared<TravelCamera>(a_v4Perspective);

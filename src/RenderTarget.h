@@ -24,7 +24,7 @@ public:
 	//RenderTarget(std::weak_ptr<Camera> a_pCamera, glm::vec3 a_v3ClearColor, glm::ivec2 a_iv2FboSize) :
 	RenderTarget(Camera* a_pCamera, glm::ivec2 a_iv2FboSize) :
 		m_fboID(USHRT_MAX),
-		m_fboTexture(nullptr),
+		m_fboTexture(),
 		m_fboDepth(USHRT_MAX),
 		m_pCamera(a_pCamera),
 		//m_clearColor(a_v3ClearColor),

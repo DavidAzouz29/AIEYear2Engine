@@ -36,6 +36,7 @@
 //#include <stb_image.h>
 #include <glm\glm.hpp>
 #include <glm\ext.hpp>
+#include <glm/vec2.hpp>
 #include <GLFW\glfw3.h>
 
 //#include <cstdio> //TODO: remove once Texture class is working
@@ -103,113 +104,10 @@ Render::~Render()
 } */
 
 //function to create a grid
-GLvoid Render::generateGrid(const GLuint a_iRows, const GLuint a_iCols)
+/*GLvoid Render::generateGrid(const GLuint a_iRows, const GLuint a_iCols)
 {
-	Vertex_PositionColor* aoVertices = new Vertex_PositionColor[a_iRows * a_iCols];
-	for (GLushort r = 0; r < a_iRows; ++r)
-	{
-		for (GLushort c = 0; c < a_iCols; ++c)
-		{
-			aoVertices[r * a_iCols + c].position = glm::vec4((GLfloat)c, 0.0f, (GLfloat)r, 1.0f);
-
-			//create some arbitary colour based off something
-			//that might not be related to tiling a texture
-			glm::vec3 colour = glm::vec3(sinf((c / (GLfloat)(a_iCols - 1.0f)) * (r / (GLfloat)(a_iRows - 1.0f))));
-			aoVertices[r * a_iCols + c].color = glm::vec4(colour, 1.0f);
-		}
-	}
-
-	/// ----------------------------------------------------------
-	/// we'll do more here soon!
-	/// ----------------------------------------------------------
-	/// defining index count based off quad count (2 triangles per quad)
-	/// ----------------------------------------------------------
-	GLuint* auiIndices = new GLuint[(a_iRows - 1) * (a_iCols - 1) * 6];
 	
-	GLuint index = 0;
-	for (GLuint r = 0; r < (a_iRows - 1); ++r)
-	{
-		for (GLuint c = 0; c < (a_iCols - 1); ++c)
-		{
-			// triangle 1
-			auiIndices[index++] = r * a_iCols + c;
-			auiIndices[index++] = (r + 1) * a_iCols + c;
-			auiIndices[index++] = (r + 1) * a_iCols + (c + 1);
-
-			// triangle 2
-			auiIndices[index++] = r * a_iCols + c;
-			auiIndices[index++] = (r + 1) * a_iCols + (c + 1);
-			auiIndices[index++] = r * a_iCols + (c + 1);
-		}
-	}
-
-	m_mesh.SetIndexCount((a_iRows - 1) * (a_iCols - 1) * 6);
-
-#pragma region Big Old
-#pragma region Old
-	/// ----------------------------------------------------------
-	/// create and bind buffers to a vertex array object
-	/// Generates a VBO
-	/// ----------------------------------------------------------
-	/* TODO: Delete?  glGenBuffers(1, &m_VBO); */
-	/*glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, (a_iRows * a_iCols) * sizeof(Vertex_PositionColor), aoVertices, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), 0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), (void*)(sizeof(glm::vec4)));*/
-
-	/* TODO: Delete?  glBindBuffer(GL_ARRAY_BUFFER, 0); */
-
-	/// ----------------------------------------------------------
-	/// OpenGL Index Buffer
-	/// ----------------------------------------------------------
-	/* TODO: Delete?  glGenBuffers(1, &m_IBO); */
-
-	/*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (a_iRows - 1) * (a_iCols - 1) * 6 * sizeof(unsigned int), auiIndices, GL_STATIC_DRAW);
-	*//* TODO: Delete?  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); */
-#pragma endregion
-
-	/// ----------------------------------------------------------
-	/// Thing
-	/// ----------------------------------------------------------
-/*	// Generate our GL Buffers
-	// Let's move these so that they are all generated together
-	glGenBuffers(1, &m_VBO);
-	glGenBuffers(1, &m_IBO);
-
-	//Add the following line to generate a VertexArrayObject
-	glGenVertexArrays(1, &m_VAO);
-
-	glBindVertexArray(m_VAO);
-
-	//... Code Segment here to bind and fill VBO + IBO
-	//
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, (a_iRows * a_iCols) * sizeof(Vertex_PositionColor), aoVertices, GL_STATIC_DRAW);
-
-	//
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (a_iRows - 1) * (a_iCols - 1) * 6 * sizeof(unsigned int), auiIndices, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), 0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), (void*)(sizeof(glm::vec4)));
-
-	glBindVertexArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	//
-	//Render::VAO = m_VAO */
-#pragma endregion
-
-	delete[] aoVertices;
-}
+} */
 
 GLvoid Render::InitGeometry()
 {
@@ -269,12 +167,12 @@ GLvoid Render::InitGeometry()
 	glDeleteShader(iVertexShader);
 }
 
-GLvoid Render::DrawGeometry(Camera* cam)
+GLvoid Render::DrawGeometry(const Camera& a_pCamState)
 {
 	fTime = static_cast<GLfloat>(glfwGetTime());
 	glUseProgram(m_programID);
 	GLuint projectionViewUniform = glGetUniformLocation(m_programID, "ProjectionView");
-	glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(cam->getProjectionView())); //m_projectionViewMatrix
+	glUniformMatrix4fv(projectionViewUniform, 1, false, &a_pCamState.getProjectionView()[0][0]); //m_projectionViewMatrix
 
 	GLuint uiHeightScale = glGetUniformLocation(m_programID, "heightScale");
 	GLuint uiTime = glGetUniformLocation(m_programID, "time");

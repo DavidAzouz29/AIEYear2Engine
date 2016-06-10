@@ -11,7 +11,7 @@ class TravelCamera : public Camera
 public:
 	TravelCamera() = default;
 	TravelCamera(vec4 a_v4Perspective);
-	virtual ~TravelCamera();
+	virtual ~TravelCamera() = default;
 
 	GLvoid Enter();
 	GLvoid Update(GLfloat fDeltaTime) override;
@@ -26,7 +26,7 @@ public:
 	/// --------------------------------------------------------------------------------------------------
 	GLvoid Travel(GLfloat a_fStartTime, GLfloat a_fEndTime, vec4 a_v4StartLocation, vec4 a_v4EndLocation);
 	GLvoid RenderUI() override;
-	//GLvoid Exit() {};
+	GLvoid Exit() override {}
 
 protected:
 	GLfloat m_fTimer;

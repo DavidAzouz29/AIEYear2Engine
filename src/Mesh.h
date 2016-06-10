@@ -148,7 +148,7 @@ bool Mesh::Create(T* pVertices, GLuint vertexCount, GLuint* pIndices, GLuint ind
 
 	SetupVertexAttributes<T>();
 
-	// Create the IBO
+	// OpenGL Index Buffer/ Create the IBO
 	glGenBuffers(1, &m_IBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount*sizeof(GLuint), pIndices, GL_STATIC_DRAW);

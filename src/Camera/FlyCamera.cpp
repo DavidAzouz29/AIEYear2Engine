@@ -22,6 +22,7 @@
 #define GLM_SWIZZLE
 
 #include "FlyCamera.h"
+#include "imgui.h"
 
 #include <GLFW/glfw3.h>
 #include <glm/ext.hpp>
@@ -30,10 +31,6 @@
 FlyCamera::FlyCamera(glm::vec4 a_v4Perspective)
 {
 	setPerspective(m_v4Perspective.x, m_v4Perspective.y, m_v4Perspective.z, m_v4Perspective.w);
-} 
-
-FlyCamera::~FlyCamera()
-{
 }
 
 GLvoid FlyCamera::Update(GLfloat fDeltaTime)
@@ -381,4 +378,17 @@ GLvoid FlyCamera::Update(GLfloat fDeltaTime)
 
 	m_view = glm::inverse(m_transform);
 	m_projectionView = m_projection * m_view;
+}
+
+/// -----------------------------
+// Renders UI elements via ImGui
+/// -----------------------------
+GLvoid FlyCamera::RenderUI()
+{
+	if (ImGui::CollapsingHeader("Fly Camera"))
+	{
+		ImGui::DragFloat("Speed", &m_speed, 0.1f, 0.01f, (GLfloat)INT_MAX);
+		ImGui::InputFloat4("Camera Location", m_transform[3].data);
+		ImGui::DragFloat4("Camera Location", m_transform[3].data, 1.1f, 0.01f, (GLfloat)INT_MAX);
+	}
 }

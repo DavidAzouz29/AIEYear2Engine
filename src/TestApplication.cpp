@@ -33,7 +33,7 @@
 #include "Entity\GPUParticleEmitter.h"
 #include "Camera\CameraStateMachine.h"
 #include "Camera\Camera.h"
-#include "Render.h"// | TODO: remove if Draw is removed?
+#include "Grid.h"
 #include "Mesh.h"  // | TODO: remove if Draw is removed?
 #include "RenderTarget.h"
 #include "Helpers.h"
@@ -61,69 +61,6 @@ using glm::vec4;
 using glm::mat4;
 using namespace std;
 
-//--------------------------------------------------------------------------------------
-// Default Constructor with Initializer list
-//--------------------------------------------------------------------------------------
-TestApplication::TestApplication() : 
-	m_eCurrentDrawState(E_DRAW_STATE_FILL),
-	//m_pRenderApp(nullptr),
-	m_fPrevTime(0),
-	m_v3ClearColor(glm::vec3(0.25f)),
-	m_v4StartColor(1, 0, 0, 1),
-	m_v4EndColor(1, 1, 0, 1),
-	m_bDrawGizmoGrid(true)
-{
-#pragma region CPU Particles Config(s)
-	GLuint uiAmount = 20; //TODO: 3000
-	ParticleEmitterConfig configA;
-	configA.particleCount = uiAmount; //1000 
-	configA.emitRate = (float)configA.particleCount / 2; //500
-	configA.startColor = glm::vec4(1.56f, 0, 1.25f, 0.8f); //glm::vec4(1, 0, 0, 1); <-RED
-	configA.endColor = glm::vec4(0, 0.07f, 0.3f, 1);  //vec4(0, 0, 1, 0.8f); //vec4(0, 0, 1, 0.8f);//vec4(1, 1, 0, 1);
-	configA.lifespanMin = 0.1f;
-	configA.lifespanMax = 5; //5
-	configA.startSize = 0.4f; // 1
-	configA.endSize = 0.1f;
-	configA.velocityMin = 0.1f;
-	configA.velocityMax = 1.0f;
-	configA.v3ParticlePosition = glm::vec3(-3, 5, 0);
-	
-	//if (!ParticleLoader(configA)) return -4;
-
-	ParticleEmitterConfig configB;
-	configB.particleCount = uiAmount; //5000
-	configB.emitRate = (float)configB.particleCount / 2; //500
-	configB.startColor = glm::vec4(1, 0, 1, 0.8f); //glm::vec4(1, 0, 0, 1); <-RED
-	configB.endColor = glm::vec4(0.3, 0, 0.07f, 1);  //vec4(0, 0, 1, 0.8f); //vec4(0, 0, 1, 0.8f);//vec4(1, 1, 0, 1);
-	configB.lifespanMin = 0.9f;
-	configB.lifespanMax = 3; //5
-	configB.startSize = 0.4f; // 1
-	configB.endSize = 0.2f;
-	configB.velocityMin = 0.1f;
-	configB.velocityMax = 2.0f;
-	configB.v3ParticlePosition = glm::vec3(3, 5, 0);
-#pragma endregion
-	
-	//m_pEntity = std::make_unique<Entity>();
-	//m_pRenderApp = std::make_shared<Render>();
-	// Adds our inherited classes to the vector.
-	//m_entities.push_back(std::make_shared<Render>());
-	m_entities.push_back(std::make_shared<FBXModel>("./data/models/soulspear/soulspear.fbx"));
-	m_entities.push_back(std::make_shared<FBXModel>("./data/models/characters/Pyro/pyro.fbx"));
-	/*m_entities.push_back(std::make_shared<ParticleEmitter>(configA));
-	m_entities.push_back(std::make_shared<ParticleEmitter>(configB));
-	m_entities.push_back(std::make_shared<GPUParticleEmitter>()); //*/
-
-	m_pMath = std::make_shared<MathCollision>();
-	//m_entities.resize(m_entities.size()); //TODO: remove?
-
-} //: m_pCamera(nullptr),
-
-/*TestApplication::~TestApplication() 
-{
-	//TextureManager::DestroySingleton();
-} */
-
 bool TestApplication::startup() {
 
 	// create a basic window
@@ -138,13 +75,16 @@ bool TestApplication::startup() {
 	//m_pCamera = std::make_shared<Camera>(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
 	//m_pCamera->setLookAtFrom(vec3(10, 10, 10), vec3(0));
 
+	/// ------------------------------------------------------------
 	/// <summary>
 	/// Camera Perspective
+	/// ------------------------------------------------------------
 	/// <para>P1: FoVY: Field of View Y.</para>
 	/// <para>P2: Aspect Ratio.</para>
 	/// <para>P3: Near: nearest clipping plane to render to.</para>
 	/// <para>P4: Far: furthest clipping plane to render to.</para>
 	/// </summary>
+	/// ------------------------------------------------------------
 	vec4 v4Perspective(glm::pi<GLfloat>() * 0.25f, 16 / 9.0f, 0.1f, 10000.f);
 	m_pCameraStateMachine = std::make_shared<CameraStateMachine>(v4Perspective);
 
@@ -160,6 +100,48 @@ bool TestApplication::startup() {
 	//Entity::CreateSingleton();
 
 	//m_pEntity = std::make_shared<Entity>();
+#pragma region CPU Particles Config(s)
+	GLuint uiAmount = 20; //TODO: 3000
+	ParticleEmitterConfig configA;
+	configA.particleCount = uiAmount; //1000 
+	configA.emitRate = (float)configA.particleCount / 2; //500
+	configA.startColor = glm::vec4(1.56f, 0, 1.25f, 0.8f); //glm::vec4(1, 0, 0, 1); <-RED
+	configA.endColor = glm::vec4(0, 0.07f, 0.3f, 1);  //vec4(0, 0, 1, 0.8f); //vec4(0, 0, 1, 0.8f);//vec4(1, 1, 0, 1);
+	configA.lifespanMin = 0.1f;
+	configA.lifespanMax = 5; //5
+	configA.startSize = 0.4f; // 1
+	configA.endSize = 0.1f;
+	configA.velocityMin = 0.1f;
+	configA.velocityMax = 1.0f;
+	configA.v3ParticlePosition = glm::vec3(-3, 5, 0);
+
+	//if (!ParticleLoader(configA)) return -4;
+
+	ParticleEmitterConfig configB;
+	configB.particleCount = uiAmount; //5000
+	configB.emitRate = (float)configB.particleCount / 2; //500
+	configB.startColor = glm::vec4(1, 0, 1, 0.8f); //glm::vec4(1, 0, 0, 1); <-RED
+	configB.endColor = glm::vec4(0.3, 0, 0.07f, 1);  //vec4(0, 0, 1, 0.8f); //vec4(0, 0, 1, 0.8f);//vec4(1, 1, 0, 1);
+	configB.lifespanMin = 0.9f;
+	configB.lifespanMax = 3; //5
+	configB.startSize = 0.4f; // 1
+	configB.endSize = 0.2f;
+	configB.velocityMin = 0.1f;
+	configB.velocityMax = 2.0f;
+	configB.v3ParticlePosition = glm::vec3(3, 5, 0);
+#pragma endregion
+
+	//m_pEntity = std::make_unique<Entity>();
+	// Adds our inherited classes to the vector.
+	m_entities.push_back(std::make_shared<Grid>());
+	m_entities.push_back(std::make_shared<FBXModel>("./data/models/soulspear/soulspear.fbx"));
+	m_entities.push_back(std::make_shared<FBXModel>("./data/models/characters/Pyro/pyro.fbx"));
+	m_entities.push_back(std::make_shared<ParticleEmitter>(configA));
+	m_entities.push_back(std::make_shared<ParticleEmitter>(configB));
+	m_entities.push_back(std::make_shared<GPUParticleEmitter>());
+
+	m_pMath = std::make_shared<MathCollision>();
+
 	// Loops through each entity and calls their respected Create functions.
 	for (auto &pEntity : m_entities)
 	{
@@ -167,8 +149,6 @@ bool TestApplication::startup() {
 		{
 			return false;
 		}
-
-		//Entity::GetSingleton()->Create();
 	}
 
 	// ----------------------------------------------------------
@@ -176,7 +156,7 @@ bool TestApplication::startup() {
 	// ----------------------------------------------------------
 	glm::ivec2 iv2RenderTSize = glm::ivec2(512);
 	m_pRenderTarget = std::make_shared<RenderTarget>(m_pCamState, iv2RenderTSize); //TODO: fix fbo size
-	if (m_pRenderTarget->Create()) 
+	if (!m_pRenderTarget->Create()) 
 	{ 
 		return false; 
 	}
@@ -199,8 +179,7 @@ GLvoid TestApplication::shutdown()
 	}
 	//////////////////////////////////////////////////////////////////////////
 
-	// delete our camera and cleanup gizmos
-	//delete m_pCamera;
+	// cleanup gizmos
 	Gizmos::destroy();
 
 	// destroy our window properly
@@ -259,6 +238,8 @@ bool TestApplication::Update(GLfloat deltaTime)
 		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_LOCATION);
 	}
 
+	m_pCamState = m_pCameraStateMachine->GetCurrentCamera();
+
 #pragma endregion
 
 	// update the camera's movement
@@ -266,11 +247,8 @@ bool TestApplication::Update(GLfloat deltaTime)
 	// clear the gizmos out for this frame
 	Gizmos::clear();
 
-	//TODO: ImGui here?
-
 	//////////////////////////////////////////////////////////////////////////
 	// YOUR UPDATE CODE HERE
-	//m_pEntity->Update();
 	for (auto &pEntity : m_entities)
 	{
 		pEntity->Update();
@@ -281,12 +259,7 @@ bool TestApplication::Update(GLfloat deltaTime)
 	// TODO: does this break things - m_pCamState = m_pCameraStateMachine.get()->GetCurrentCamera();
 	m_pMath->Update(m_pCamState);
 
-/*	m_pMath->Update(m_pCamState);
 	///----------------------------------------------------------
-	// Particles
-	//m_pParticleEmitterA->update(deltaTime, m_pCamera->getTransform());
-	m_pParticleEmitterA->update(deltaTime, m_pCamState->getTransform());
-	m_pParticleEmitterB->update(deltaTime, m_pCamState->getTransform()); */
 	//////////////////////////////////////////////////////////////////////////
 
 	// an example of mouse picking
@@ -368,7 +341,6 @@ GLvoid TestApplication::Draw()
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 	// Draw Captured Objects Here
-	bool m_bDrawGizmoGrid = true; //TODO: remove - found in Entity
 	if (m_bDrawGizmoGrid)
 	{
 		// ...for now let's add a grid to the gizmos
@@ -386,7 +358,7 @@ GLvoid TestApplication::Draw()
 	// unbind the FBO so that we can render to the back buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//glUseProgram(m_pRenderApp->GetProgramID()); //*/
-	glUseProgram(m_render.GetProgramID()); //*/
+	glUseProgram(m_pRenderTarget->GetFBO()); //*/
 	//TODO: VV needed?
 	DrawApp();
 	check_gl_error();
@@ -474,15 +446,11 @@ GLvoid TestApplication::DrawApp()
 	//////////////////////////////////////////////////////////////////////////
 	// DRAW YOUR THINGS HERE
 	// 
-	//pRender->DrawTexture(m_pCamera.get());
-	//pRender->DrawTexture(m_pCamState); //TODO: needed for Soulspear
 
 	/*m_texture.DrawTexture(*m_pCamState,
 		TextureManager::GetSingleton()->GetTextureByName("soulspear_d"),  //m_texture.GetTextureByName("soulspear_d"),
 		TextureManager::GetSingleton()->GetTextureByName("soulspear_n")); //m_texture.GetTextureByName("soulspear_n")); */
 
-	// TODO:
-	//m_pEntity->Draw(m_pCamState);
 	for (auto &pEntity : m_entities)
 	{
 		pEntity->Draw(*m_pCamState);
@@ -490,35 +458,18 @@ GLvoid TestApplication::DrawApp()
 
 	m_pRenderTarget->BindDraw();
 
+	// TODO: Get Pyro Textures working again
 	//m_render.DrawTextureP(m_pCamState); // TODO: FBX Texture - Needed for Render Target
 	/*m_texture.DrawTexture(*m_pCamState,
 		TextureManager::GetSingleton()->GetTextureByName("Pyro_D"),  //m_texture.GetTextureByName("Pyro_D"), 
 		TextureManager::GetSingleton()->GetTextureByName("Pyro_N"));  //m_texture.GetTextureByName("Pyro_N")); */
 
 	// Old draw items
-	Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, m_v4EndColor);
-	/*	//
-		//m_pVertexColoredGrid->draw(projView);
-		//m_pSpriteSheetQuad->draw(projView);
-		//m_pFBXMesh->draw(projView);
+	Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, glm::vec4(1, 1, 0, 1));
+	//////////////////////////////////////////////////////////////////////////
 
-		// FBX
-		////RenderFBX(m_pCamState); // Need this for FBX
-		//FBXDraw(); //TODO: this
-		////FBXSkeletonRender();
-
-		// Particles
-	//	m_pParticleEmitterA->draw(projView);
-	//	m_pParticleEmitterB->draw(projView);
-
-		// GPU Particles
-		m_pGPUEmitter.get()->Draw((GLfloat)glfwGetTime(),
-			m_pCamState->getTransform(),
-			m_pCamState->getProjectionView()); */
-			//////////////////////////////////////////////////////////////////////////
-
-			//draw our meshes, or gizmos, to the render target
-			// display the 3D gizmos
+	//draw our meshes, or gizmos, to the render target
+	// display the 3D gizmos
 	Gizmos::draw(projView);
 
 	// get a orthographic projection matrix and draw 2D gizmos
@@ -533,11 +484,9 @@ GLvoid TestApplication::DrawApp()
 	// Shows a demonstration on how to use elements of ImGui
 	ImGui::ShowTestWindow();
 	ImGui::Begin("My rendering options");
-	if (ImGui::CollapsingHeader("Entity"))
+	if (ImGui::CollapsingHeader("Test"))
 	{
 		ImGui::ColorEdit3("clear color", glm::value_ptr(m_v3ClearColor));
-		ImGui::ColorEdit3("Particle Start Colour", glm::value_ptr(m_v4StartColor));
-		ImGui::ColorEdit3("Particle End Colour", glm::value_ptr(m_v4EndColor));
 		ImGui::Checkbox("Should render Gizmo grid", &m_bDrawGizmoGrid);
 		ImGui::Separator();
 
@@ -549,8 +498,8 @@ GLvoid TestApplication::DrawApp()
 			{
 				printf("Helllooo Dingo");
 			}
+			ImGui::TreePop();
 		}
-		ImGui::TreePop();
 	}
 
 	// Camera State
@@ -584,13 +533,14 @@ GLvoid TestApplication::DrawApp()
 	//static int e = 0; // E_CAMERA_MODE_STATE 
 	//TODO: Make radio buttons select state
 	static GLint iCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
+	static GLint eRad = 0;
 	//for (GLushort i = 0; i < IM_ARRAYSIZE(names); i++) { //TODO: is this doable?
 	// replace numbers in names to be names[i] and    V here
-	ImGui::RadioButton(names[0], &iCurrentCameraMode, 0); ImGui::SameLine();
-	ImGui::RadioButton(names[1], &iCurrentCameraMode, 1); ImGui::SameLine();
-	ImGui::RadioButton(names[2], &iCurrentCameraMode, 2); ImGui::SameLine();
-	ImGui::RadioButton(names[3], &iCurrentCameraMode, 3); ImGui::SameLine();
-	ImGui::RadioButton(names[4], &iCurrentCameraMode, 4);
+	ImGui::RadioButton(names[0], &eRad, 0); ImGui::SameLine();
+	ImGui::RadioButton(names[1], &eRad, 1); ImGui::SameLine();
+	ImGui::RadioButton(names[2], &eRad, 2); ImGui::SameLine();
+	ImGui::RadioButton(names[3], &eRad, 3); ImGui::SameLine();
+	ImGui::RadioButton(names[4], &eRad, 4);
 	//}
 	if (ImGui::Button("Camera State"))
 	{
@@ -604,12 +554,9 @@ GLvoid TestApplication::DrawApp()
 	}
 
 	// Each Camera specific UI attributes
-	m_pCamState->RenderUI();
+	m_pCameraStateMachine->GetCurrentCamera()->RenderUI(); //m_pCamState->RenderUI();
 	ImGui::Separator();
 
-	// GPU Particles
-	//m_pGPUEmitter.get()->RenderUI();
-	//m_pEntity->RenderUI();
 	for (auto &pEntity : m_entities)
 	{
 		pEntity->RenderUI();

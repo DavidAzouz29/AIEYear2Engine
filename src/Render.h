@@ -10,7 +10,6 @@
 
 class Camera;
 //class Mesh;
-class Texture;
 
 class Render // : public Entity
 {
@@ -30,10 +29,10 @@ public:
 	///			a_iRows: a set of rows
 	///			a_iCols: a set of columns
 	/// ----------------------------------------------------------
-	GLvoid generateGrid(const GLuint a_iRows, const GLuint a_iCols);
+	//GLvoid generateGrid(const GLuint a_iRows, const GLuint a_iCols);
 
 	GLvoid InitGeometry();
-	GLvoid DrawGeometry(Camera* cam);
+	GLvoid DrawGeometry(const Camera& a_pCamState);
 
 	///void FBXLoader();
 	//void RenderFBX(Camera* cam);
@@ -78,7 +77,7 @@ private:
 	GLfloat fHeightScale;
 	GLfloat fTime;
 
-	Mesh m_mesh;
+	Mesh m_mesh; //TODO: remove
 
 	//std::shared_ptr<Texture> m_pTexture;
 };

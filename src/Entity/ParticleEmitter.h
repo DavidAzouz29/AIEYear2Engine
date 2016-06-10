@@ -49,6 +49,7 @@ public:
 	//GLvoid Draw(const Camera* m_pCamState) override;
 	GLvoid Draw(const Camera& m_pCamState) override;
 	GLvoid Destroy() override;
+	GLvoid RenderUI() override;
 
 	/// ----------------------------------------------------------
 	/// Safety for dangling pointer
@@ -71,6 +72,11 @@ private:
 
 	ParticleEmitterConfig m_config;
 	GLfloat m_fEmitTimer;
+
+	// Colours used primarily for particles and 
+	// modification during runtime via ImGui.
+	glm::vec4 m_v4StartColor;
+	glm::vec4 m_v4EndColor;
 
 	//Render m_render; 
 	//Geometry m_geometry; //

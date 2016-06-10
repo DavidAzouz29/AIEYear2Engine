@@ -39,7 +39,9 @@ GPUParticleEmitter::GPUParticleEmitter()
 	m_v3Position(0, 0, 0),
 	m_drawShader(0),
 	m_updateShader(0),
-	m_fLastDrawTime(0)
+	m_fLastDrawTime(0),
+	m_v4StartColor(1, 0.4f, 1, 1),
+	m_v4EndColor(0, 0.4f, 1, 1)
 {
 	m_vao[0] = 0;
 	m_vao[1] = 0;
@@ -62,11 +64,9 @@ GPUParticleEmitter::~GPUParticleEmitter()
 
 bool GPUParticleEmitter::Create()
 {
-	/*m_pGPUEmitter = std::make_shared<GPUParticleEmitter>();
-	m_pGPUEmitter.get()-> */
 	Initalise(MAX_PARTICLES, 3.0f, 5.0f, 5, 20, 1, 0.1f,
 		m_v4StartColor, m_v4EndColor);
-	return false;
+	return true;
 }
 
 /// ----------------------------------------------------------

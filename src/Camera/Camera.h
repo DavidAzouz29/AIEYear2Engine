@@ -19,8 +19,8 @@ public:
 
 	virtual GLvoid Enter();
 	virtual GLvoid Update(GLfloat deltaTime) {};
-	virtual GLvoid RenderUI();
-	virtual GLvoid Exit() {}; //TODO: = 0;?
+	virtual GLvoid RenderUI() = 0;
+	virtual GLvoid Exit() = 0;
 
 	GLvoid	setSpeed(GLfloat speed)		{ m_speed = speed; }
 	GLvoid	setRotation(GLfloat a_fRotation)	{ m_fRotation = a_fRotation; }
