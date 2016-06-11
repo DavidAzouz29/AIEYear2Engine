@@ -10,11 +10,8 @@
 /// ***EDIT***
 /// - Perlin land generation added	 	- David Azouz 10/06/16
 /// 
-/// TODO: Clean up
-/// Camera zoom with scroll
-/// search for TODO:
-/// DrawGeom(m_projectionViewMatrix or in this case m4ProjectionTrans
-/// FBXTexture
+/// TODO: fix m_perlinTextureID in .cpp
+/// 
 /// </summary>
 /// ----------------------------------------------------------
 
@@ -30,11 +27,12 @@ public:
 	Grid() :
 		fHeightScale(2),
 		fTime(0.0f),
-		iGrid(64),
 		m_perlinTextureID(),
-		uiOctaves(6),
-		fAmplitude(5.8f),
-		fPersistence(0.3f)
+		m_iGrid(64),
+		m_fScale((1.0f / m_iGrid) * 3),
+		m_uiOctaves(6),
+		m_fAmplitude(5.8f),
+		m_fPersistence(0.3f)
 	{}
 	~Grid();
 
@@ -64,12 +62,13 @@ public:
 private:
 	GLfloat fHeightScale;
 	GLfloat fTime;
-	GLint iGrid;
 	GLuint m_perlinTextureID; //m_programID
 	Texture m_perlinTexture; //-1;
 
-	GLint uiOctaves;
-	GLfloat fAmplitude;
-	GLfloat fPersistence;
+	GLint m_iGrid;
+	GLfloat m_fScale;
+	GLint m_uiOctaves;
+	GLfloat m_fAmplitude;
+	GLfloat m_fPersistence;
 };
 

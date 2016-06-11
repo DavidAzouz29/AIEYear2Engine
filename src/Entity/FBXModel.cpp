@@ -443,10 +443,11 @@ GLvoid FBXModel::FBXAnimationDraw(const Camera& a_pCamState)
 
 	// -----------------------------------------------------
 	// Renders job
+	// If we have any textures...
 	if (m_pRenderable->samplers.size() != 0)
 	{
-		glActiveTexture(GL_TEXTURE0);
-		// TODO: delete me: glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_D").GetId()); // m_texture);
+		// Diffuse Texture in slot 0
+		glActiveTexture(GL_TEXTURE0); // TODO: delete me: glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_D").GetId()); // m_texture);
 		// Hacky condition for the Pyro/ characters
 		// if we're not loading a character...
 		if (m_pRenderable->samplers.size() <= 3)
@@ -461,25 +462,26 @@ GLvoid FBXModel::FBXAnimationDraw(const Camera& a_pCamState)
 		}
 		loc = glGetUniformLocation(m_program_FBXAnimation_ID, "diffuse");
 		glUniform1i(loc, 0);
-	}
-	else if (m_pRenderable->samplers.size() >= 1)
-	{
-		glActiveTexture(GL_TEXTURE1);
-		//TODO: delete me: glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_N").GetId()); // m_normal);
-		//glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByPath("./data/models/characters/Pyro/Pyro_N.tga")->GetId()); // m_normal);
-		// Hacky condition for the Pyro/ characters
-		if (!m_pRenderable->samplers.size() >= 5)
+
+		// If we have a normal texture...
+		if (m_pRenderable->samplers.size() >= 1)
 		{
-			glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers[2].tTexture->GetId()); // m_texture); 
+			// Normal Texture in slot 1
+			glActiveTexture(GL_TEXTURE1); //TODO: delete me: glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_N").GetId()); // m_normal);
+			//glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByPath("./data/models/characters/Pyro/Pyro_N.tga")->GetId()); // m_normal);
+			// Hacky condition for the Pyro/ characters
+			if (m_pRenderable->samplers.size() <= 3)
+			{
+				glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers[2].tTexture->GetId()); // m_texture); 
+			}
+			else
+			{
+				glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers[4].tTexture->GetId()); // m_texture); 
+			}
+			loc = glGetUniformLocation(m_program_FBXAnimation_ID, "normal");
+			glUniform1i(loc, 1);
 		}
-		else
-		{
-			glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers[4].tTexture->GetId()); // m_texture); 
-		}
-		loc = glGetUniformLocation(m_program_FBXAnimation_ID, "normal");
-		glUniform1i(loc, 1);
 	}
-	// -----------------------------------------------------
 
 	// -----------------------------------------------------
 	// FBX Mesh Draw

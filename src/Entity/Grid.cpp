@@ -15,9 +15,14 @@ Grid::~Grid()
 
 bool Grid::Create()
 {
+	// Load textures for our terrain
+	m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("./data/textures/dirt.png"));
+	m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("./data/textures/grass.png"));
+	m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("./data/textures/snow.png"));
+
 	CreateDrawShader();
 
-	GenerateGrid(iGrid, iGrid);
+	GenerateGrid(m_iGrid, m_iGrid);
 	//TODO: perlin creation
 	return true;
 }
@@ -93,11 +98,12 @@ GLvoid Grid::RenderUI()
 		}*/
 
 		ImGui::DragFloat("Height Scale", &fHeightScale, 0.1f, 0.01f, (GLfloat)INT_MAX);
-		ImGui::DragInt("Octaves", &uiOctaves, 0.1f, uiOctaves, USHRT_MAX);
-		ImGui::DragFloat("Amplitude", &fAmplitude, 0.1f, 0.01f, (GLfloat)INT_MAX);
-		ImGui::DragFloat("Persistence", &fPersistence, 0.1f, 0.01f, (GLfloat)INT_MAX);
+		ImGui::DragInt("Grid", &m_iGrid, 0.1f, 0, USHRT_MAX);
+		ImGui::DragFloat("Scale", &m_fScale, 0.1f, 0.01f, (GLfloat)INT_MAX);
+		ImGui::DragInt("Octaves", &m_uiOctaves, 0.1f, 0, USHRT_MAX);
+		ImGui::DragFloat("Amplitude", &m_fAmplitude, 0.1f, 0.01f, (GLfloat)INT_MAX);
+		ImGui::DragFloat("Persistence", &m_fPersistence, 0.1f, 0.01f, (GLfloat)INT_MAX);
 		/*ImGui::DragFloat("Timer", &m_fTimer, 0.1f, 0.01f, MAX_LOCATIONS * m_fLengthTime + m_fLengthTime);
-		ImGui::DragFloat("End Time", &m_fEndTime, 0.1f, 0.01f, (GLfloat)INT_MAX);
 		ImGui::DragFloat("Length of time", &m_fLengthTime, 0.1f, 0.01f, MAX_LOCATIONS * m_fLengthTime);
 		ImGui::DragFloat("Lerped Interpolant", &m_fTravelLerp, 0.1f, 0.01f, 1.0f);
 		ImGui::Separator();
@@ -157,22 +163,20 @@ GLvoid Grid::GenerateGrid(const GLuint a_iRows, const GLuint a_iCols)
 #pragma region Procedural
 	/// ----------------------------------------------------------
 	/// Grid Size
-	GLint iGrid = 64;
 	GLfloat *perlin_data = new GLfloat[a_iRows * a_iCols];
-	GLfloat fScale = (1.0f / iGrid) * 3;
 
-	for (GLint x = 0; x < iGrid; ++x)
+	for (GLint x = 0; x < m_iGrid; ++x)
 	{
-		for (GLint y = 0; y < iGrid; ++y)
+		for (GLint y = 0; y < m_iGrid; ++y)
 		{
-			perlin_data[y * iGrid + x] = 0;// glm::perlin(vec2(x, y) * fScale) * 0.5f + 0.5f;
+			perlin_data[y * m_iGrid + x] = 0;// glm::perlin(vec2(x, y) * fScale) * 0.5f + 0.5f;
 
-			for (int o = 0; o < uiOctaves; ++o)
+			for (int o = 0; o < m_uiOctaves; ++o)
 			{
 				GLfloat fFreq = powf(2, (GLfloat)o);
-				GLfloat fPerlin_sample = glm::perlin(glm::vec2((GLfloat)x, (GLfloat)y) * fScale * fFreq) * 0.5f + 0.5f;
-				perlin_data[y * iGrid + x] += fPerlin_sample * fAmplitude; //TODO: iGrid.x?
-				fAmplitude *= fPersistence;
+				GLfloat fPerlin_sample = glm::perlin(glm::vec2((GLfloat)x, (GLfloat)y) * m_fScale * fFreq) * 0.5f + 0.5f;
+				perlin_data[y * m_iGrid + x] += fPerlin_sample * m_fAmplitude; //TODO: iGrid.x?
+				m_fAmplitude *= m_fPersistence;
 			} //*/
 		}
 	}
@@ -182,8 +186,8 @@ GLvoid Grid::GenerateGrid(const GLuint a_iRows, const GLuint a_iCols)
 	glBindTexture(GL_TEXTURE_2D, m_perlinTextureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, iGrid, iGrid, 0, GL_RED, GL_FLOAT, perlin_data); */
 
-	m_perlinTexture = Texture(iGrid, iGrid, GL_R32F, GL_RED, GL_FLOAT, perlin_data);
-
+	m_perlinTexture = Texture(GL_R32F, m_iGrid, m_iGrid, m_perlinTextureID, GL_RED, GL_FLOAT, perlin_data);
+	// TODO: m_pRenderable->samplers.push_back(
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -281,51 +285,20 @@ GLvoid Grid::CreateDrawShader()
 
 	//vec4 P = Position; P.y += tan ( time + Position.x ) * heightScale; \
 
-	const char* fsSource = "#version 410\n \
-							in vec2 outCoord; \
-							in vec4 vNormal; \
-							out vec4 out_color; \
-							uniform vec3 LightDir; \
-							uniform vec3 LightColour; \
-							uniform sampler2D perlin_texture; \
-							uniform sampler2D dirt_texture; \
-							uniform sampler2D grass_texture; \
-							uniform sampler2D snow_texture; \
-							void main() { \
-							float d = max(0, \
-							dot( normalize(vNormal).xyz, LightDir ) ); \
-							float height = texture(perlin_texture, outCoord).r; \
-							vec4 dirtColor = texture(dirt_texture, outCoord); \
-							vec4 grassColor = texture(grass_texture, outCoord); \
-							vec4 snowColor = texture(snow_texture, outCoord); \
-							float blendValue = smoothstep(0.2, 0.5, height); \
-							vec4 color = mix(dirtColor, grassColor, blendValue); \
-							blendValue = smoothstep(0.7, 0.8, height); \
-							out_color = d * mix(color, snowColor, blendValue); \
-							out_color.a = 1; }";
+	GLushort fsSource = LoadShader(GL_FRAGMENT_SHADER, "./data/shaders/perlinTerrain.frag");
 
-	//TODO: LightColour; \
-	//void main() {	out_color = texture(perlin_texture, outCoord).rrrr; \
-	//void main() { out_color = vec4(outCoord.xy, 0, 1); \
-
-	/*out_color = d * texture(perlin_texture, outCoord).rrrr; \
-	out_color = d * mix(color, snowColor, blendValue); \
-	*/
 	/// ----------------------------------------------------------
 	/// Compile shaders
 	/// ----------------------------------------------------------
 	int success = GL_FALSE;
 	unsigned int iVertexShader = glCreateShader(GL_VERTEX_SHADER);
-	unsigned int iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
 	glShaderSource(iVertexShader, 1, (const char**)&vsSource, 0);
 	glCompileShader(iVertexShader);
-	glShaderSource(iFragmentShader, 1, (const char**)&fsSource, 0);
-	glCompileShader(iFragmentShader);
 
 	m_perlinTextureID = glCreateProgram();
 	glAttachShader(m_perlinTextureID, iVertexShader);
-	glAttachShader(m_perlinTextureID, iFragmentShader);
+	glAttachShader(m_perlinTextureID, fsSource);
 	glLinkProgram(m_perlinTextureID);
 
 	glGetProgramiv(m_perlinTextureID, GL_LINK_STATUS, &success);
@@ -341,7 +314,7 @@ GLvoid Grid::CreateDrawShader()
 		delete[] infoLog;
 	}
 
-	glDeleteShader(iFragmentShader);
+	glDeleteShader(fsSource);
 	glDeleteShader(iVertexShader);
 }
 
@@ -352,11 +325,12 @@ GLvoid Grid::DrawGeometry(const glm::mat4& a_projectionView)
 	GLuint projectionViewUniform = glGetUniformLocation(m_perlinTextureID, "ProjectionView");
 	glUniformMatrix4fv(projectionViewUniform, 1, false, &a_projectionView[0][0]); //m_projectionViewMatrix
 
-	/*unsigned int uiHeightScale = glGetUniformLocation(m_programID, "heightScale");
-	unsigned int uiTime = glGetUniformLocation(m_programID, "time");
+	//TODO: figure out what to do with heightscale
+	GLuint uiHeightScale = glGetUniformLocation(m_perlinTextureID, "heightScale");
+	GLuint uiTime = glGetUniformLocation(m_perlinTextureID, "time");
 
 	glUniform1f(uiHeightScale, fHeightScale);
-	glUniform1f(uiTime, fTime); //*/
+	glUniform1f(uiTime, fTime);
 
 	// Set prelin_texture sampler2D sampler to the tex unit we're going to use, init?
 	// tell the shader where it is
@@ -365,15 +339,17 @@ GLvoid Grid::DrawGeometry(const glm::mat4& a_projectionView)
 	GLint perlinTextureLocation = glGetUniformLocation(m_perlinTextureID, "perlin_texture");
 	glBindTexture(GL_TEXTURE_2D, m_perlinTextureID);
 
+	// dirt //glBindTexture(GL_TEXTURE_2D, m_textures["dirt"]);
 	glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, m_textures["dirt"]);
-	glBindTexture(GL_TEXTURE_2D, TextureManager::GetSingleton().LoadTexture("./data/textures/dirt.png")->GetId()); //TODO: clean this up?
+	glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers.begin()->tTexture->GetId()); 
 
+	// grass
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, TextureManager::GetSingleton().LoadTexture("./data/textures/grass.png")->GetId());
+	glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers[1].tTexture->GetId());
 
+	// snow
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, TextureManager::GetSingleton().LoadTexture("./data/textures/snow.png")->GetId());
+	glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers[2].tTexture->GetId());
 
 	// tell the shader where it is
 	glUniform1i(perlinTextureLocation, 0);
@@ -391,15 +367,15 @@ GLvoid Grid::DrawGeometry(const glm::mat4& a_projectionView)
 	glUniform3f(loc, v3Pos.x, v3Pos.y, v3Pos.z);
 
 	// bind the Light Dir
-	vec3 light(0, 1, 0);
-	//vec3 light(sin(glfwGetTime()), 1, cos(glfwGetTime()));
+	//vec3 light(0, 1, 0); //TODO:
+	vec3 light(sin(glfwGetTime()), 1, cos(glfwGetTime()));
 	loc = glGetUniformLocation(m_perlinTextureID, "LightDir");
 	glUniform3f(loc, light.x, light.y, light.z);
 
 	// bind the Light Colour
-	//vec3 v3Colour(1, sin(glfwGetTime()), 255);
+	vec3 v3Colour(1, sin(glfwGetTime()), 255);
 	//vec3 v3Colour(1, 50, 255); //TODO:
-	vec3 v3Colour(0, 0, 1);
+	//vec3 v3Colour(0, 0, 1);
 	loc = glGetUniformLocation(m_perlinTextureID, "LightColour");
 	glUniform3f(loc, v3Colour.x, v3Colour.y, v3Colour.z);
 	// TODO: v3Colour *= d 

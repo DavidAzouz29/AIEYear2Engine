@@ -103,7 +103,7 @@ bool RenderTarget::CreateFrame()
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fboID);
 
 	// Construct the FBO texture.
-	m_fboTexture = Texture(m_fboSize.x, m_fboSize.y, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	m_fboTexture = Texture(GL_RGB8, m_fboSize.x, m_fboSize.y, m_fboID, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 

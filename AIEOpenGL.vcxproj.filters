@@ -99,10 +99,10 @@
     <ClCompile Include="src\Sampler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Grid.cpp">
+    <ClCompile Include="src\Camera\StaticCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Camera\StaticCamera.cpp">
+    <ClCompile Include="src\Entity\Grid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -200,10 +200,10 @@
     <ClInclude Include="src\TextureManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Grid.h">
+    <ClInclude Include="src\Camera\StaticCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Camera\StaticCamera.h">
+    <ClInclude Include="src\Entity\Grid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

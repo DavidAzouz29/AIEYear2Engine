@@ -160,19 +160,22 @@ Texture::Texture(const GLchar *a_filename) :
 /// --------------------------------------------------------------------
 /// <summary>
 /// Note: Can be used for procedural textures.
-/// <para><param>P1: width.</param></para>
-/// <para><param>P2: height.</param></para>
-/// <para><param>P3: format: GL_R32F.</param></para>
-/// <para><param>P4: components: GL_RGB.</param></para>
-/// <para><param>P5: type: e.g. GL_UNSIGNED_BYTE.</param></para>
-/// <para><param>P6: pixel data.</param></para>
+/// <para><param>P1: format: GL_R32F.</param></para>
+/// <para><param>P2: width.</param></para>
+/// <para><param>P3: height.</param></para>
+/// <para><param>P4: Texture/ program ID.</param></para>
+/// <para><param>P5: components: GL_RGB.</param></para>
+/// <para><param>P6: type: e.g. GL_UNSIGNED_BYTE.</param></para>
+/// <para><param>P7: pixel data.</param></para>
 /// <example> Texture </example>
 /// </summary>
 /// --------------------------------------------------------------------
-Texture::Texture(GLuint a_width, GLuint a_height, GLenum a_format, GLenum a_components, GLenum a_type, const GLvoid* a_pPixels)
+Texture::Texture(GLenum a_format, GLuint a_width, GLuint a_height, GLuint a_textureID, GLenum a_components, GLenum a_type, const GLvoid* a_pPixels)
 {
 	m_width = a_width;
 	m_height = a_height;
+
+	m_textureID = a_textureID;
 
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);

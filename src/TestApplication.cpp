@@ -138,7 +138,7 @@ bool TestApplication::startup() {
 	m_entities.push_back(std::make_shared<FBXModel>("./data/models/characters/Pyro/pyro.fbx"));
 	m_entities.push_back(std::make_shared<ParticleEmitter>(configA));
 	m_entities.push_back(std::make_shared<ParticleEmitter>(configB));
-	m_entities.push_back(std::make_shared<GPUParticleEmitter>());
+	//m_entities.push_back(std::make_shared<GPUParticleEmitter>()); //TODO: uncomment to add GPU Particles again
 
 	m_pMath = std::make_shared<MathCollision>();
 
@@ -320,7 +320,7 @@ GLvoid TestApplication::Draw()
 
 	// Clear ImGui
 	ImGui_ImplGlfwGL3_NewFrame();
-	check_gl_error();
+	//check_gl_error(); //TODO: restore check
 
 	// For the render target
 	//glBindFramebuffer(GL_FRAMEBUFFER, m_pRenderTarget->GetSharedPointer()->GetFBO());
@@ -361,7 +361,7 @@ GLvoid TestApplication::Draw()
 	glUseProgram(m_pRenderTarget->GetFBO()); //*/
 	//TODO: VV needed?
 	DrawApp();
-	check_gl_error();
+	//check_gl_error(); //TODO: restore this for error checking
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
 	//Render ImGui over everything
@@ -448,8 +448,8 @@ GLvoid TestApplication::DrawApp()
 	// 
 
 	/*m_texture.DrawTexture(*m_pCamState,
-		TextureManager::GetSingleton()->GetTextureByName("soulspear_d"),  //m_texture.GetTextureByName("soulspear_d"),
-		TextureManager::GetSingleton()->GetTextureByName("soulspear_n")); //m_texture.GetTextureByName("soulspear_n")); */
+		TextureManager::GetSingleton()->GetTextureByName("soulspear_d"),  //m_texture.GetTextureByName("soulspear_d"), //Pyro_D
+		TextureManager::GetSingleton()->GetTextureByName("soulspear_n")); //m_texture.GetTextureByName("soulspear_n")); Pyro_N */
 
 	for (auto &pEntity : m_entities)
 	{
@@ -457,12 +457,6 @@ GLvoid TestApplication::DrawApp()
 	}
 
 	m_pRenderTarget->BindDraw();
-
-	// TODO: Get Pyro Textures working again
-	//m_render.DrawTextureP(m_pCamState); // TODO: FBX Texture - Needed for Render Target
-	/*m_texture.DrawTexture(*m_pCamState,
-		TextureManager::GetSingleton()->GetTextureByName("Pyro_D"),  //m_texture.GetTextureByName("Pyro_D"), 
-		TextureManager::GetSingleton()->GetTextureByName("Pyro_N"));  //m_texture.GetTextureByName("Pyro_N")); */
 
 	// Old draw items
 	Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, glm::vec4(1, 1, 0, 1));
