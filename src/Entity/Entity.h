@@ -27,18 +27,11 @@
 
 #include <gl_core_4_4.h>
 #include <glm/vec3.hpp>
-//#include <glm/mat4x2.hpp>
-#include <glm/mat4x4.hpp>
+//#include <glm/mat4x4.hpp>
 #include <memory>
 
 //class CameraStateMachine;
 //class Camera;
-class ParticleEmitter;
-class GPUParticleEmitter;
-class FBXModel;
-class Render; //TODO: render?
-class Mesh;
-class Texture;
 //class MathCollision;
 class BoundingShape;
 
@@ -51,7 +44,10 @@ public:
 	// The 'default' keyword is a c++11 feature and should be used instead of {}.
 	// This way the class can remain aggregate and/ or trivial.
 	//--------------------------------------------------------------------------------------
-	Entity() : m_pRenderable(std::make_shared<Renderable>()) {}
+	Entity() : 
+		m_pRenderable(std::make_shared<Renderable>())
+		//m_boundShape(std::make_shared<BoundingShape>())
+	{}
 	virtual ~Entity() = default;
 
 	// Is an abstract class
@@ -71,11 +67,6 @@ public:
 	/// <param>P1: Program ID</param>
 	/// </summary>
 	/*Entity */ void(*EntityRender)(GLint) = NULL;
-/*	//glm::mat4 GetColor() { return m_m4Colors; }
-
-	static std::shared_ptr<Entity> GetSingleton() { return ms_pSingleton; }
-	static void CreateSingleton() { ms_pSingleton = std::make_shared<Entity>().get(); }
-	static void DestroySingleton() { delete ms_pSingleton; } */
 
 // Protected so that other classes that inherit from
 // Entity can have access to certain member variables.
@@ -83,41 +74,22 @@ protected:
 	// Every entity uses frustum culling.
 	//BoundingShape m_boundShape; //TODO: frustum culling
 
-/*	//std::shared_ptr<Camera> m_pCurrentCamera;
-	std::shared_ptr<ParticleEmitter> m_pParticleEmitterA;
-	std::shared_ptr<ParticleEmitter> m_pParticleEmitterB;
-	std::shared_ptr<GPUParticleEmitter> m_pGPUEmitter; //*/
-
-	//---------------------------------------
-	// TODO: Remove
-	//---------------------------------------
-	//std::shared_ptr<Render> m_pRender; 
-	//std::shared_ptr<Mesh> m_pMesh;
-	//std::shared_ptr<Texture> m_pTexture; //TODO: remain here?
-	//---------------------------------------
-
 	// Each class/ entity contains a randerable component 
 	// which contains a Mesh, ability to render, and a Sampler/ Texture (id)
 	std::shared_ptr<Renderable> m_pRenderable;
 
-	//std::shared_ptr<RenderTarget> m_pRenderTarget;
 	//std::shared_ptr<MathCollision> m_pMath;
-	//Render* m_pRender;
-
 	/// ----------------------------------------------------------
 
 private:
-	//static Entity* ms_pSingleton;
 	/// ----------------------------------------------------------
 	//GLvoid PlanetCreation();
 	//GLvoid RenderGeometry();
 	/// ----------------------------------------------------------
 
-	//RenderTarget m_renderTarget; //TODO: render target? renderTarget
-
 	// TODO: Transform class?
-	// where our entity is in the world
 
+	// where our entity is in the world
 	glm::mat4 m_m4WorldTransform;
 };
 

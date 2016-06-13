@@ -90,6 +90,37 @@ std::shared_ptr<Texture> TextureManager::LoadTexture(const GLchar* szFileName)
 	return pNewTexture;
 }
 
+// --------------------------------------------------------------------
+// For Textures we create
+// e.g. Perlin or FBO.
+// --------------------------------------------------------------------
+std::shared_ptr<Texture> TextureManager::LoadTexture(const GLchar* a_name, GLenum a_format, GLuint a_width, GLuint a_height, GLuint a_textureID, GLenum a_components, GLenum a_type, const GLvoid* a_pPixels)
+{
+	auto it = m_textures.find(a_name); //identifier
+
+	// if not at the end
+	if (it != m_textures.end())
+	{
+		// set lock and store in a variable
+		// Pointing to a 
+		std::shared_ptr<Texture> texture = it->second.lock();
+		// check if the texture may have been deleted - create again.
+		if (texture == nullptr)
+		{
+			// point to a new instance
+			texture = std::make_shared<Texture>(a_format, a_width, a_height, a_textureID, a_components, a_type, a_pPixels);
+			it->second = texture;
+		}
+		// return what's valid
+		return texture;
+	}
+
+	// if we have reached the end/ hasn't been loaded before
+	std::shared_ptr<Texture> pNewTexture = std::make_shared<Texture>(a_format, a_width, a_height, a_textureID, a_components, a_type, a_pPixels);
+	m_textures.emplace(a_name, pNewTexture);
+	return pNewTexture;
+}
+
 // Returns a flag (nullptr) value to determine whether a Texture has been loaded.
 std::shared_ptr<Texture> TextureManager::GetTextureByName(const GLchar* a_name)
 {

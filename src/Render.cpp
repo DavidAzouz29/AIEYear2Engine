@@ -28,7 +28,7 @@
 #include "Render.h"
 #include "Camera\Camera.h"
 #include "Mesh.h"
-#include "Texture.h"
+//#include "Texture.h"
 //#include "gl_core_4_4.h"
 //#include "VertexData.h"
 
@@ -47,13 +47,6 @@
 	fTime(0.0f)
 {
 	//m_pMesh = std::make_shared<Mesh>();
-}
-
-Render::~Render()
-{
-	//CleanupOpenGLBuffers(m_fbx);
-
-	//glDeleteProgram(m_programID);
 } */
 
 /*bool Render::Create()
@@ -101,12 +94,6 @@ Render::~Render()
 	//GetSharedPointer()->CreateRenderTargetQuad();
 	//=======================================================
 	return true;
-} */
-
-//function to create a grid
-/*GLvoid Render::generateGrid(const GLuint a_iRows, const GLuint a_iCols)
-{
-	
 } */
 
 GLvoid Render::InitGeometry()
@@ -567,3 +554,85 @@ GLuint Render::GetTextureByName(const GLchar* name)
 	//std::vector<std::string>::iterator iter = m_textures.begin();
 	return m_textures[name];
 } */
+
+Meshes* CreateMeshFromBuffers(SimpleVertex* vertex_data, unsigned int vertex_count,
+	unsigned int *index_data, unsigned int index_count,
+	Material material)
+{
+	if (!vertex_data || !index_data) return 0;
+
+	//NOTE(aidan): all data for the scene amortized into a single buffer for easy deallocation
+	//			This is easy to do as its all just simple POD types
+	size_t total_bytes = sizeof(Meshes) +
+		sizeof(SubMesh) +
+		sizeof(SimpleVertex) * vertex_count +
+		sizeof(unsigned int) * index_count;
+	void* memory = calloc(total_bytes, 1);
+
+	Meshes* result = (Meshes*)memory;
+	SubMesh* sub_mesh = (SubMesh*)(result + 1);
+	SimpleVertex* verts = (SimpleVertex*)(sub_mesh + 1);
+	unsigned int* indices = (unsigned int*)(verts + vertex_count);
+
+	memcpy(verts, vertex_data, sizeof(SimpleVertex) * vertex_count);
+	memcpy(indices, index_data, sizeof(unsigned int) * index_count);
+
+	result->sub_meshes = sub_mesh;
+	result->sub_mesh_count = 1;
+	result->vertex_count = vertex_count;
+	result->vertex_data = verts;
+
+	sub_mesh->index_count = index_count;
+	sub_mesh->index_data = indices;
+	sub_mesh->material = material;
+
+	glGenBuffers(1, &result->vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, result->vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(SimpleVertex) * result->vertex_count, result->vertex_data, GL_DYNAMIC_DRAW);
+
+	glGenVertexArrays(1, &sub_mesh->vao);
+	glBindVertexArray(sub_mesh->vao);
+
+	glGenBuffers(1, &sub_mesh->ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sub_mesh->ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * sub_mesh->index_count, sub_mesh->index_data, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), (void*)(sizeof(float) * 3));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), (void*)(sizeof(float) * 6));
+
+	glBindVertexArray(0);
+
+	return result;
+}
+
+void FreeMesh(Meshes* mesh)
+{
+	*mesh = {};
+	free(mesh);
+}
+
+void RebuildVertexBuffer(Meshes* mesh)
+{
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, mesh->vertex_count * sizeof(SimpleVertex), mesh->vertex_data);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+Renderer::Renderer()
+{
+	LoadShader("./data/shaders/main_shader.vs", 0, "./data/shaders/main_shader.fs", &main_shader);
+}
+
+void Renderer::PushMesh(Meshes* mesh, mat4 transform)
+{
+	RenderItem item = {};
+	item.mesh = mesh;
+	item.transform = transform;
+
+	render_queue.push_back(item);
+}

@@ -10,6 +10,8 @@
 #include "Renderable.h"
 #include "Texture.h"
 
+#include "imgui.h"
+
 #include <stb_image.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -94,7 +96,21 @@ GLvoid FBXModel::Destroy()
 
 GLvoid FBXModel::RenderUI()
 {
-
+	GLfloat tex_size = 96.0f;
+	for (GLuint i = 0; i < m_pRenderable->samplers.size() ; ++i)
+	{
+		ImTextureID tex_id = (ImTextureID)m_pRenderable->samplers[i].tTexture->GetId();
+		ImGui::Text("Texture ID: ", tex_id);
+		ImGui::Image(tex_id, ImVec2(tex_size, tex_size), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+		if (i % 2 || i % 3)
+		{
+			ImGui::SameLine();
+		}
+		else
+		{
+			ImGui::Separator();
+		}
+	}
 }
 
 // Loads Textures already placed on a FBX //TODO: correct comment?
@@ -259,7 +275,9 @@ GLvoid FBXModel::RenderFBX(const Camera& a_pCamState)
 	glUniformMatrix4fv(loc, 1, GL_FALSE, &a_pCamState.getProjectionView()[0][0]); //m_projectionViewMatrix
 
 	//GLuint id = m_pRenderable->GetTextureByName("soulspear_d").GetId(); //TODO: soulspear
-	GLuint id = m_pRenderable->GetTextureByPath("./data/models/soulspear/soulspear_diffuse.tga")->GetId(); //TODO: soulspear
+	//GLuint id = m_pRenderable->GetTextureByPath("./data/models/soulspear/soulspear_diffuse.tga")->GetId();
+	//GLuint id = m_pRenderable->samplers[1].tTexture->GetId();
+	GLuint id = m_pRenderable->samplers.begin()->tTexture->GetId();
 	
 	//const unsigned int id = m_pRender->GetTextureByName("Pyro_D");
 	glBindTexture(GL_TEXTURE_2D, id);

@@ -158,6 +158,6 @@ GLvoid DrawTexture(const Camera& a_pCamState, T a_uiTexture1, T a_uiTexture2)
 
 	// draw
 	glBindVertexArray(m_mesh.GetVAO()); //TODO: replace m_VAO with VAO
-										//glBindVertexArray(m_pMesh->GetVAO()); //TODO: replace m_VAO with VAO
+	//glBindVertexArray(m_pMesh->GetVAO()); //TODO: replace m_VAO with VAO
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }

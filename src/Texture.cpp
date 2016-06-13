@@ -84,6 +84,7 @@ Texture::Texture(const GLchar *a_filename) :
 	glGenTextures(1, &m_textureID);
 	// Bind the texture to the correct slot for the dimension, in this case 2-D.
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
+	//glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //TODO: useful? https://www.khronos.org/opengles/sdk/docs/man/xhtml/glPixelStorei.xml
 	// Specify the data for the texture, including the format, resolution and variable type.
 	// Out data is an unsigned char, therefor it should be GL_UNSIGNED_BYTE.
 	glTexImage2D(GL_TEXTURE_2D, 0, E_FORMAT, imageWidth, imageHeight, 0, E_FORMAT, GL_UNSIGNED_BYTE, data);
@@ -167,7 +168,8 @@ Texture::Texture(const GLchar *a_filename) :
 /// <para><param>P5: components: GL_RGB.</param></para>
 /// <para><param>P6: type: e.g. GL_UNSIGNED_BYTE.</param></para>
 /// <para><param>P7: pixel data.</param></para>
-/// <example> Texture </example>
+/// <example> m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture(
+/// <para>"perlin", GL_R32F, m_iGrid, m_iGrid, m_perlinTextureID, GL_RED, GL_FLOAT, perlin_data)); </para></example>
 /// </summary>
 /// --------------------------------------------------------------------
 Texture::Texture(GLenum a_format, GLuint a_width, GLuint a_height, GLuint a_textureID, GLenum a_components, GLenum a_type, const GLvoid* a_pPixels)
@@ -176,9 +178,10 @@ Texture::Texture(GLenum a_format, GLuint a_width, GLuint a_height, GLuint a_text
 	m_height = a_height;
 
 	m_textureID = a_textureID;
-
+	//TODO: find out why texture ID is set to soulspear - glActiveTexture may be a clue
+	
 	glGenTextures(1, &m_textureID);
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
+	glBindTexture(GL_TEXTURE_2D, m_textureID); //*/
 
 	glTexImage2D(GL_TEXTURE_2D, 0, a_format, m_width, m_height, 0, a_components, a_type, a_pPixels);
 }

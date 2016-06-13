@@ -9,6 +9,8 @@
 ///
 /// ***EDIT***
 /// - Perlin land generation added	 	- David Azouz 10/06/16
+/// - Undo/ Reset button added		 	- David Azouz 12/06/16
+/// - Terrain Texture correct again	 	- David Azouz 12/06/16
 /// 
 /// TODO: fix m_perlinTextureID in .cpp
 /// 
@@ -18,7 +20,7 @@
 #pragma once
 
 #include "Entity\Entity.h"
-#include "Texture.h"
+//#include "Texture.h"
 #include "gl_core_4_4.h"
 
 class Grid : public Entity
@@ -32,7 +34,12 @@ public:
 		m_fScale((1.0f / m_iGrid) * 3),
 		m_uiOctaves(6),
 		m_fAmplitude(5.8f),
-		m_fPersistence(0.3f)
+		m_fPersistence(0.3f),
+		m_piGrid(m_iGrid),
+		m_pfScale(m_fScale),
+		m_puiOctaves(m_uiOctaves),
+		m_pfAmplitude(m_fAmplitude),
+		m_pfPersistence(m_fPersistence)
 	{}
 	~Grid();
 
@@ -41,7 +48,7 @@ public:
 	// ------------------------------------
 	bool Create() override;
 	GLvoid Update() override;
-	GLvoid Draw(const Camera& m_pCamState) override;
+	GLvoid Draw(const Camera& a_camState) override;
 	GLvoid Destroy() override {}
 	GLvoid RenderUI() override;
 	// ----------------------------------------------------------
@@ -63,12 +70,19 @@ private:
 	GLfloat fHeightScale;
 	GLfloat fTime;
 	GLuint m_perlinTextureID; //m_programID
-	Texture m_perlinTexture; //-1;
+	//Texture m_perlinTexture; //-1;
 
 	GLint m_iGrid;
 	GLfloat m_fScale;
 	GLint m_uiOctaves;
 	GLfloat m_fAmplitude;
 	GLfloat m_fPersistence;
+
+	//Previous values for undo
+	GLint m_piGrid;
+	GLfloat m_pfScale;
+	GLint m_puiOctaves;
+	GLfloat m_pfAmplitude;
+	GLfloat m_pfPersistence;
 };
 

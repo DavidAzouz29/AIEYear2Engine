@@ -25,6 +25,9 @@
     <ClCompile Include="dep\imgui-master\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="src\Camera\StaticCamera.cpp" />
     <ClCompile Include="src\Entity\Grid.cpp" />
+    <ClCompile Include="src\ParticleFluidEmitter.cpp" />
+    <ClCompile Include="src\Physics.cpp" />
+    <ClCompile Include="src\Render.cpp" />
     <ClCompile Include="src\Renderable.cpp" />
     <ClCompile Include="src\RenderTarget.cpp" />
     <ClCompile Include="src\Entity\FBXModel.cpp" />
@@ -43,7 +46,6 @@
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Entity\ParticleEmitter.cpp" />
     <ClCompile Include="src\Program.cpp" />
-    <ClCompile Include="src\Render.cpp" />
     <ClCompile Include="src\Sampler.cpp" />
     <ClCompile Include="src\TestApplication.cpp" />
     <ClCompile Include="src\Camera\TravelCamera.cpp" />
@@ -56,6 +58,9 @@
     <ClInclude Include="dep\imgui-master\imgui_internal.h" />
     <ClInclude Include="src\Camera\StaticCamera.h" />
     <ClInclude Include="src\Entity\Grid.h" />
+    <ClInclude Include="src\ParticleFluidEmitter.h" />
+    <ClInclude Include="src\Physics.h" />
+    <ClInclude Include="src\Render.h" />
     <ClInclude Include="src\Renderable.h" />
     <ClInclude Include="src\RenderableBatch.h" />
     <ClInclude Include="src\RenderTarget.h" />
@@ -77,7 +82,6 @@
     <ClInclude Include="src\Particle.h" />
     <ClInclude Include="src\Entity\ParticleEmitter.h" />
     <ClInclude Include="src\Program.h" />
-    <ClInclude Include="src\Render.h" />
     <ClInclude Include="src\Sampler.h" />
     <ClInclude Include="src\TestApplication.h" />
     <ClInclude Include="src\VertexData.h" />
@@ -170,13 +174,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)dep\stb;$(ProjectDir)dep\FBXLoader;$(ProjectDir)dep\aieutilities-master\aie;$(ProjectDir)dep\glfw\include;$(ProjectDir)dep\imgui-master;$(ProjectDir)dep\lodepng;$(ProjectDir)dep\glm;$(ProjectDir)src\;$(ProjectDir)src\Camera;$(ProjectDir)src\Entity;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dep\stb;$(ProjectDir)dep\FBXLoader;$(ProjectDir)dep\aieutilities-master\aie;$(ProjectDir)dep\glfw\include;$(ProjectDir)dep\glm;$(ProjectDir)dep\imgui-master;$(ProjectDir)dep\lodepng;$(ProjectDir)dep\physx\include;$(ProjectDir)dep\physx\lib\vc14win32;$(ProjectDir)src\;$(ProjectDir)src\Camera;$(ProjectDir)src\Entity;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>FBXLoader_d.lib;opengl32.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)dep\FBXLoader;$(ProjectDir)dep\glm\glm;$(ProjectDir)dep\glfw\include\GLFW;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>FBXLoader_d.lib;opengl32.lib;glfw3.lib;PhysX3DEBUG_x86.lib;PhysX3CommonDEBUG_x86.lib;PhysX3ExtensionsDEBUG.lib;PhysXVisualDebuggerSDKDEBUG.lib;PhysX3CookingDEBUG_x86.lib;PhysX3CharacterKinematicDEBUG_x86.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)dep\FBXLoader;$(ProjectDir)dep\glm\glm;$(ProjectDir)dep\glfw\include\GLFW;$(ProjectDir)dep\physx\lib\vc14win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

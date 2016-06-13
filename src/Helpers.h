@@ -20,6 +20,9 @@ std::string ReadFile(const char* fileName);
 // 
 GLuint LoadShader(GLuint a_iType, const GLchar* ac_cPath);
 
+bool LoadShaderType(char* filename, GLenum shader_type, unsigned int* output);
+bool LoadShader(char* vertex_filename, char* geometry_filename, char* fragment_filename, GLuint* result);
+
 // Register the OpenGL debugging callback.
 void TurnOnOpenGLDebugLogging();
 

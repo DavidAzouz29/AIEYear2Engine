@@ -23,8 +23,8 @@ GLvoid RenderTarget::Destroy()
 	//glDeleteBuffers(1, &m_VBO);
 	//glDeleteBuffers(1, &m_IBO);
 
-	GLuint texId = m_fboTexture.GetId();
-	glDeleteTextures(1, &texId);
+	//GLuint texId = m_fboTexture.GetId();
+	//glDeleteTextures(1, &texId);
 	glDeleteRenderbuffers(1, &m_fboDepth);
 
 	m_fboID = USHRT_MAX; //(GLuint)-1;
@@ -103,13 +103,14 @@ bool RenderTarget::CreateFrame()
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fboID);
 
 	// Construct the FBO texture.
-	m_fboTexture = Texture(GL_RGB8, m_fboSize.x, m_fboSize.y, m_fboID, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	//m_fboTexture = Texture(GL_RGB8, m_fboSize.x, m_fboSize.y, m_fboID, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("fbo", GL_RGB8, m_fboSize.x, m_fboSize.y, m_fboID, GL_RGB, GL_UNSIGNED_BYTE, nullptr));
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// attach it to the framebuffer as the first colour attachment
 	// the FBO MUST still be bound
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_fboTexture.GetId(), 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_pRenderable->samplers.begin()->tTexture->GetId(), 0);
 
 	// Let the FBO know which attachment to render to
 	GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
@@ -168,7 +169,7 @@ GLvoid RenderTarget::CreateRenderTargetQuad()
 	};
 
 	//TODO:
-	m_mesh.Create(vertexData, 6 * 4, indexData, 6);
+	m_pRenderable->mesh.Create(vertexData, 6 * 4, indexData, 6);
 
 	/* Add the following line to generate a VertexArrayObject
 	glGenVertexArrays(1, &m_mesh.GetVAO());
@@ -214,7 +215,7 @@ GLvoid RenderTarget::RenderRenderTargetQuad(const glm::mat4& a_projectionView)
 	glActiveTexture(GL_TEXTURE0);
 	//glBindTexture(GL_TEXTURE_2D, m_pRenderApp->GetSharedPointer()->GetFboTexture());
 	//glBindTexture(GL_TEXTURE_2D, GetFboTexture());
-	glBindTexture(GL_TEXTURE_2D, GetTexture().GetId());
+	glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers.begin()->tTexture->GetId());
 
 	// tell the shader where it is
 	GLint diffLoc = glGetUniformLocation(m_fboID, "diffuse"); // m_program_ID, m_render.GetProgramID()
@@ -225,6 +226,6 @@ GLvoid RenderTarget::BindDraw()
 {
 	glUseProgram(m_fboID);
 
-	glBindVertexArray(m_mesh.GetVAO()); // mesh Vertex Array Object
+	glBindVertexArray(m_pRenderable->mesh.GetVAO()); // mesh Vertex Array Object
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }

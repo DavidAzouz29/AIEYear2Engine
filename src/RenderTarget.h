@@ -1,9 +1,12 @@
 #pragma once
 
 /// viewed: https://github.com/johnsietsma/RefEngine/blob/102a07439ebf40182c4cab27df3001f0607234cc/Engine/src/graphics/RenderPass.cpp
+// TODO: remove m_fboTexture ?
+
 //#include "Render.h" //TODO: for inheritance 
-#include "Mesh.h"
-#include "Texture.h"
+//#include "Mesh.h"
+#include "Renderable.h"
+//#include "Texture.h"
 //#include "VertexData.h"
 
 #include <gl_core_4_4.h>
@@ -24,11 +27,12 @@ public:
 	//RenderTarget(std::weak_ptr<Camera> a_pCamera, glm::vec3 a_v3ClearColor, glm::ivec2 a_iv2FboSize) :
 	RenderTarget(Camera* a_pCamera, glm::ivec2 a_iv2FboSize) :
 		m_fboID(USHRT_MAX),
-		m_fboTexture(),
+		//m_fboTexture(),
 		m_fboDepth(USHRT_MAX),
 		m_pCamera(a_pCamera),
 		//m_clearColor(a_v3ClearColor),
-		m_fboSize(a_iv2FboSize)
+		m_fboSize(a_iv2FboSize),
+		m_pRenderable(std::make_shared<Renderable>())
 	{}
 	
 	bool Create();
@@ -44,20 +48,26 @@ public:
 
 	GLuint& GetFBO() { return m_fboID; }
 	//GLuint& GetFboTexture() { return m_fboTexture; }
-	const Texture& GetTexture() const { return m_fboTexture; }
-	Mesh GetMesh() const { return m_mesh; }
+	//const Texture& GetTexture() const { return m_fboTexture; }
+	//Mesh GetMesh() const { return m_mesh; }
 	GLuint& GetFboDepth() { return m_fboDepth; }
 	
+	Renderable* GetRenderable() const { return m_pRenderable.get(); }
+	//const Renderable& GetRenderable() { return m_pRenderable.get(); }
+
 private:
 	GLuint m_fboID; //What was GLuint m_programID;
-	Texture m_fboTexture; //-1;
+	//Texture m_fboTexture; //-1;
 	GLuint m_fboDepth;
 	Camera* m_pCamera;
 	//std::weak_ptr<Camera> m_pCamera;
 	//glm::vec3 m_clearColor;
 	glm::ivec2 m_fboSize;
 
-	Mesh m_mesh; // TODO: solve - only needed in BindDraw GetVAO?
+	//Mesh m_mesh; // TODO: solve - only needed in BindDraw GetVAO?
+
+	// contains a Mesh, ability to render, and a Sampler/ Texture (id)
+	std::shared_ptr<Renderable> m_pRenderable;
 
 };
 

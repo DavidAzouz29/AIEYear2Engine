@@ -45,13 +45,13 @@ public:
 
 	bool Create();
 	std::shared_ptr<Texture> LoadTexture(const GLchar* szFileName);
+	std::shared_ptr<Texture> LoadTexture(const GLchar* a_name, GLenum a_format, GLuint a_width, GLuint a_height, GLuint a_textureID, GLenum a_components, GLenum a_type, const GLvoid* a_pPixels);
 
 	std::shared_ptr<Texture> GetTextureByName(const GLchar* a_name);
 	bool DoesTextureNameExist(const GLchar* a_name);
 
-	//GLuint TextureInit(const GLchar* a_path);
-
 private:
-	// A way to track 
+	// A way to hold all our textures that have been loaded.
+	// Textures are able to be reused for more that one object
 	std::unordered_map<std::string, std::weak_ptr<Texture>> m_textures;
 };

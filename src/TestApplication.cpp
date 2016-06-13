@@ -337,7 +337,7 @@ GLvoid TestApplication::Draw()
 	//ImGui_ImplGlfwGL3_NewFrame();
 	// ----------------------------------------------------------
 	//glBindVertexArray(m_pRenderApp->GetSharedPointer()->GetVAO());
-	glBindVertexArray(m_pRenderTarget.get()->GetMesh().GetVAO());
+	glBindVertexArray(m_pRenderTarget->GetRenderable()->mesh.GetVAO()); //.get()->GetMesh().GetVAO());
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 	// Draw Captured Objects Here
