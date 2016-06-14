@@ -13,6 +13,39 @@
 	If you add a new vertex type you can add a new Mesh::create override to setup vertex attributes correctly.
 */
 
+/*struct Vertex
+{
+	glm::vec4 position;
+	//glm::vec4 colour;
+
+	Vertex()
+	{
+
+	}
+
+	Vertex(glm::vec4 in_pos)
+	{
+		position = in_pos;
+		//colour = in_color;
+	}
+};
+
+struct VertexColourTexture : public Vertex
+{
+	glm::vec2 texCoord;
+	glm::vec4 normal;
+	VertexColourTexture()
+	{
+
+	}
+
+	VertexColourTexture(glm::vec2 in_texCoord, glm::vec4 in_norm, glm::vec4 in_pos) : Vertex(in_pos)
+	{
+		texCoord = in_texCoord;
+		normal = in_norm;
+	}
+}; */
+
 struct Vertex_PositionColor
 {
 	glm::vec4 position;

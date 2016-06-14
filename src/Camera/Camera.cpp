@@ -83,7 +83,7 @@ GLvoid Camera::Enter()
 	m_up = glm::vec3(0, 1, 0);
 
 	// TODO: delete?
-	setLookAtFrom(glm::vec3(10, 10, 10), glm::vec3(0));
+	setLookAtFrom(glm::vec3(70, 90, 70), glm::vec3(0));
 
 	m_pWindow = glfwGetCurrentContext();
 }

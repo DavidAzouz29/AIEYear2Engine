@@ -71,19 +71,19 @@ GLvoid RenderTarget::RenderTargetLoader()
 	glShaderSource(iFragmentShader, 1, (const GLchar**)&fsSource, 0);
 	glCompileShader(iFragmentShader);
 
-	m_fboID = glCreateProgram();
-	glAttachShader(m_fboID, iVertexShader);
-	glAttachShader(m_fboID, iFragmentShader);
-	glLinkProgram(m_fboID);
+	m_programID = glCreateProgram();
+	glAttachShader(m_programID, iVertexShader);
+	glAttachShader(m_programID, iFragmentShader);
+	glLinkProgram(m_programID);
 
-	glGetProgramiv(m_fboID, GL_LINK_STATUS, &success);
+	glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
 	if (success == GL_FALSE)
 	{
 		GLint infoLogLength = 0;
-		glGetProgramiv(m_fboID, GL_INFO_LOG_LENGTH, &infoLogLength);
+		glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &infoLogLength);
 		GLchar* infoLog = new GLchar[infoLogLength];
 
-		glGetProgramInfoLog(m_fboID, infoLogLength, 0, infoLog);
+		glGetProgramInfoLog(m_programID, infoLogLength, 0, infoLog);
 		printf("Error: Failed to link shader program!\n");
 		printf("%s\n", infoLog);
 		delete[] infoLog;
@@ -104,7 +104,7 @@ bool RenderTarget::CreateFrame()
 
 	// Construct the FBO texture.
 	//m_fboTexture = Texture(GL_RGB8, m_fboSize.x, m_fboSize.y, m_fboID, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-	m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("fbo", GL_RGB8, m_fboSize.x, m_fboSize.y, m_fboID, GL_RGB, GL_UNSIGNED_BYTE, nullptr));
+	m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("fbo", GL_RGB8, m_fboSize.x, m_fboSize.y, GL_RGB, GL_UNSIGNED_BYTE, nullptr));
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -202,13 +202,13 @@ GLvoid RenderTarget::CreateRenderTargetQuad()
 
 GLvoid RenderTarget::RenderRenderTargetQuad(const glm::mat4& a_projectionView)
 {
-	glUseProgram(m_fboID);
+	glUseProgram(m_programID);
 
 	//glm::mat4 projView = m_pCameraStateMachine->GetCurrentCamera()->getProjectionView();
 
 	// Render Target
 	// bind the camera
-	GLint loc = glGetUniformLocation(m_fboID, "ProjectionView"); //m_program_ID
+	GLint loc = glGetUniformLocation(m_programID, "ProjectionView"); //m_program_ID
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(a_projectionView));
 
 	// Set texture slots
@@ -218,13 +218,13 @@ GLvoid RenderTarget::RenderRenderTargetQuad(const glm::mat4& a_projectionView)
 	glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers.begin()->tTexture->GetId());
 
 	// tell the shader where it is
-	GLint diffLoc = glGetUniformLocation(m_fboID, "diffuse"); // m_program_ID, m_render.GetProgramID()
+	GLint diffLoc = glGetUniformLocation(m_programID, "diffuse"); // m_program_ID, m_render.GetProgramID()
 	glUniform1i(diffLoc, 0);
 }
 
 GLvoid RenderTarget::BindDraw()
 {
-	glUseProgram(m_fboID);
+	glUseProgram(m_programID);
 
 	glBindVertexArray(m_pRenderable->mesh.GetVAO()); // mesh Vertex Array Object
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

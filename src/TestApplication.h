@@ -1,9 +1,7 @@
 #pragma once
 
 #include "BaseApplication.h"
-#include "Mesh.h"
-#include "Render.h"
-#include "Texture.h"
+#include "Physics.h"
 
 #include <gl_core_4_4.h>
 #include <vector>
@@ -15,6 +13,7 @@ class CameraStateMachine;
 class Camera;
 class Entity;
 class MathCollision;
+class Physics;
 class RenderTarget;
 
 /// <summary> 
@@ -57,6 +56,7 @@ private:
 	// This should be used for any camera related activites.
 	std::shared_ptr<CameraStateMachine> m_pCameraStateMachine;
 	std::shared_ptr<MathCollision> m_pMath;
+	std::shared_ptr<Physics> m_pPhysics;
 	std::shared_ptr<RenderTarget> m_pRenderTarget;
 	std::vector< std::shared_ptr<Entity> > m_entities;
 	Camera* m_pCamState;

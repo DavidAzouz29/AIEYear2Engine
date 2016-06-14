@@ -56,7 +56,8 @@ public:
 	//const Renderable& GetRenderable() { return m_pRenderable.get(); }
 
 private:
-	GLuint m_fboID; //What was GLuint m_programID;
+	GLuint m_fboID; //What was 
+	GLuint m_programID;
 	//Texture m_fboTexture; //-1;
 	GLuint m_fboDepth;
 	Camera* m_pCamera;

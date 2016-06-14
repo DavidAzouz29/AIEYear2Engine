@@ -7,6 +7,8 @@
 #include <glm\ext.hpp> //perlin
 #include <glm/gtc/type_ptr.hpp> //value_ptr
 
+#include <memory>
+
 using glm::vec3;
 
 Grid::~Grid()
@@ -98,8 +100,7 @@ GLvoid Grid::RenderUI()
 		ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
 		GLfloat tex_size = 96.0f;
 		ImTextureID tex_id = (ImTextureID)m_pRenderable->samplers.begin()->tTexture->GetId(); //m_perlinTextureID;
-		ImGui::Text("Perlin Texture ID: ", TextureManager::GetSingleton().GetTextureByName("perlin")->GetId(),
-			", Sampler: ", m_pRenderable->samplers[1].tTexture->GetId());
+		ImGui::Text("Perlin Texture ID: %d", m_pRenderable->samplers[0].tTexture->GetId());
 		ImGui::Image(tex_id, ImVec2(tex_size, tex_size), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
 		if (ImGui::IsItemHovered())
 		{
@@ -115,26 +116,24 @@ GLvoid Grid::RenderUI()
 			ImGui::EndTooltip();
 		}
 		// ------------------------------------------------------
-		ImGui::DragFloat("Height Scale", &fHeightScale, 0.1f, 0.01f, (GLfloat)INT_MAX);
+		ImGui::DragFloat("Height Scale", &fHeightScale, 0.1f, 0.01f, FLT_MAX);
 		ImGui::DragInt("Grid", &m_iGrid, 0.1f, 0, USHRT_MAX);
-		ImGui::DragFloat("Scale", &m_fScale, 0.1f, 0.01f, (GLfloat)INT_MAX);
-		if (ImGui::DragInt("Octaves", &m_uiOctaves, 0.1f, 0, USHRT_MAX))
-		{
-			m_puiOctaves = m_uiOctaves;
-		}
-		ImGui::DragFloat("Amplitude", &m_fAmplitude, 0.1f, 0.01f, (GLfloat)INT_MAX);
-		ImGui::DragFloat("Persistence", &m_fPersistence, 0.1f, 0.01f, (GLfloat)INT_MAX);
+		ImGui::DragFloat("Scale", &m_fScale, 0.1f, 0.01f, FLT_MAX);
+		ImGui::DragInt("Octaves", &m_uiOctaves, 0.1f, 0, USHRT_MAX);
+		ImGui::DragFloat("Amplitude", &m_fAmplitude, 0.1f, 0.01f, FLT_MAX);
+		ImGui::DragFloat("Persistence", &m_fPersistence, 0.01f, 0.01f, 1.f);
 		// Regenerates terrain based off values above
 		if (ImGui::Button("Generate Terrain"))
 		{
 			// store the previous data
+			m_pfHeightScale = fHeightScale;
 			m_piGrid = m_iGrid;
 			m_pfScale = m_fScale;
 			m_puiOctaves = m_uiOctaves;
 			m_pfAmplitude = m_fAmplitude;
 			m_pfPersistence = m_fPersistence;
 			// Create the terrain again
-			//GenerateGrid(m_iGrid, m_iGrid); //TODO: TODO: fix crash + make Perlin adjustable 'live' in runtime.
+			GenerateGrid(m_iGrid, m_iGrid); //TODO: TODO: fix crash + make Perlin adjustable 'live' in runtime.
 		}
 
 		GLfloat tex_w = (GLfloat)ImGui::GetIO().Fonts->TexWidth;
@@ -142,16 +141,17 @@ GLvoid Grid::RenderUI()
 		// Undo/ Reset button
 		ImGui::Text("Reset");
 		ImGui::SameLine();
-		if (ImGui::ImageButton(ImGui::GetIO().Fonts->TexID, ImVec2(20, 20), ImVec2(55.0f / tex_w, 17 / tex_h), ImVec2(70.0f / tex_w, 25 / tex_h), -1, ImColor(0, 0, 0, 255)))
+		if (ImGui::ImageButton(ImGui::GetIO().Fonts->TexID, ImVec2(20, 20), ImVec2(55.0f / tex_w, 17 / tex_h), ImVec2(70.0f / tex_w, 29 / tex_h), -1, ImColor(0, 0, 0, 255)))
 		{
 			// restore the data to the previous/ original value
+			fHeightScale = m_pfHeightScale;
 			m_iGrid = m_piGrid;
 			m_fScale = m_pfScale;
 			m_uiOctaves = m_puiOctaves;
 			m_fAmplitude = m_pfAmplitude;
 			m_fPersistence = m_pfPersistence;
 			// Create the terrain again
-			//GenerateGrid(m_iGrid, m_iGrid); //TODO: fix crash
+			GenerateGrid(m_iGrid, m_iGrid); //TODO: fix crash
 		}
 		/*ImGui::DragFloat("Timer", &m_fTimer, 0.1f, 0.01f, MAX_LOCATIONS * m_fLengthTime + m_fLengthTime);
 		ImGui::DragFloat("Length of time", &m_fLengthTime, 0.1f, 0.01f, MAX_LOCATIONS * m_fLengthTime);
@@ -170,7 +170,7 @@ GLvoid Grid::GenerateGrid(const GLuint a_iRows, const GLuint a_iCols)
 	/// ----------------------------------------------------------
 #pragma region Grid
 	/// ----------------------------------------------------------
-	Vertex_PositionColor* aoVertices = new Vertex_PositionColor[a_iRows * a_iCols];
+	/*Vertex_PositionColor* aoVertices = new Vertex_PositionColor[a_iRows * a_iCols];
 	for (GLushort r = 0; r < a_iRows; ++r)
 	{
 		for (GLushort c = 0; c < a_iCols; ++c)
@@ -181,6 +181,24 @@ GLvoid Grid::GenerateGrid(const GLuint a_iRows, const GLuint a_iCols)
 			//that might not be related to tiling a texture
 			glm::vec3 colour = glm::vec3(sinf((c / (GLfloat)(a_iCols - 1.0f)) * (r / (GLfloat)(a_iRows - 1.0f))));
 			aoVertices[r * a_iCols + c].color = glm::vec4(colour, 1.0f);
+		}
+	} */
+
+	Vertex_PositionTexCoord* aoVertices = new Vertex_PositionTexCoord[a_iRows * a_iCols];
+	for (GLushort r = 0; r < a_iRows; ++r)
+	{
+		for (GLushort c = 0; c < a_iCols; ++c)
+		{
+			aoVertices[r * a_iCols + c].position = glm::vec4((GLfloat)c, 0.0f, (GLfloat)r, 1.0f);
+
+			//create some arbitary colour based off something
+			//that might not be related to tiling a texture
+			//glm::vec3 colour = glm::vec3(sinf((c / (GLfloat)(a_iCols - 1.0f)) * (r / (GLfloat)(a_iRows - 1.0f))));
+
+			const float xCoord = r / static_cast<float>(a_iRows);
+			const float yCoord = c / static_cast<float>(a_iCols);
+
+			aoVertices[r * a_iCols + c].uv = glm::vec2(xCoord, yCoord); //glm::vec4(colour, 1.0f);
 		}
 	}
 
@@ -207,10 +225,15 @@ GLvoid Grid::GenerateGrid(const GLuint a_iRows, const GLuint a_iCols)
 			auiIndices[index++] = r * a_iCols + (c + 1);
 		}
 	}
-
+	bool isRegenerated = false;
 	m_pRenderable->mesh.SetIndexCount((a_iRows - 1) * (a_iCols - 1) * 6);
-
+	if (m_pRenderable->mesh.GetVAO() != (GLushort)-1)
+	{
+		m_pRenderable->mesh.Destroy();
+		isRegenerated = true;
+	}
 	m_pRenderable->mesh.Create(aoVertices, a_iRows * a_iCols, auiIndices, m_pRenderable->mesh.GetIndexCount());
+
 #pragma endregion
 	/// ----------------------------------------------------------
 #pragma region Procedural
@@ -222,14 +245,16 @@ GLvoid Grid::GenerateGrid(const GLuint a_iRows, const GLuint a_iCols)
 	{
 		for (GLint y = 0; y < m_iGrid; ++y)
 		{
-			perlin_data[y * m_iGrid + x] = 0;// glm::perlin(vec2(x, y) * fScale) * 0.5f + 0.5f;
+			perlin_data[y * m_iGrid + x] = 0;
 
+			float fAmplitude = m_fAmplitude;
+			float fPersistence = m_fPersistence;
 			for (int o = 0; o < m_uiOctaves; ++o)
 			{
 				GLfloat fFreq = powf(2, (GLfloat)o);
 				GLfloat fPerlin_sample = glm::perlin(glm::vec2((GLfloat)x, (GLfloat)y) * m_fScale * fFreq) * 0.5f + 0.5f;
-				perlin_data[y * m_iGrid + x] += fPerlin_sample * m_fAmplitude; //TODO: iGrid.x?
-				m_fAmplitude *= m_fPersistence;
+				perlin_data[y * m_iGrid + x] += fPerlin_sample * fAmplitude; //TODO: iGrid.x?
+				fAmplitude *= fPersistence;
 			} //*/
 		}
 	}
@@ -240,7 +265,14 @@ GLvoid Grid::GenerateGrid(const GLuint a_iRows, const GLuint a_iCols)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, iGrid, iGrid, 0, GL_RED, GL_FLOAT, perlin_data); */
 
 	//m_perlinTexture = Texture(GL_R32F, m_iGrid, m_iGrid, m_perlinTextureID, GL_RED, GL_FLOAT, perlin_data);
-	m_pRenderable->samplers.insert(m_pRenderable->samplers.begin(), TextureManager::GetSingleton().LoadTexture("perlin", GL_R32F, m_iGrid, m_iGrid, m_perlinTextureID, GL_RED, GL_FLOAT, perlin_data));
+	if (!isRegenerated)
+	{
+		m_pRenderable->samplers.insert(m_pRenderable->samplers.begin(), std::make_shared<Texture>(GL_R32F, m_iGrid, m_iGrid, GL_RED, GL_FLOAT, perlin_data));
+	}
+	else
+	{
+		m_pRenderable->samplers[0] = std::make_shared<Texture>(GL_R32F, m_iGrid, m_iGrid, GL_RED, GL_FLOAT, perlin_data);
+	}
 	//m_perlinTextureID = m_pRenderable->samplers.begin()->tTexture->GetId();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -350,19 +382,19 @@ GLvoid Grid::CreateDrawShader()
 	glShaderSource(iVertexShader, 1, (const char**)&vsSource, 0);
 	glCompileShader(iVertexShader);
 
-	m_perlinTextureID = glCreateProgram();
-	glAttachShader(m_perlinTextureID, iVertexShader);
-	glAttachShader(m_perlinTextureID, fsSource);
-	glLinkProgram(m_perlinTextureID);
+	m_perlinProgramID = glCreateProgram();
+	glAttachShader(m_perlinProgramID, iVertexShader);
+	glAttachShader(m_perlinProgramID, fsSource);
+	glLinkProgram(m_perlinProgramID);
 
-	glGetProgramiv(m_perlinTextureID, GL_LINK_STATUS, &success);
+	glGetProgramiv(m_perlinProgramID, GL_LINK_STATUS, &success);
 	if (success == GL_FALSE)
 	{
 		int infoLogLength = 0;
-		glGetProgramiv(m_perlinTextureID, GL_INFO_LOG_LENGTH, &infoLogLength);
+		glGetProgramiv(m_perlinProgramID, GL_INFO_LOG_LENGTH, &infoLogLength);
 		char* infoLog = new char[infoLogLength];
 
-		glGetProgramInfoLog(m_perlinTextureID, infoLogLength, 0, infoLog);
+		glGetProgramInfoLog(m_perlinProgramID, infoLogLength, 0, infoLog);
 		printf("Error: Failed to link shader program!\n");
 		printf("%s\n", infoLog);
 		delete[] infoLog;
@@ -375,23 +407,22 @@ GLvoid Grid::CreateDrawShader()
 GLvoid Grid::DrawGeometry(const glm::mat4& a_projectionView)
 {
 	fTime = static_cast<float>(glfwGetTime());
-	glUseProgram(m_perlinTextureID);
-	GLuint projectionViewUniform = glGetUniformLocation(m_perlinTextureID, "ProjectionView");
+	glUseProgram(m_perlinProgramID);
+	GLuint projectionViewUniform = glGetUniformLocation(m_perlinProgramID, "ProjectionView");
 	glUniformMatrix4fv(projectionViewUniform, 1, false, &a_projectionView[0][0]); //m_projectionViewMatrix
 
 	//TODO: figure out what to do with heightscale
-	GLuint uiHeightScale = glGetUniformLocation(m_perlinTextureID, "heightScale");
-	GLuint uiTime = glGetUniformLocation(m_perlinTextureID, "time");
+	GLuint uiHeightScale = glGetUniformLocation(m_perlinProgramID, "heightScale");
+	GLuint uiTime = glGetUniformLocation(m_perlinProgramID, "time");
 
-	glUniform1f(uiHeightScale, fHeightScale);
+	glUniform1f(uiHeightScale, m_fAmplitude);
 	glUniform1f(uiTime, fTime);
 
 	// Set prelin_texture sampler2D sampler to the tex unit we're going to use, init?
 	// tell the shader where it is
 	// TODO: Create only once
 	glActiveTexture(GL_TEXTURE0);
-	GLint perlinTextureLocation = glGetUniformLocation(m_perlinTextureID, "perlin_texture");
-	glBindTexture(GL_TEXTURE_2D, TextureManager::GetSingleton().GetTextureByName("perlin")->GetId());
+	glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers[0].tTexture->GetId());
 	//m_pRenderable->samplers.begin()->tTexture->GetId());
 
 	// dirt //glBindTexture(GL_TEXTURE_2D, m_textures["dirt"]);
@@ -406,32 +437,35 @@ GLvoid Grid::DrawGeometry(const glm::mat4& a_projectionView)
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers[3].tTexture->GetId());
 
+	
+	GLint perlinTextureLocation = glGetUniformLocation(m_perlinProgramID, "perlin_texture");
 	// tell the shader where it is
 	glUniform1i(perlinTextureLocation, 0);
-	GLint loc = glGetUniformLocation(m_perlinTextureID, "dirt_texture");
+
+	GLint loc = glGetUniformLocation(m_perlinProgramID, "dirt_texture");
 	glUniform1i(loc, 1);
-	loc = glGetUniformLocation(m_perlinTextureID, "grass_texture");
+	loc = glGetUniformLocation(m_perlinProgramID, "grass_texture");
 	glUniform1i(loc, 2);
-	loc = glGetUniformLocation(m_perlinTextureID, "snow_texture");
+	loc = glGetUniformLocation(m_perlinProgramID, "snow_texture");
 	glUniform1i(loc, 3);
 
 	// bind the position
 	vec3 v3Pos(0, 1, 0);
 	//vec3 v3Pos(cos(glfwGetTime()), 1, sin(glfwGetTime()));
-	loc = glGetUniformLocation(m_perlinTextureID, "Position");
+	loc = glGetUniformLocation(m_perlinProgramID, "Position");
 	glUniform3f(loc, v3Pos.x, v3Pos.y, v3Pos.z);
 
 	// bind the Light Dir
-	vec3 light(1, 1, 1); //TODO:
-	//vec3 light(sin(glfwGetTime()), 1, cos(glfwGetTime()));
-	loc = glGetUniformLocation(m_perlinTextureID, "LightDir");
+	//vec3 light(1, 1, 1); //TODO:
+	vec3 light(sin(glfwGetTime()), 1, cos(glfwGetTime()));
+	loc = glGetUniformLocation(m_perlinProgramID, "LightDir");
 	glUniform3f(loc, light.x, light.y, light.z);
 
 	// bind the Light Colour
 	vec3 v3Colour(1, sin(glfwGetTime()), 255);
 	//vec3 v3Colour(1, 50, 255); //TODO:
 	//vec3 v3Colour(0, 0, 1);
-	loc = glGetUniformLocation(m_perlinTextureID, "LightColour");
+	loc = glGetUniformLocation(m_perlinProgramID, "LightColour");
 	glUniform3f(loc, v3Colour.x, v3Colour.y, v3Colour.z);
 	// TODO: v3Colour *= d 
 

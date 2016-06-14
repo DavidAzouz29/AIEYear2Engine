@@ -45,7 +45,7 @@ public:
 
 	bool Create();
 	std::shared_ptr<Texture> LoadTexture(const GLchar* szFileName);
-	std::shared_ptr<Texture> LoadTexture(const GLchar* a_name, GLenum a_format, GLuint a_width, GLuint a_height, GLuint a_textureID, GLenum a_components, GLenum a_type, const GLvoid* a_pPixels);
+	std::shared_ptr<Texture> LoadTexture(const GLchar* a_name, GLenum a_format, GLuint a_width, GLuint a_height, GLenum a_components, GLenum a_type, const GLvoid* a_pPixels);
 
 	std::shared_ptr<Texture> GetTextureByName(const GLchar* a_name);
 	bool DoesTextureNameExist(const GLchar* a_name);

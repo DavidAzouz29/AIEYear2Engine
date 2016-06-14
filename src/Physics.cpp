@@ -113,11 +113,9 @@ void Physics::Shutdown()
 	//Application::shutdown();
 }
 
-bool Physics::Update()
+bool Physics::Update(GLfloat deltaTime)
 {
 	float dt = (float)glfwGetTime();
-	m_delta_time = dt;
-	glfwSetTime(0.0);
 
 	if (dt > 0)
 	{
@@ -138,15 +136,19 @@ bool Physics::Update()
 
 		//Density
 		float fDensity = 10.0f;
+		m_fTimer += dt;
+		if (m_fTimer >= 15.0f)
+		{
+			PxRigidDynamic* new_actor = PxCreateDynamic(*m_physics, box_transform, sphere, *m_physics_material, fDensity);
 
-		PxRigidDynamic* new_actor = PxCreateDynamic(*m_physics, box_transform, sphere, *m_physics_material, fDensity);
-
-		PxReal muzzleSpeed = -50;
-		// balls velocity
-		vec3 v3Direction(-m_camera.getTransform()[2]);
-		physx::PxVec3 velocity = physx::PxVec3(v3Direction.x, v3Direction.y, v3Direction.z) * muzzleSpeed;
-		new_actor->setLinearVelocity(velocity, true);
-		m_physics_scene->addActor(*new_actor); //TODO: new_box
+			PxReal muzzleSpeed = -50;
+			// balls velocity
+			vec3 v3Direction(-m_camera.getTransform()[2]);
+			physx::PxVec3 velocity = physx::PxVec3(v3Direction.x, v3Direction.y, v3Direction.z) * muzzleSpeed;
+			new_actor->setLinearVelocity(velocity, true);
+			m_physics_scene->addActor(*new_actor); //TODO: new_box
+		}
+		m_fTimer = 0;
 	}
 	
 	return true;

@@ -6,6 +6,9 @@ out vec4 out_color;
 
 uniform vec3 LightDir; 
 uniform vec3 LightColour; 
+
+uniform float heightScale;
+
 uniform sampler2D perlin_texture; 
 uniform sampler2D dirt_texture; 
 uniform sampler2D grass_texture; 
@@ -14,7 +17,7 @@ uniform sampler2D snow_texture;
 void main() 
 {
 	float d = max(0, dot( normalize(vNormal).xyz, LightDir ) ); 
-	float height = texture(perlin_texture, outCoord).r; 
+	float height = texture(perlin_texture, outCoord).r / heightScale; 
 	vec4 dirtColor = texture(dirt_texture, outCoord); 
 	vec4 grassColor = texture(grass_texture, outCoord); 
 	vec4 snowColor = texture(snow_texture, outCoord); 

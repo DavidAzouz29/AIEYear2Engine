@@ -33,9 +33,11 @@
 
 const Texture Texture::Invalid = Texture();
 
-Texture::Texture(const GLchar *a_filename) :
-	sPath(a_filename)
+Texture::Texture(const GLchar *a_filename) : 
+	Texture()
 {
+	sPath = a_filename;
+
 	// Load diffuse map
 	GLint imageWidth = 0, imageHeight = 0, imageFormat = 0;
 
@@ -44,9 +46,11 @@ Texture::Texture(const GLchar *a_filename) :
 	// In the case the image stores RGB values at 515x512 resolution.
 	/// ----------------------------------------------------------
 	GLubyte* data = stbi_load(a_filename, &imageWidth, &imageHeight, &imageFormat, STBI_default);
-	/// ----------------------------------------------------------
-	assert(data != nullptr);
+	if (data == nullptr) 
+		return;
 
+	m_width = imageWidth;
+	m_height = imageHeight;
 	/// --------------------
 	// Image Format
 	/// --------------------
@@ -88,6 +92,9 @@ Texture::Texture(const GLchar *a_filename) :
 	// Specify the data for the texture, including the format, resolution and variable type.
 	// Out data is an unsigned char, therefor it should be GL_UNSIGNED_BYTE.
 	glTexImage2D(GL_TEXTURE_2D, 0, E_FORMAT, imageWidth, imageHeight, 0, E_FORMAT, GL_UNSIGNED_BYTE, data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	stbi_image_free(data);
 }
@@ -164,20 +171,19 @@ Texture::Texture(const GLchar *a_filename) :
 /// <para><param>P1: format: GL_R32F.</param></para>
 /// <para><param>P2: width.</param></para>
 /// <para><param>P3: height.</param></para>
-/// <para><param>P4: Texture/ program ID.</param></para>
-/// <para><param>P5: components: GL_RGB.</param></para>
-/// <para><param>P6: type: e.g. GL_UNSIGNED_BYTE.</param></para>
-/// <para><param>P7: pixel data.</param></para>
+/// <para><param>P4: components: GL_RGB.</param></para>
+/// <para><param>P5: type: e.g. GL_UNSIGNED_BYTE.</param></para>
+/// <para><param>P6: pixel data.</param></para>
 /// <example> m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture(
-/// <para>"perlin", GL_R32F, m_iGrid, m_iGrid, m_perlinTextureID, GL_RED, GL_FLOAT, perlin_data)); </para></example>
+/// <para>"perlin", GL_R32F, m_iGrid, m_iGrid, GL_RED, GL_FLOAT, perlin_data)); </para></example>
 /// </summary>
 /// --------------------------------------------------------------------
-Texture::Texture(GLenum a_format, GLuint a_width, GLuint a_height, GLuint a_textureID, GLenum a_components, GLenum a_type, const GLvoid* a_pPixels)
+Texture::Texture(GLenum a_format, GLuint a_width, GLuint a_height, GLenum a_components, GLenum a_type, const GLvoid* a_pPixels)
+	: Texture()
 {
 	m_width = a_width;
 	m_height = a_height;
 
-	m_textureID = a_textureID;
 	//TODO: find out why texture ID is set to soulspear - glActiveTexture may be a clue
 	
 	glGenTextures(1, &m_textureID);

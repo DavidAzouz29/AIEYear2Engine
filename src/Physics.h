@@ -20,13 +20,14 @@ public:
 	Physics(Camera& a_camState) :
 		m_pRenderable(std::make_shared<Renderable>()),
 		m_camera(a_camState),
-		isRBD(true)
+		isRBD(true),
+		m_fTimer(0)
 	{}
 
 	bool Create();
 	//virtual bool Startup();
 	virtual void Shutdown();
-    virtual bool Update();
+    virtual bool Update(GLfloat deltaTime);
     virtual void Draw(const Camera& a_camState);
 
 	//Render and Clear
@@ -67,6 +68,9 @@ private:
 	PxCooking*		m_physics_cooker;
 	PxControllerManager*		m_controller_manager;
 	//PxController*				m_playerController; //TOOD: 
+
+	float m_fTimer;
+
 };
 
 #endif //CAM_PROJ_H_

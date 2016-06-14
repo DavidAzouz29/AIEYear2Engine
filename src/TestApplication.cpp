@@ -19,11 +19,11 @@
 /// - FBX Animation working	 	- David Azouz 8/03/16
 /// - Removed m_pCamera and replaced with m_pCameraStateMachine
 /// - Set up Entity/ Game Object system	- David Azouz 18/03/16
+/// - pRender & m_pRender business somewhat fixed - David Azouz 14/06/16
 /// 
 /// TODO: 
 /// Invoke and cycle camera
 /// change to #include <gl_core_4_4.h, <Gizmos.h, and to GLvoid
-/// Fix this whole pRender & m_pRender business
 /// </summary>
 /// ----------------------------------------------------------
 #include "TestApplication.h"
@@ -34,12 +34,9 @@
 #include "Camera\CameraStateMachine.h"
 #include "Camera\Camera.h"
 #include "Grid.h"
-#include "Mesh.h"  // | TODO: remove if Draw is removed?
 #include "RenderTarget.h"
 #include "Helpers.h"
 #include "MathCollision.h"
-#include "Texture.h"
-#include "TextureManager.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
@@ -53,8 +50,6 @@
 #include <assert.h>
 
 #define IM_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
-
-//struct ParticleEmitterConfig;
 
 using glm::vec3;
 using glm::vec4;
@@ -138,9 +133,10 @@ bool TestApplication::startup() {
 	m_entities.push_back(std::make_shared<FBXModel>("./data/models/characters/Pyro/pyro.fbx"));
 	m_entities.push_back(std::make_shared<ParticleEmitter>(configA));
 	m_entities.push_back(std::make_shared<ParticleEmitter>(configB));
-	//m_entities.push_back(std::make_shared<GPUParticleEmitter>()); //TODO: uncomment to add GPU Particles again
+	m_entities.push_back(std::make_shared<GPUParticleEmitter>()); //TODO: uncomment to add GPU Particles again
 
 	m_pMath = std::make_shared<MathCollision>();
+	m_pPhysics = std::make_shared<Physics>(*m_pCamState);
 
 	// Loops through each entity and calls their respected Create functions.
 	for (auto &pEntity : m_entities)
@@ -150,7 +146,7 @@ bool TestApplication::startup() {
 			return false;
 		}
 	}
-
+	m_pPhysics->Create();
 	// ----------------------------------------------------------
 	// Render Target(s)
 	// ----------------------------------------------------------
@@ -160,6 +156,7 @@ bool TestApplication::startup() {
 	{ 
 		return false; 
 	}
+
 	//////////////////////////////////////////////////////////////////////////
 	m_pickPosition = glm::vec3(0);
 
@@ -177,6 +174,7 @@ GLvoid TestApplication::shutdown()
 	{
 		pEntity->Destroy();
 	}
+	m_pPhysics->Shutdown();
 	//////////////////////////////////////////////////////////////////////////
 
 	// cleanup gizmos
@@ -200,13 +198,19 @@ bool TestApplication::Update(GLfloat deltaTime)
 	// Camera Mode: Static, FlyCamera, Orbit
 #pragma region Camera Mode
 	m_fPrevTime += deltaTime;
+	bool hasSpaceBeenPressed = false;
+	// Allow the character to be moved
+	if (glfwGetKey(m_pWindow, GLFW_KEY_0) || glfwGetKey(m_pWindow, GLFW_KEY_KP_0))
+	{
+
+	}
 	// Camera cycling and lerping // slerping/ squad.
 	// Cycles between various Cameras during run time
-	if (glfwGetKey(m_pWindow, GLFW_KEY_GRAVE_ACCENT) || glfwGetKey(m_pWindow, GLFW_KEY_KP_0))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS && !hasSpaceBeenPressed)
 	{
 		//std::invoke(
 		E_CAMERA_MODE_STATE eCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
-		if (m_fPrevTime > 5)
+		if (m_fPrevTime > 1)
 		{
 			eCurrentCameraMode = (E_CAMERA_MODE_STATE)(eCurrentCameraMode + 1);
 			if (eCurrentCameraMode > E_CAMERA_MODE_STATE_COUNT - 1)
@@ -216,6 +220,11 @@ bool TestApplication::Update(GLfloat deltaTime)
 			m_pCameraStateMachine->ChangeState((E_CAMERA_MODE_STATE)(eCurrentCameraMode));
 			m_fPrevTime = 0;
 		}
+		hasSpaceBeenPressed = true;
+	}
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_SPACE) == GLFW_RELEASE && hasSpaceBeenPressed)
+	{
+		hasSpaceBeenPressed = false;
 	}
 	else if (glfwGetKey(m_pWindow, GLFW_KEY_1) || glfwGetKey(m_pWindow, GLFW_KEY_KP_1))
 	{
@@ -259,6 +268,7 @@ bool TestApplication::Update(GLfloat deltaTime)
 	// TODO: does this break things - m_pCamState = m_pCameraStateMachine.get()->GetCurrentCamera();
 	m_pMath->Update(m_pCamState);
 
+	m_pPhysics->Update(deltaTime);
 	///----------------------------------------------------------
 	//////////////////////////////////////////////////////////////////////////
 
@@ -275,15 +285,15 @@ bool TestApplication::Update(GLfloat deltaTime)
 
 	// Draw Mode: Filled, Poly, Dot
 #pragma region Choose Draw state
-	if (glfwGetKey(m_pWindow, GLFW_KEY_0))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_9))
 	{
 		m_eCurrentDrawState = E_DRAW_STATE_FILL;
 	}
-	else if (glfwGetKey(m_pWindow, GLFW_KEY_9))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_8))
 	{
 		m_eCurrentDrawState = E_DRAW_STATE_POLY;
 	}
-	else if (glfwGetKey(m_pWindow, GLFW_KEY_8))
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_7))
 	{
 		m_eCurrentDrawState = E_DRAW_STATE_DOT;
 	}
@@ -323,48 +333,31 @@ GLvoid TestApplication::Draw()
 	//check_gl_error(); //TODO: restore check
 
 	// For the render target
-	//glBindFramebuffer(GL_FRAMEBUFFER, m_pRenderTarget->GetSharedPointer()->GetFBO());
-	glBindFramebuffer(GL_FRAMEBUFFER, m_pRenderTarget.get()->GetFBO());
+	//glBindFramebuffer(GL_FRAMEBUFFER, m_pRenderTarget.get()->GetFBO());
 	//printf("%d\n", m_pRenderApp->GetSharedPointer());
-	glViewport(0, 0, 512, 512); // 265 lower quarter of the texture
+	//glViewport(0, 0, 512, 512); // 265 lower quarter of the texture
 
 	// ----------------------------------------------------------
-	//glClearColor(m_v3ClearColor.r, m_v3ClearColor.g, m_v3ClearColor.b, 1);
-	glClearColor(0.75f, 0.75f, 0.75f, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	// Clear ImGui
 	//ImGui_ImplGlfwGL3_NewFrame();
 	// ----------------------------------------------------------
 	//glBindVertexArray(m_pRenderApp->GetSharedPointer()->GetVAO());
-	glBindVertexArray(m_pRenderTarget->GetRenderable()->mesh.GetVAO()); //.get()->GetMesh().GetVAO());
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+	//glBindVertexArray(m_pRenderTarget->GetRenderable()->mesh.GetVAO()); //.get()->GetMesh().GetVAO());
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
-	// Draw Captured Objects Here
-	if (m_bDrawGizmoGrid)
-	{
-		// ...for now let's add a grid to the gizmos
-		for (int i = 0; i < 21; ++i) {
-			Gizmos::addLine(vec3(-10 + i, 0, 10), vec3(-10 + i, 0, -10),
-				i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+	// TODO: Render to texture
+	//glBindFramebuffer(m_pRenderTarget->GetFBO());
+	//Gizmos::draw(m_pCamState->getProjectionView());
+	//DrawApp();
 
-			Gizmos::addLine(vec3(10, 0, -10 + i), vec3(-10, 0, -10 + i),
-				i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
-		}
-	}
-
-	Gizmos::draw(m_pCamState->getProjectionView());
-	// draw
 	// unbind the FBO so that we can render to the back buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//glUseProgram(m_pRenderApp->GetProgramID()); //*/
-	glUseProgram(m_pRenderTarget->GetFBO()); //*/
-	//TODO: VV needed?
 	DrawApp();
 	//check_gl_error(); //TODO: restore this for error checking
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
 	//Render ImGui over everything
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
 	ImGui::Render();
 	check_gl_error();
 }
@@ -409,14 +402,15 @@ GLvoid TestApplication::DrawApp()
 	}
 
 	// clear the screen for this frame
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, 1280, 720);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// use our texture program
 
 	glm::mat4 projView = m_pCamState->getProjectionView();
 
 	// For our RenderTarget/ Camera View on Render Target
-	m_pRenderTarget->RenderRenderTargetQuad(projView);
+	// TODO: Render to texture
+	//m_pRenderTarget->RenderRenderTargetQuad(projView);
 
 	// Rendering mode
 	switch (m_eCurrentDrawState)
@@ -446,17 +440,32 @@ GLvoid TestApplication::DrawApp()
 	//////////////////////////////////////////////////////////////////////////
 	// DRAW YOUR THINGS HERE
 	// 
-
 	/*m_texture.DrawTexture(*m_pCamState,
 		TextureManager::GetSingleton()->GetTextureByName("soulspear_d"),  //m_texture.GetTextureByName("soulspear_d"), //Pyro_D
 		TextureManager::GetSingleton()->GetTextureByName("soulspear_n")); //m_texture.GetTextureByName("soulspear_n")); Pyro_N */
+
+	// Draw Captured Objects Here
+	if (m_bDrawGizmoGrid)
+	{
+		// ...for now let's add a grid to the gizmos
+		for (int i = 0; i < 21; ++i) {
+			Gizmos::addLine(vec3(-10 + i, 0, 10), vec3(-10 + i, 0, -10),
+				i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+
+			Gizmos::addLine(vec3(10, 0, -10 + i), vec3(-10, 0, -10 + i),
+				i == 10 ? vec4(1, 1, 1, 1) : vec4(0, 0, 0, 1));
+		}
+	}
 
 	for (auto &pEntity : m_entities)
 	{
 		pEntity->Draw(*m_pCamState);
 	}
 
-	m_pRenderTarget->BindDraw();
+	// TODO: Render to texture
+	//m_pRenderTarget->BindDraw();
+
+	m_pPhysics->Draw(*m_pCamState);
 
 	// Old draw items
 	Gizmos::addSphere(glm::vec3(0, 7, 0), 0.5f, 8, 8, glm::vec4(1, 1, 0, 1));

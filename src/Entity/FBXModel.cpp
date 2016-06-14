@@ -18,6 +18,8 @@
 
 #include <glm/ext.hpp>
 
+#define MAX_COLS 3
+
 using glm::vec3;
 using glm::mat4;
 
@@ -96,20 +98,27 @@ GLvoid FBXModel::Destroy()
 
 GLvoid FBXModel::RenderUI()
 {
-	GLfloat tex_size = 96.0f;
-	for (GLuint i = 0; i < m_pRenderable->samplers.size() ; ++i)
+	if (ImGui::CollapsingHeader("FBX Models"))
 	{
-		ImTextureID tex_id = (ImTextureID)m_pRenderable->samplers[i].tTexture->GetId();
-		ImGui::Text("Texture ID: ", tex_id);
-		ImGui::Image(tex_id, ImVec2(tex_size, tex_size), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
-		if (i % 2 || i % 3)
+		GLfloat tex_size = 96.0f;
+
+		for (GLuint i = 0; i < m_pRenderable->samplers.size(); ++i)
 		{
-			ImGui::SameLine();
+			ImGui::BeginGroup();
+			ImGui::PushID(i);
+			ImTextureID tex_id = (ImTextureID)m_pRenderable->samplers[i].tTexture->GetId();
+			ImGui::Text("Texture ID: %d", tex_id);
+			ImGui::Image(tex_id, ImVec2(tex_size, tex_size), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+
+			ImGui::PopID();
+			ImGui::EndGroup();
+			if ((i % MAX_COLS) < 2)
+			{
+				ImGui::SameLine();
+			}
 		}
-		else
-		{
-			ImGui::Separator();
-		}
+
+		ImGui::Separator();
 	}
 }
 
@@ -120,7 +129,9 @@ GLvoid FBXModel::LoadFBXTextures(FBXFile* fbx)
 	//add them to our sampler vector.
 	for (GLuint i = 0; i < fbx->getTextureCount(); ++i)
 	{
-		m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture(fbx->getTextureByIndex(i)->path.c_str()));
+		auto pTexture = TextureManager::GetSingleton().LoadTexture(fbx->getTextureByIndex(i)->path.c_str());
+		if( pTexture!=nullptr )
+			m_pRenderable->samplers.push_back(pTexture);
 	}
 }
 

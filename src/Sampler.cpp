@@ -1,18 +1,23 @@
 #include "Sampler.h"
 
+#include <assert.h>
+
 Sampler::Sampler(const std::shared_ptr<Texture>& a_texture) : 
 	tTexture(a_texture) 
 {
-	glGenSamplers(1, &m_samplerID);
-	glBindSampler(GL_SAMPLER_2D, m_samplerID);
+	assert(tTexture != nullptr);
+	assert(tTexture->IsValid());
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glGenSamplers(1, &m_samplerID);
+	//glBindSampler(GL_SAMPLER_2D, m_samplerID);
+
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
 Sampler::~Sampler()
 {
-	glDeleteSamplers(1, &m_samplerID);
+	//glDeleteSamplers(1, &m_samplerID);
 }
 
 /*

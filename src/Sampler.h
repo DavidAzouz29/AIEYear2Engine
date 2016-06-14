@@ -36,6 +36,6 @@ struct Sampler
 	std::shared_ptr<Texture> tTexture; //
 
 private:
-	GLuint m_samplerID;
+	//GLuint m_samplerID;
 };
 

@@ -35,11 +35,13 @@ public:
 	// overloaded constructor
 	// loads a texture given the filename...
 	// program will crash if texture was unable to be found.
-	Texture(GLenum a_format, GLuint width, GLuint height, GLuint a_textureID, GLenum a_components, GLenum a_type, const GLvoid* pixels);
+	Texture(GLenum a_format, GLuint width, GLuint height, GLenum a_components, GLenum a_type, const GLvoid* pixels);
 
 	~Texture();
 
 	Texture& operator=(Texture&&);
+
+	bool IsValid() const { return m_textureID != USHRT_MAX; }
 
 	// Returns m_textureID.
 	GLuint GetId() const { return m_textureID; }

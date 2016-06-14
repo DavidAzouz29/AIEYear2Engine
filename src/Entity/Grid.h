@@ -29,12 +29,13 @@ public:
 	Grid() :
 		fHeightScale(2),
 		fTime(0.0f),
-		m_perlinTextureID(),
+		m_perlinProgramID(),
 		m_iGrid(64),
 		m_fScale((1.0f / m_iGrid) * 3),
 		m_uiOctaves(6),
 		m_fAmplitude(5.8f),
 		m_fPersistence(0.3f),
+		m_pfHeightScale(fHeightScale),
 		m_piGrid(m_iGrid),
 		m_pfScale(m_fScale),
 		m_puiOctaves(m_uiOctaves),
@@ -64,12 +65,12 @@ public:
 	GLvoid CreateDrawShader();
 	GLvoid DrawGeometry(const glm::mat4& a_projectionView);
 
-	GLuint GetProgramID() const { return m_perlinTextureID; }
+	GLuint GetProgramID() const { return m_perlinProgramID; }
 	
 private:
 	GLfloat fHeightScale;
 	GLfloat fTime;
-	GLuint m_perlinTextureID; //m_programID
+	GLuint m_perlinProgramID; //m_programID
 	//Texture m_perlinTexture; //-1;
 
 	GLint m_iGrid;
@@ -79,6 +80,7 @@ private:
 	GLfloat m_fPersistence;
 
 	//Previous values for undo
+	GLfloat m_pfHeightScale;
 	GLint m_piGrid;
 	GLfloat m_pfScale;
 	GLint m_puiOctaves;
