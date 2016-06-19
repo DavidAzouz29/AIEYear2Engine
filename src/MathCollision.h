@@ -16,11 +16,11 @@ class Camera;
 class MathCollision
 {
 public:
-	MathCollision();
-	~MathCollision();
+	MathCollision() = default;
+	~MathCollision() = default;
 
 	bool Create();
-	GLvoid Update(Camera* cam);
+	GLvoid Update(const Camera& a_cam);
 };
 
 /*class BoundingShape 

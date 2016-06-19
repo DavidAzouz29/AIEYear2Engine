@@ -11,8 +11,15 @@ Sampler::Sampler(const std::shared_ptr<Texture>& a_texture) :
 	//glGenSamplers(1, &m_samplerID);
 	//glBindSampler(GL_SAMPLER_2D, m_samplerID);
 
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	/*auto major = ogl_GetMajorVersion();
+	auto minor = ogl_GetMinorVersion();
+	float fGLVersion = major; //TODO:
+	// if the version of OpenGL is higher than 3.1 ...
+	if (major < 3.1f)
+	{
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	} */
 }
 
 Sampler::~Sampler()

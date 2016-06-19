@@ -14,7 +14,7 @@
 /// - Entity.cpp made obsolete					- David Azouz 8/06/16
 /// 
 /// TODO:
-/// 
+/// Physics for each entity?
 /// </summary>
 /// ----------------------------------------------------------
 
@@ -22,15 +22,16 @@
 //#include "VertexData.h"
 #include "Camera\Camera.h"
 #include "Helpers.h"
+//#include "Physics.h"
 #include "Renderable.h"
 //#include "RenderTarget.h"
+//#include "MathCollision.h"
 
 #include <gl_core_4_4.h>
 #include <glm/vec3.hpp>
 //#include <glm/mat4x4.hpp>
 #include <memory>
 
-//class CameraStateMachine;
 //class Camera;
 //class MathCollision;
 class BoundingShape;
@@ -45,19 +46,22 @@ public:
 	// This way the class can remain aggregate and/ or trivial.
 	//--------------------------------------------------------------------------------------
 	Entity() : 
-		m_pRenderable(std::make_shared<Renderable>())
-		//m_boundShape(std::make_shared<BoundingShape>())
+		//m_boundShape(std::make_shared<BoundingShape>()),
+		m_pRenderable(std::make_shared<Renderable>()),
+		//m_pPhysics(std::make_shared<Physics>()),
+		m_m4WorldTransform(1)
 	{}
 	virtual ~Entity() = default;
 
 	// Is an abstract class
 	// cannot create instances of this class
-	// Pure virtual function
+	// = 0 makes it a Pure (virtual) function
 	virtual bool	Create() = 0; //TODO: GLboolean?
-	virtual GLvoid	Update()	{};
-	virtual GLvoid	Draw(const Camera& m_pCamState) = 0; // pure func
+	// not every entity must have an update
+	virtual bool	Update(GLfloat deltaTime) { return true; }
+	virtual GLvoid	Draw(const Camera& m_pCamState) = 0;
 	// Items to be drawn to our Render Target.
-	GLvoid	DrawApp(); //TODO: create a DrawApp for each class that inherits from Entity - and remove from here
+	//GLvoid	DrawApp(); //TODO: create a DrawApp for each class that inherits from Entity - and remove from here
 	virtual GLvoid	Destroy()	{};
 	virtual GLvoid	RenderUI() = 0;
 
@@ -77,19 +81,19 @@ protected:
 	// Each class/ entity contains a randerable component 
 	// which contains a Mesh, ability to render, and a Sampler/ Texture (id)
 	std::shared_ptr<Renderable> m_pRenderable;
+	//std::shared_ptr<Physics> m_pPhysics;
 
 	//std::shared_ptr<MathCollision> m_pMath;
 	/// ----------------------------------------------------------
+	// TODO: Transform class?
 
+	// where our entity is in the world
+	glm::mat4 m_m4WorldTransform;
 private:
 	/// ----------------------------------------------------------
 	//GLvoid PlanetCreation();
 	//GLvoid RenderGeometry();
 	/// ----------------------------------------------------------
 
-	// TODO: Transform class?
-
-	// where our entity is in the world
-	glm::mat4 m_m4WorldTransform;
 };
 

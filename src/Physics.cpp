@@ -3,11 +3,13 @@
 #include "Physics.h"
 #include "Camera\Camera.h"
 #include "Render.h"
+#include "TestApplication.h"
 
 #include "gl_core_4_4.h"
 #include <GLFW/glfw3.h>
 #include "Gizmos.h"
 
+#include <assert.h>
 #include <glm/ext.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/vec3.hpp>
@@ -105,9 +107,9 @@ bool Physics::Create()
 void Physics::Shutdown()
 {
 	m_physics_scene->release();
-	m_physics_foundation->release();
+	m_physics_foundation->release(); //TODO" 178: ...pending module ref. Close .. dep mod first
 	m_physics->release();
-	m_controller_manager->purgeControllers();
+	//m_controller_manager->purgeControllers();
 	//delete m_renderer;
 	//Gizmos::destroy();
 	//Application::shutdown();
@@ -115,6 +117,7 @@ void Physics::Shutdown()
 
 bool Physics::Update(GLfloat deltaTime)
 {
+	//TODO: make 'deltaTime' useful?
 	float dt = (float)glfwGetTime();
 
 	if (dt > 0)
@@ -312,7 +315,8 @@ PxScene* Physics::CreateDefaultScene()
 	PxSceneDesc scene_desc(m_physics->getTolerancesScale());
 	scene_desc.gravity = PxVec3(0, -9.807f, 0);
 	scene_desc.filterShader = &PxDefaultSimulationFilterShader; //TODO: myFilterShader;
-	scene_desc.cpuDispatcher = PxDefaultCpuDispatcherCreate(8); //Note/ TODO: can use GPU or multiple CPU cores.
+	//unsigned int uiThreads = TestApplication::concurentThreadsSupported;
+	scene_desc.cpuDispatcher = PxDefaultCpuDispatcherCreate(2); //was 8 - Note/ TODO: can use GPU or multiple CPU cores.
 	PxScene* result = m_physics->createScene(scene_desc);
 	return result;
 }
@@ -388,9 +392,9 @@ void Physics::SetupIntroductionToPhysX()
 #pragma endregion
 #pragma endregion
 #pragma endregion
-/*
+
 #pragma region Player Controller ( Capsule )
-	m_myHitReport = new ControllerHitReport();
+	/*m_myHitReport = new ControllerHitReport();
 	m_controller_manager = PxCreateControllerManager(*m_physics_scene);
 
 	PxCapsuleControllerDesc desc;
@@ -412,9 +416,9 @@ void Physics::SetupIntroductionToPhysX()
 
 	m_myHitReport->clearPlayerContactNormal();
 
-	m_physics_scene->addActor(*m_playerController->getActor());
+	m_physics_scene->addActor(*m_playerController->getActor()); */
 #pragma endregion
-
+/*
 #pragma region Ragdoll
 	//Adding A ragdoll into the scene
 	Ragdoll* ragdoll = new Ragdoll();
@@ -547,4 +551,118 @@ void Physics::renderGizmos(PxScene* physics_scene)
         delete[] links;
     }
 }
+/*
+void attachedRigidBodyConvex(float density, PxMaterial* g_PhysicsMaterial, bool isDynamic)
+{
+	//need a placeholder box 
+	PxBoxGeometry box = PxBoxGeometry(1, 1, 1);
+	PxTransform transform(*(PxMat44*)(&_worldTransform[0])); //PhysX and GLM matricies are the same internally so we simply cast between them; 
+	if (isDynamic)
+	{
+		_pXactor = PxCreateDynamic(*g_Physics, transform, box, *g_PhysicsMaterial, density);
+	}
+	else
+	{
+		_pXactor = PxCreateStatic(*g_Physics, transform, box, *g_PhysicsMaterial);
+		//PxRigidActor* //TODO: 
+	}
+	_pXactor->userData = this; //link the PhysX actor to our FBX model
+
+	int numberVerts = 0;
+	//find out how many verts there are in total in tank model 
+	for (unsigned int i = 0; i < _FBXModel->getMeshCount(); ++i)
+	{
+		FBXMeshNode* mesh = _FBXModel->getMeshByIndex(i);
+		numberVerts += mesh->m_vertices.size();
+	}
+	//reserve space for vert buffer 
+	PxVec3 *verts = new PxVec3[numberVerts]; //temporary buffer for our verts 
+	int vertIDX = 0;
+	//copy our verts from all the sub meshes 
+	//and tranform them into the same space 
+	for (unsigned int i = 0; i < _FBXModel->getMeshCount(); ++i)
+	{
+		FBXMeshNode* mesh = _FBXModel->getMeshByIndex(i);
+		int numberVerts = mesh->m_vertices.size();
+		for (int vertCount = 0; vertCount< numberVerts; vertCount++)
+		{
+			glm::vec4 temp = mesh->m_globalTransform * mesh->m_vertices[vertCount].position;
+			verts[vertIDX++] = PxVec3(temp.x, temp.y, temp.z);
+		}
+	}
+
+	if (isDynamic)
+	{
+		PxConvexMeshDesc convexDesc;
+		convexDesc.points.count = numberVerts;
+		convexDesc.points.stride = sizeof(PxVec3);
+		convexDesc.points.data = verts;
+		convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX;
+		convexDesc.vertexLimit = 128;
+		PxDefaultMemoryOutputStream* buf = new PxDefaultMemoryOutputStream();
+		assert(g_PhysicsCooker->cookConvexMesh(convexDesc, *buf));
+		PxU8* contents = buf->getData();
+		PxU32 size = buf->getSize();
+		PxDefaultMemoryInputData input(contents, size);
+		PxConvexMesh* convexMesh = g_Physics->createConvexMesh(input);
+		PxTransform pose = PxTransform(PxVec3(0.0f, 0, 0.0f));
+		PxShape* convexShape = _pXactor->createShape(PxConvexMeshGeometry(convexMesh), *g_PhysicsMaterial, pose);
+		//remove the placeholder box we started with 
+		int numberShapes = _pXactor->getNbShapes();
+		PxShape** shapes = (PxShape**)_aligned_malloc(sizeof(PxShape*)*numberShapes, 16);
+		_pXactor->getShapes(shapes, numberShapes);
+		_pXactor->detachShape(**shapes); delete(verts);
+		//delete our temporary vert buffer. 
+		//Add it to the scene 
+		g_Physics->addActor(_pXactor);
+	}
+	else
+	{
+		// Less efficient than convex hulls
+		PxTriangleMeshDesc meshDesc;
+		meshDesc.points.count = numberVerts;
+		meshDesc.points.stride = sizeof(PxVec3);
+		meshDesc.points.data = verts;
+		int triCount = numberIndex / 3;
+		meshDesc.triangles.count = triCount;
+		meshDesc.triangles.stride = 3 * sizeof(PxU32);
+		meshDesc.triangles.data = indexes;
+
+		PxDefaultMemoryOutputStream* buf = new PxDefaultMemoryOutputStream();
+		assert(g_PhysicsCooker->cookTriangleMesh(meshDesc, *buf));
+		PxU8* contents = buf->getData();
+		PxU32 size = buf->getSize();
+		PxDefaultMemoryInputData input(contents, size);
+		PxTriangleMesh* triangleMesh = g_Physics->createTriangleMesh(input);
+		PxTransform pose = PxTransform(PxVec3(0.0f, 0, 0.0f));
+		PxShape* convexShape = _pXactor->createShape(PxTriangleMeshGeometry(triangleMesh), *g_PhysicsMaterial, pose);
+	}
+}
+
+/// --------------------------------------------------------------------
+/// <summary>
+/// <para><param>P1 + 2: rows + columns.</param></para>
+/// <para><param>P3: terrain: int* perlin_data.</param></para>
+/// <para><param>P4: _heightScalePX = *number next to height* i.e. height * x.</param></para>
+/// <para><param>P5: size: .</param></para>
+///
+/// Height-map i.e. Terrain
+/// <example> </example>
+/// </summary> //Physics::
+/// --------------------------------------------------------------------
+void TerrainCollision(unsigned int _rows, unsigned int _cols, int* _samples, int _heightScalePX, int _size, PxMaterial* g_PhysicsMaterial = Physics::m_physics_material)
+{
+	PxHeightFieldDesc hfDesc;
+	hfDesc.format = PxHeightFieldFormat::eS16_TM;
+	hfDesc.nbColumns = _cols;
+	hfDesc.nbRows = _rows;
+	hfDesc.samples.data = _samples;
+	hfDesc.samples.stride = sizeof(PxHeightFieldSample);
+	hfDesc.thickness = -100.0f;
+	PxHeightField* aHeightField = g_Physics->createHeightField(hfDesc);
+	PxHeightFieldGeometry hfGeom(aHeightField, PxMeshGeometryFlags(), _heightScalePX, _size, _size);
+	PxTransform pose = PxTransform(PxVec3(0.0f, 0, 0.0f));
+	PxShape* heightmap = _pXactor->createShape((PxHeightFieldGeometry)hfGeom, *g_PhysicsMaterial, pose);
+	assert(heightmap);
+} */
 

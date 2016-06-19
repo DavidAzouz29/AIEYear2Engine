@@ -12,7 +12,8 @@
 /// Invoke http://en.cppreference.com/w/cpp/utility/functional/invoke
 /// Vector Insert http://www.cplusplus.com/reference/vector/vector/insert/
 /// Error checking https://blog.nobel-joergensen.com/2013/01/29/debugging-opengl-using-glgeterror/
-/// 
+/// Number of Threads available http://en.cppreference.com/w/cpp/thread/thread/hardware_concurrency
+///
 /// ***EDIT***
 /// - Render Targets Working	- David Azouz 7/03/16
 /// - Camera States implemented	- David Azouz 7/03/16
@@ -21,6 +22,11 @@
 /// - Set up Entity/ Game Object system	- David Azouz 18/03/16
 /// - pRender & m_pRender business somewhat fixed - David Azouz 14/06/16
 /// 
+/// Notes:
+/// Threads: Windows IOCP
+/// static std::mutex myMutex;
+/// std::lock_guard std::mutex> guard(myMutex);
+///
 /// TODO: 
 /// Invoke and cycle camera
 /// change to #include <gl_core_4_4.h, <Gizmos.h, and to GLvoid
@@ -41,13 +47,14 @@
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 
-#include <iostream>
+#include <assert.h>
 #include <Gizmos.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp> //needed for pi
-
-#include <assert.h>
+#include <iostream>
+#include <mutex> //locking/ unlocking threads
+#include <thread>
 
 #define IM_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 
@@ -56,11 +63,11 @@ using glm::vec4;
 using glm::mat4;
 using namespace std;
 
-bool TestApplication::startup() {
-
+bool TestApplication::startup() 
+{
 	// create a basic window
 	createWindow("AIE OpenGL Application", 1280, 720);
-	
+	//if(_DEBUG) //TODO: 
 	TurnOnOpenGLDebugLogging();
 
 	// start the gizmo system that can draw basic shapes
@@ -84,17 +91,34 @@ bool TestApplication::startup() {
 	m_pCameraStateMachine = std::make_shared<CameraStateMachine>(v4Perspective);
 
 	m_pCamState = m_pCameraStateMachine->GetCurrentCamera();
-	// Repeating code: TODO: change
-	/*if (m_pCamState == nullptr)
-	{
-		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_FLYCAMERA);
-	}*/
 	//////////////////////////////////////////////////////////////////////////
 	// YOUR STARTUP CODE HERE
 	// -----------------------
-	//Entity::CreateSingleton();
-
-	//m_pEntity = std::make_shared<Entity>();
+	///<summary>
+	/// Threading
+	/// may return 0 when not able to detect 
+	/// TODO: Threads seek work from a queue if their spin count is greater than 'x'
+	/// Research Windows IOCP
+	///</summary>
+	// -----------------------
+	concurentThreadsSupported = std::thread::hardware_concurrency();
+	std::cout << concurentThreadsSupported << " concurrent threads are supported.\n";
+	// this is to stop chunkLength equalling to 0
+	if (concurentThreadsSupported <= 2 && concurentThreadsSupported > 0)
+	{
+		chunkLength = 1;
+	}
+	else if (concurentThreadsSupported > 2)
+	{
+		// We minus one as we are still running our main thread
+		chunkLength = (int)m_entities.size() / (concurentThreadsSupported - 1);
+	}
+	else
+	{
+		chunkLength = 0;
+		printf("Buy a new PC, cannot detect any threads.");
+	}
+	// -----------------------
 #pragma region CPU Particles Config(s)
 	GLuint uiAmount = 20; //TODO: 3000
 	ParticleEmitterConfig configA;
@@ -126,7 +150,6 @@ bool TestApplication::startup() {
 	configB.v3ParticlePosition = glm::vec3(3, 5, 0);
 #pragma endregion
 
-	//m_pEntity = std::make_unique<Entity>();
 	// Adds our inherited classes to the vector.
 	m_entities.push_back(std::make_shared<Grid>());
 	m_entities.push_back(std::make_shared<FBXModel>("./data/models/soulspear/soulspear.fbx"));
@@ -138,15 +161,32 @@ bool TestApplication::startup() {
 	m_pMath = std::make_shared<MathCollision>();
 	m_pPhysics = std::make_shared<Physics>(*m_pCamState);
 
+	//int i = 0;
 	// Loops through each entity and calls their respected Create functions.
 	for (auto &pEntity : m_entities)
 	{
+		/*// Making use of a Lambda function //	qThreads.push(std::thread([&pEntity]()
+		vThreads.push_back(std::thread([&pEntity](int low, int high)
+		{
+			// Only "process" as much data our threads can handle
+			for (int j = low; j < high; j++)
+			{ */
 		if (!pEntity->Create())
 		{
 			return false;
 		}
+		/*	}
+		}, i * chunkLength, (i + 1) * chunkLength
+			));
+		i++; */
 	}
-	m_pPhysics->Create();
+	//m_pMath->Create(); // so far does nothing
+	//TODO: threading
+	//vThreads.push_back(std::thread([this]() {
+	if (!m_pPhysics->Create())
+	{
+		return false;
+	} //}));
 	// ----------------------------------------------------------
 	// Render Target(s)
 	// ----------------------------------------------------------
@@ -157,6 +197,12 @@ bool TestApplication::startup() {
 		return false; 
 	}
 
+	/*for (auto &thread : vThreads)
+	{
+		thread.join();
+	}
+	// clear the data in vThreads for our 'Update' version of threads
+	vThreads.clear();*/
 	//////////////////////////////////////////////////////////////////////////
 	m_pickPosition = glm::vec3(0);
 
@@ -198,15 +244,14 @@ bool TestApplication::Update(GLfloat deltaTime)
 	// Camera Mode: Static, FlyCamera, Orbit
 #pragma region Camera Mode
 	m_fPrevTime += deltaTime;
-	bool hasSpaceBeenPressed = false;
 	// Allow the character to be moved
 	if (glfwGetKey(m_pWindow, GLFW_KEY_0) || glfwGetKey(m_pWindow, GLFW_KEY_KP_0))
 	{
-
+		//TODO: character controller
 	}
 	// Camera cycling and lerping // slerping/ squad.
 	// Cycles between various Cameras during run time
-	else if (glfwGetKey(m_pWindow, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS && !hasSpaceBeenPressed)
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS && !m_hasSpaceBeenPressed)
 	{
 		//std::invoke(
 		E_CAMERA_MODE_STATE eCurrentCameraMode = m_pCameraStateMachine->GetCurrentCameraMode();
@@ -220,11 +265,11 @@ bool TestApplication::Update(GLfloat deltaTime)
 			m_pCameraStateMachine->ChangeState((E_CAMERA_MODE_STATE)(eCurrentCameraMode));
 			m_fPrevTime = 0;
 		}
-		hasSpaceBeenPressed = true;
+		m_hasSpaceBeenPressed = true;
 	}
-	else if (glfwGetKey(m_pWindow, GLFW_KEY_SPACE) == GLFW_RELEASE && hasSpaceBeenPressed)
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_GRAVE_ACCENT) == GLFW_RELEASE && m_hasSpaceBeenPressed)
 	{
-		hasSpaceBeenPressed = false;
+		m_hasSpaceBeenPressed = false;
 	}
 	else if (glfwGetKey(m_pWindow, GLFW_KEY_1) || glfwGetKey(m_pWindow, GLFW_KEY_KP_1))
 	{
@@ -258,17 +303,36 @@ bool TestApplication::Update(GLfloat deltaTime)
 
 	//////////////////////////////////////////////////////////////////////////
 	// YOUR UPDATE CODE HERE
+	//int i = 0;
 	for (auto &pEntity : m_entities)
 	{
-		pEntity->Update();
+		/*// Making use of a Lambda function //	qThreads.push(std::thread([&pEntity]()
+		vThreads.push_back(std::thread([&pEntity, &deltaTime](int low, int high)
+		{
+			// Only "process" as much data our threads can handle
+			for (int j = low; j < high; j++)
+			{ */
+		if (!pEntity->Update(deltaTime))
+		{
+			return false;
+		}
+			/*}
+		}, i * chunkLength, (i + 1) * chunkLength
+			));
+		i++; */
 	}
-	// FBX Skeleton and Animation
-	//FBXUpdate();
 
 	// TODO: does this break things - m_pCamState = m_pCameraStateMachine.get()->GetCurrentCamera();
-	m_pMath->Update(m_pCamState);
+	m_pMath->Update(*m_pCamState);
 
-	m_pPhysics->Update(deltaTime);
+	//vThreads.push_back(std::thread([&]() {
+	m_pPhysics->Update(deltaTime);// })); //TODO: thread
+	/*for (auto &thread : vThreads)
+	{
+		thread.join();
+	}
+	vThreads.clear(); */
+
 	///----------------------------------------------------------
 	//////////////////////////////////////////////////////////////////////////
 
@@ -298,23 +362,33 @@ bool TestApplication::Update(GLfloat deltaTime)
 		m_eCurrentDrawState = E_DRAW_STATE_DOT;
 	}
 	// Cycle Draw State
-	if (glfwGetKey(m_pWindow, GLFW_KEY_MINUS))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_MINUS) == GLFW_PRESS && !m_hasSpaceBeenPressed)
 	{
 		if (m_eCurrentDrawState < 0)
 		{
 			m_eCurrentDrawState = (E_DRAW_STATE)(E_DRAW_STATE_COUNT - 1);
 		}
-		//m_eCurrentDrawState--;
+		//effectively m_eCurrentDrawState--;
 		m_eCurrentDrawState = (E_DRAW_STATE)(m_eCurrentDrawState - 1);
+		m_hasSpaceBeenPressed = true;
 	}
-	else if (glfwGetKey(m_pWindow, GLFW_KEY_EQUAL)) // == GLFW_RELEASE
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_MINUS) == GLFW_RELEASE && m_hasSpaceBeenPressed)
 	{
-		//m_eCurrentDrawState++;
+		m_hasSpaceBeenPressed = false;
+	}
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_EQUAL) == GLFW_PRESS && !m_hasSpaceBeenPressed) // == GLFW_RELEASE
+	{
+		//effectively m_eCurrentDrawState++;
 		if (m_eCurrentDrawState > E_DRAW_STATE_COUNT)
 		{
 			m_eCurrentDrawState = (E_DRAW_STATE)0;
 		}
 		m_eCurrentDrawState = (E_DRAW_STATE)(m_eCurrentDrawState + 1);
+		m_hasSpaceBeenPressed = true;
+	}
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_EQUAL) == GLFW_RELEASE && m_hasSpaceBeenPressed)
+	{
+		m_hasSpaceBeenPressed = false;
 	}
 #pragma endregion
 
@@ -486,6 +560,7 @@ GLvoid TestApplication::DrawApp()
 #pragma region My Rendering Options
 	// Shows a demonstration on how to use elements of ImGui
 	ImGui::ShowTestWindow();
+	// My ImGui features
 	ImGui::Begin("My rendering options");
 	if (ImGui::CollapsingHeader("Test"))
 	{
@@ -493,7 +568,7 @@ GLvoid TestApplication::DrawApp()
 		ImGui::Checkbox("Should render Gizmo grid", &m_bDrawGizmoGrid);
 		ImGui::Separator();
 
-		// Locations in Grid format
+		/* TODO: delete me // Locations in Grid format
 		if (ImGui::TreeNode("Locations"))
 		{
 			// If button 'A' is pressed...
@@ -502,12 +577,11 @@ GLvoid TestApplication::DrawApp()
 				printf("Helllooo Dingo");
 			}
 			ImGui::TreePop();
-		}
+		} */
 	}
 
 	// Camera State
 	ImGui::TextWrapped("Camera Mode");
-
 	//static int selected_camera = -1;
 	static E_CAMERA_MODE_STATE selected_camera = m_pCameraStateMachine->GetCurrentCameraMode();
 	//const char* c_camera = "Camera"; //TODO:
@@ -570,7 +644,6 @@ GLvoid TestApplication::DrawApp()
 #pragma endregion
 
 #pragma region Overlay
-
 	// Overlay FPS 
 	static bool show_app_fixed_overlay = true;
 	if (glfwGetKey(m_pWindow, GLFW_KEY_F1))
@@ -599,58 +672,3 @@ GLvoid TestApplication::DrawApp()
 #pragma endregion
 	///-----------------------------------------------------------------------------------------------------------
 }
-
-#pragma region FBX
-/// ----------------------------------------------------------
-/* void TestApplication::FBXRender()
-{
-	glUseProgram(m_program_FBXAnimation_ID);
-
-	int loc = glGetUniformLocation(m_program_FBXAnimation_ID, "ProjectionView");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m_pCameraStateMachine->GetCurrentCamera()->getProjectionView()));
-
-	/*int light_dir_uniform = glGetUniformLocation(m_programID, "LightDir");
-	glUniform3f(light_dir_uniform, 0, 1, 0); //* /
-
-	vec3 light(sin(glfwGetTime()), 1, cos(glfwGetTime()));
-	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "LightDir");
-	glUniform3f(loc, light.x, light.y, light.z);
-
-	int light_colour_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "LightColour");
-	glUniform3f(light_colour_uniform, 1, 1, 1);
-
-	mat4 camera_matrix = m_pCameraStateMachine->GetCurrentCamera()->getTransform();
-	int camera_pos_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "CameraPos");
-	glUniform3f(camera_pos_uniform, camera_matrix[3][0], camera_matrix[3][1], camera_matrix[3][2]);
-
-	int specular_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "SpecPow");
-	glUniform1f(specular_uniform, 12);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, pRender->GetTextureByName("Pyro_D")); // m_texture);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, pRender->GetTextureByName("Pyro_N")); // m_normal);
-
-	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "diffuse");
-	glUniform1i(loc, 0);
-
-	loc = glGetUniformLocation(m_program_FBXAnimation_ID, "normal");
-	glUniform1i(loc, 1);
-
-	FBXSkeleton* skeleton = m_pFbx->getSkeletonByIndex(0);
-	skeleton->updateBones();
-
-	int bones_location = glGetUniformLocation(m_program_FBXAnimation_ID, "bones");
-	glUniformMatrix4fv(bones_location, skeleton->m_boneCount, GL_FALSE, (float*)skeleton->m_bones);
-
-	// bind our vertex array object and draw the mesh
-	for (unsigned int i = 0; i < m_pFbx->getMeshCount(); ++i) {
-		FBXMeshNode* mesh = m_pFbx->getMeshByIndex(i);
-		unsigned int* glData = (unsigned int*)mesh->m_userData;
-		glBindVertexArray(glData[0]);
-		glDrawElements(GL_TRIANGLES,
-			(unsigned int)mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
-	}
-} */
-#pragma endregion

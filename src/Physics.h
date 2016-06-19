@@ -20,7 +20,7 @@ public:
 	Physics(Camera& a_camState) :
 		m_pRenderable(std::make_shared<Renderable>()),
 		m_camera(a_camState),
-		isRBD(true),
+		isRBD(false), //TODO: causes framerate to tank
 		m_fTimer(0)
 	{}
 
@@ -40,6 +40,9 @@ public:
 	void SetupRBDTutorial();
 
 	void renderGizmos(PxScene* physics_scene);
+
+	//void attachedRigidBodyConvex(float density, PxMaterial* g_PhysicsMaterial, bool isDynamic);
+	void TerrainCollision(unsigned int _rows, unsigned int _cols, int* _samples, int _heightScalePX, int _size, PxMaterial* g_PhysicsMaterial);
 
 	const Renderable* GetRenderable() const { return m_pRenderable.get(); }
 

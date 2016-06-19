@@ -1,5 +1,7 @@
 #include "Grid.h"
 #include "Renderable.h"
+#include "Physics.h"
+
 #include "imgui.h"
 
 #include <GLFW/glfw3.h>
@@ -11,9 +13,9 @@
 
 using glm::vec3;
 
-Grid::~Grid()
+/*Grid::~Grid()
 {
-}
+} */
 
 bool Grid::Create()
 {
@@ -25,14 +27,13 @@ bool Grid::Create()
 	CreateDrawShader();
 
 	GenerateGrid(m_iGrid, m_iGrid);
-	//TODO: perlin creation
 	return true;
 }
 
-GLvoid Grid::Update()
+/*bool Grid::Update(GLfloat deltaTime)
 {
-
-}
+	return true;
+} */
 
 GLvoid Grid::Draw(const Camera& a_camState)
 {
@@ -51,49 +52,6 @@ GLvoid Grid::RenderUI()
 {
 	if (ImGui::CollapsingHeader("Perlin Generation"))
 	{
-		// Locations in Grid format
-		/*if (ImGui::TreeNode("Locations"))
-		{
-			const int MAX_LOCATIONS = 4;
-			//static bool selected[MAX_LOCATIONS] = { true, false, false, false };
-			for (GLint i = 0; i < MAX_LOCATIONS; i++)
-			{
-				/ImGui::PushID(i); // TODO: better way to do this?
-				std::string sLocationName = "Location ";
-				sLocationName = sLocationName + std::to_string(i + 1);
-				m_cLocationName[i] = sLocationName.c_str();
-				// If button 'A' is pressed...
-				if (ImGui::Button(m_cLocationName[i], ImVec2(80, 40)))
-				{
-					//int x = i % MAX_COLS, y = i / MAX_COLS;
-					// ... go to location 'A'
-					m_v4EndLocation = m_v4LocationArray[i];
-					/*if (selected[i] == 0)
-					{
-					m_transform[3] = v4Location1;
-					}
-					else if (selected[i] == 1)
-					{
-					m_transform[3] = v4Location2;
-					}
-					else if (selected[i] == 2)
-					{
-					m_transform[3] = v4Location2;
-					}
-					else if (selected[i] == 3)
-					{
-					m_transform[3] = v4Location3;
-					} //* /
-				}
-				if ((i % MAX_COLS) < 3)
-				{
-					ImGui::SameLine();
-				} 
-			ImGui::PopID();
-
-			ImGui::TreePop();
-		}*/
-
 		// ------------------------------------------------------
 		// Used to display the Perlin Texture in ImGui
 		// ------------------------------------------------------
@@ -116,24 +74,31 @@ GLvoid Grid::RenderUI()
 			ImGui::EndTooltip();
 		}
 		// ------------------------------------------------------
-		ImGui::DragFloat("Height Scale", &fHeightScale, 0.1f, 0.01f, FLT_MAX);
+		// Position 
+		ImGui::DragFloat4("World Trans 3", &glm::value_ptr(m_m4WorldTransform)[3], 1.1f, -FLT_MAX, FLT_MAX);
+		ImGui::DragFloat4("World Trans data", m_m4WorldTransform[3].data, 1.1f, -FLT_MAX, FLT_MAX);
+		//ImGui::DragFloat4("World Trans", glm::value_ptr(m_m4WorldTransform[3].data), 1.1f, -FLT_MAX, FLT_MAX);
+		ImGui::DragFloat("Height Scale", &m_fHeightScale, 0.1f, 0.01f, FLT_MAX);
 		ImGui::DragInt("Grid", &m_iGrid, 0.1f, 0, USHRT_MAX);
 		ImGui::DragFloat("Scale", &m_fScale, 0.1f, 0.01f, FLT_MAX);
 		ImGui::DragInt("Octaves", &m_uiOctaves, 0.1f, 0, USHRT_MAX);
 		ImGui::DragFloat("Amplitude", &m_fAmplitude, 0.1f, 0.01f, FLT_MAX);
 		ImGui::DragFloat("Persistence", &m_fPersistence, 0.01f, 0.01f, 1.f);
+		//ImGui::DragFloat4("Location 2", glm::value_ptr(v4Location2), 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
+		//ImGui::DragFloat4("Location 3", v4Location3.data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
+
 		// Regenerates terrain based off values above
 		if (ImGui::Button("Generate Terrain"))
 		{
 			// store the previous data
-			m_pfHeightScale = fHeightScale;
+			m_pfHeightScale = m_fHeightScale;
 			m_piGrid = m_iGrid;
 			m_pfScale = m_fScale;
 			m_puiOctaves = m_uiOctaves;
 			m_pfAmplitude = m_fAmplitude;
 			m_pfPersistence = m_fPersistence;
 			// Create the terrain again
-			GenerateGrid(m_iGrid, m_iGrid); //TODO: TODO: fix crash + make Perlin adjustable 'live' in runtime.
+			GenerateGrid(m_iGrid, m_iGrid);
 		}
 
 		GLfloat tex_w = (GLfloat)ImGui::GetIO().Fonts->TexWidth;
@@ -144,24 +109,17 @@ GLvoid Grid::RenderUI()
 		if (ImGui::ImageButton(ImGui::GetIO().Fonts->TexID, ImVec2(20, 20), ImVec2(55.0f / tex_w, 17 / tex_h), ImVec2(70.0f / tex_w, 29 / tex_h), -1, ImColor(0, 0, 0, 255)))
 		{
 			// restore the data to the previous/ original value
-			fHeightScale = m_pfHeightScale;
+			m_fHeightScale = m_pfHeightScale;
 			m_iGrid = m_piGrid;
 			m_fScale = m_pfScale;
 			m_uiOctaves = m_puiOctaves;
 			m_fAmplitude = m_pfAmplitude;
 			m_fPersistence = m_pfPersistence;
 			// Create the terrain again
-			GenerateGrid(m_iGrid, m_iGrid); //TODO: fix crash
+			GenerateGrid(m_iGrid, m_iGrid);
 		}
-		/*ImGui::DragFloat("Timer", &m_fTimer, 0.1f, 0.01f, MAX_LOCATIONS * m_fLengthTime + m_fLengthTime);
-		ImGui::DragFloat("Length of time", &m_fLengthTime, 0.1f, 0.01f, MAX_LOCATIONS * m_fLengthTime);
-		ImGui::DragFloat("Lerped Interpolant", &m_fTravelLerp, 0.1f, 0.01f, 1.0f);
-		ImGui::Separator();
-		ImGui::DragFloat4("Camera Location", m_transform[3].data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
-		ImGui::DragFloat4("Location 1", glm::value_ptr(v4Location1), 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
-		ImGui::DragFloat4("Location 2", glm::value_ptr(v4Location2), 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
-		ImGui::DragFloat4("Location 3", v4Location3.data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
-		ImGui::DragFloat4("Location 4", v4Location4.data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX); */
+		ImGui::SameLine();
+		ImGui::TextWrapped("May only reset before pressing the 'Generate Grid' Function.");
 	}
 }
 
@@ -255,7 +213,7 @@ GLvoid Grid::GenerateGrid(const GLuint a_iRows, const GLuint a_iCols)
 				GLfloat fPerlin_sample = glm::perlin(glm::vec2((GLfloat)x, (GLfloat)y) * m_fScale * fFreq) * 0.5f + 0.5f;
 				perlin_data[y * m_iGrid + x] += fPerlin_sample * fAmplitude; //TODO: iGrid.x?
 				fAmplitude *= fPersistence;
-			} //*/
+			}
 		}
 	}
 
@@ -281,68 +239,9 @@ GLvoid Grid::GenerateGrid(const GLuint a_iRows, const GLuint a_iCols)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 #pragma endregion
 
-#pragma region Big Old
-#pragma region Old
-	/// ----------------------------------------------------------
-	/// create and bind buffers to a vertex array object
-	/// Generates a VBO
-	/// ----------------------------------------------------------
-	/* TODO: Delete?  glGenBuffers(1, &m_VBO); */
-	/*glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, (a_iRows * a_iCols) * sizeof(Vertex_PositionColor), aoVertices, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), 0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), (void*)(sizeof(glm::vec4)));*/
-
-	/* TODO: Delete?  glBindBuffer(GL_ARRAY_BUFFER, 0); */
-
-	/// ----------------------------------------------------------
-	/// OpenGL Index Buffer
-	/// ----------------------------------------------------------
-	/* TODO: Delete?  glGenBuffers(1, &m_IBO); */
-
-	/*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (a_iRows - 1) * (a_iCols - 1) * 6 * sizeof(unsigned int), auiIndices, GL_STATIC_DRAW);
-	*//* TODO: Delete?  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); */
-#pragma endregion
-
-	/// ----------------------------------------------------------
-	/// Thing
-	/// ----------------------------------------------------------
-	/*	// Generate our GL Buffers
-	// Let's move these so that they are all generated together
-	glGenBuffers(1, &m_VBO);
-	glGenBuffers(1, &m_IBO);
-
-	//Add the following line to generate a VertexArrayObject
-	glGenVertexArrays(1, &m_VAO);
-
-	glBindVertexArray(m_VAO);
-
-	//... Code Segment here to bind and fill VBO + IBO
-	//
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, (a_iRows * a_iCols) * sizeof(Vertex_PositionColor), aoVertices, GL_STATIC_DRAW);
-
-	//
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (a_iRows - 1) * (a_iCols - 1) * 6 * sizeof(unsigned int), auiIndices, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), 0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), (void*)(sizeof(glm::vec4)));
-
-	glBindVertexArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	//
-	//Render::VAO = m_VAO */
-#pragma endregion
+	//PxHeightField* 
+	// the heightScale is set by amplitude. //TODO: 
+	//m_pPhysics->TerrainCollision(m_iGrid, m_iGrid, (int*)perlin_data, m_fAmplitude, m_iGrid, );
 
 	delete[] aoVertices;
 }
@@ -358,6 +257,7 @@ GLvoid Grid::CreateDrawShader()
 							layout(location=0) in vec4 Position; \
 							layout(location=1) in vec2 TexCoord; \
 							layout(location=2) in vec4 Normal; \
+							uniform float heightScale; \
 							uniform mat4 ProjectionView; \
 							uniform sampler2D perlin_texture; \
 							out vec4 vNormal; \
@@ -366,7 +266,7 @@ GLvoid Grid::CreateDrawShader()
 							outCoord = TexCoord; \
 							vNormal = Normal; \
 							vec4 pos = Position; \
-							pos.y += texture(perlin_texture, outCoord).r * 5; \
+							pos.y += texture(perlin_texture, outCoord).r * heightScale; \
 							gl_Position = ProjectionView * pos; }";
 
 	//vec4 P = Position; P.y += tan ( time + Position.x ) * heightScale; \
@@ -406,7 +306,7 @@ GLvoid Grid::CreateDrawShader()
 
 GLvoid Grid::DrawGeometry(const glm::mat4& a_projectionView)
 {
-	fTime = static_cast<float>(glfwGetTime());
+	m_fTime = static_cast<float>(glfwGetTime());
 	glUseProgram(m_perlinProgramID);
 	GLuint projectionViewUniform = glGetUniformLocation(m_perlinProgramID, "ProjectionView");
 	glUniformMatrix4fv(projectionViewUniform, 1, false, &a_projectionView[0][0]); //m_projectionViewMatrix
@@ -415,12 +315,12 @@ GLvoid Grid::DrawGeometry(const glm::mat4& a_projectionView)
 	GLuint uiHeightScale = glGetUniformLocation(m_perlinProgramID, "heightScale");
 	GLuint uiTime = glGetUniformLocation(m_perlinProgramID, "time");
 
-	glUniform1f(uiHeightScale, m_fAmplitude);
-	glUniform1f(uiTime, fTime);
+	glUniform1f(uiHeightScale, m_fHeightScale); 
+	glUniform1f(uiTime, m_fTime);
 
 	// Set prelin_texture sampler2D sampler to the tex unit we're going to use, init?
 	// tell the shader where it is
-	// TODO: Create only once
+	// TODO: Create only once?
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers[0].tTexture->GetId());
 	//m_pRenderable->samplers.begin()->tTexture->GetId());
@@ -437,11 +337,9 @@ GLvoid Grid::DrawGeometry(const glm::mat4& a_projectionView)
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, m_pRenderable->samplers[3].tTexture->GetId());
 
-	
+	// Textures
 	GLint perlinTextureLocation = glGetUniformLocation(m_perlinProgramID, "perlin_texture");
-	// tell the shader where it is
-	glUniform1i(perlinTextureLocation, 0);
-
+	glUniform1i(perlinTextureLocation, 0); // tell the shader where it is
 	GLint loc = glGetUniformLocation(m_perlinProgramID, "dirt_texture");
 	glUniform1i(loc, 1);
 	loc = glGetUniformLocation(m_perlinProgramID, "grass_texture");
@@ -449,11 +347,16 @@ GLvoid Grid::DrawGeometry(const glm::mat4& a_projectionView)
 	loc = glGetUniformLocation(m_perlinProgramID, "snow_texture");
 	glUniform1i(loc, 3);
 
-	// bind the position
-	vec3 v3Pos(0, 1, 0);
+	// bind the position //vec3 v3Pos(0, 1, 0); //TODO: m_fAmplitude vs. m_fHeightScale
+	// Set the Terrain's centre to our origin
+	// 'times' (*) 0.5f is the same as 'divide' (/) 2 but more efficient 
+	//vec3 v3Pos(0, 1, 0);	//vec3 v3Pos(-m_iGrid * 0.5f, m_fAmplitude, -m_iGrid * 0.5f);
+	m_m4WorldTransform[3] = glm::vec4(-m_iGrid * 0.5f, m_fAmplitude, -m_iGrid * 0.5f, 0);
 	//vec3 v3Pos(cos(glfwGetTime()), 1, sin(glfwGetTime()));
 	loc = glGetUniformLocation(m_perlinProgramID, "Position");
-	glUniform3f(loc, v3Pos.x, v3Pos.y, v3Pos.z);
+	//glUniformMatrix4fv(loc, 1, GL_FALSE, &glm::value_ptr(m_m4WorldTransform)[3]);
+	//glUniform3f(loc, v3Pos.x, v3Pos.y, v3Pos.z);
+	glUniform4f(loc, m_m4WorldTransform[3].x, m_m4WorldTransform[3].y, m_m4WorldTransform[3].z, m_m4WorldTransform[3].w);
 
 	// bind the Light Dir
 	//vec3 light(1, 1, 1); //TODO:

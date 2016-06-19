@@ -77,10 +77,7 @@ private:
 	// modification during runtime via ImGui.
 	glm::vec4 m_v4StartColor;
 	glm::vec4 m_v4EndColor;
-
-	//Render m_render; 
-	//Geometry m_geometry; //
-	//Mesh m_mesh; // need the VAO, VBO, IBO.
+	
 	Program m_program;
 };
 

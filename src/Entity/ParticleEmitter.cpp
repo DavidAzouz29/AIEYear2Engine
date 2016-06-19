@@ -149,7 +149,7 @@ GLvoid ParticleEmitter::RenderUI()
 	}
 }
 
-
+// Emits Particles using an object pool to recycle particles
 GLvoid ParticleEmitter::Emit()
 {
 	assert(isValid());

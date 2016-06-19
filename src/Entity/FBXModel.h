@@ -12,19 +12,16 @@ public:
 	virtual ~FBXModel();
 
 	bool Create() override;
-	GLvoid Update() override;
+	bool Update(GLfloat deltaTime) override;
 	GLvoid Draw(const Camera& m_pCamState) override;
-	GLvoid Destroy() override;
+	//GLvoid Destroy() override;
 	GLvoid RenderUI() override;
 
 	GLvoid LoadFBXTextures(FBXFile* fbx);
 
 	/// ----------------------------------------------------------
-	GLvoid FBXLoader();
-	GLvoid RenderFBX(const Camera& a_pCamState);
 	GLvoid FBXSkeletonLoader();
 	GLvoid FBXSkeletonRender();
-	//GLvoid FBXUpdate();
 	GLvoid FBXAnimationDraw(const Camera& a_pCamState);
 	/// ----------------------------------------------------------
 
@@ -35,8 +32,6 @@ private:
 	GLvoid CreateOpenGLBuffers(FBXFile* fbx);
 	GLvoid CleanupOpenGLBuffers(FBXFile* fbx);
 	GLfloat m_timer;
-
-	GLuint m_program_ID;
 
 	std::shared_ptr<FBXFile> m_pFbx;
 	GLuint m_program_FBXAnimation_ID; // another program ID used for animation

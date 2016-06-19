@@ -61,6 +61,7 @@ private:
 		// Color vertex attribute
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), (GLvoid*)(offsetof(Vertex_PositionColor, color)));
+		//glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex_PositionColor), (void*)(sizeof(glm::vec4)));
 	}
 
 	template<>

@@ -36,7 +36,7 @@
 
 GPUParticleEmitter::GPUParticleEmitter()
 	: m_particles(nullptr), m_uiMaxParticles(0),
-	m_v3Position(0, 0, 0),
+	m_v3Position(m_m4WorldTransform[3]),
 	m_drawShader(0),
 	m_updateShader(0),
 	m_fLastDrawTime(0),

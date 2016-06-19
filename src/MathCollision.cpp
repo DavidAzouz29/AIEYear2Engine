@@ -6,22 +6,22 @@ using glm::vec4;
 using glm::mat4;
 
 
-MathCollision::MathCollision()
+/*MathCollision::MathCollision()
 {
 }
 
 
 MathCollision::~MathCollision()
 {
-}
+} */
 
 bool MathCollision::Create()
 {
 	//m_pMath = std::make_shared<MathCollision>();
-	return false;
+	return true;
 }
 
-GLvoid MathCollision::Update(Camera* cam)
+GLvoid MathCollision::Update(const Camera& a_cam)
 {
 	///----------------------------------------------------------
 	BoundingSphere bound;
@@ -62,7 +62,7 @@ GLvoid MathCollision::Update(Camera* cam)
 	Gizmos::addTri(vec3(4, 1, 4), vec3(4, 1, -4), vec3(-4, 1, -4), v4PlaneColor);
 
 	vec4 v4Planes[6];
-	bound.GetFrustumPlanes(cam->getProjectionView(), v4Planes);
+	bound.GetFrustumPlanes(a_cam.getProjectionView(), v4Planes);
 
 	for (GLushort s = 0; s < 6; s++)
 	{

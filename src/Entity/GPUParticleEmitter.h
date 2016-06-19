@@ -77,6 +77,6 @@ protected:
 
 	GLfloat m_fLastDrawTime;
 
-	const GLuint MAX_PARTICLES = 100000;
+	const GLuint MAX_PARTICLES = 1000;
 };
 

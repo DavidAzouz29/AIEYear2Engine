@@ -11,7 +11,8 @@
 /// - Perlin land generation added	 	- David Azouz 10/06/16
 /// - Undo/ Reset button added		 	- David Azouz 12/06/16
 /// - Terrain Texture correct again	 	- David Azouz 12/06/16
-/// 
+/// - fixed crash upon regen + made Perlin 
+/// adjustable 'live' during runtime.	- David Azouz 14/06/16
 /// TODO: fix m_perlinTextureID in .cpp
 /// 
 /// </summary>
@@ -27,28 +28,28 @@ class Grid : public Entity
 {
 public:
 	Grid() :
-		fHeightScale(2),
-		fTime(0.0f),
+		m_fHeightScale(5),
+		m_fTime(0.0f),
 		m_perlinProgramID(),
 		m_iGrid(64),
 		m_fScale((1.0f / m_iGrid) * 3),
 		m_uiOctaves(6),
 		m_fAmplitude(5.8f),
 		m_fPersistence(0.3f),
-		m_pfHeightScale(fHeightScale),
+		m_pfHeightScale(m_fHeightScale),
 		m_piGrid(m_iGrid),
 		m_pfScale(m_fScale),
 		m_puiOctaves(m_uiOctaves),
 		m_pfAmplitude(m_fAmplitude),
 		m_pfPersistence(m_fPersistence)
 	{}
-	~Grid();
+	~Grid() = default;
 
 	// ------------------------------------
 	// Entity specific
 	// ------------------------------------
 	bool Create() override;
-	GLvoid Update() override;
+	//bool Update(GLfloat deltaTime) override;
 	GLvoid Draw(const Camera& a_camState) override;
 	GLvoid Destroy() override {}
 	GLvoid RenderUI() override;
@@ -68,8 +69,8 @@ public:
 	GLuint GetProgramID() const { return m_perlinProgramID; }
 	
 private:
-	GLfloat fHeightScale;
-	GLfloat fTime;
+	GLfloat m_fHeightScale;
+	GLfloat m_fTime;
 	GLuint m_perlinProgramID; //m_programID
 	//Texture m_perlinTexture; //-1;
 

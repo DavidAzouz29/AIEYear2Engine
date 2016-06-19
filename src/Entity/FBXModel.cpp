@@ -1,7 +1,8 @@
 /// ***EDIT***
-/// - Texture class added	 	- David Azouz 13/05/16
-///
-/// TODO: add texture?
+/// - Texture class added	 				- David Azouz 13/05/16
+/// - Loads textures attached to a fbx	 	- David Azouz 13/05/16
+/// - Removed FBXLoader and RenderFBX funcs as they were redundant - David Azouz 19/06/16
+/// TO DO: add texture?
 
 #include "FBXModel.h"
 #include "FBXFile.h"
@@ -52,7 +53,6 @@ bool FBXModel::Create()
 	//m_pFbx->load("./data/models/stanford/Bunny.fbx");
 	//m_pFbx->load("./data/models/soulspear/soulspear.fbx");
 	//m_pFbx->load("./data/models/characters/Pyro/pyro.fbx", FBXFile::UNITS_METER);
-	//FBXLoader(); // Needed if FBX without Animation
 	FBXSkeletonLoader();
 
 	CreateOpenGLBuffers(m_pFbx.get());
@@ -61,17 +61,19 @@ bool FBXModel::Create()
 }
 
 // Used for FBX Skeleton and Animation
-GLvoid FBXModel::Update()
+bool FBXModel::Update(GLfloat deltaTime)
 {
 	//if no skeleton - don't update
 	if (m_pFbx->getSkeletonCount() == 0)
 	{
-		return;
+		// we don't want the update to throw a false negative, so we still return true.
+		return true;
 	}
 	// Grab the skeleton and animation we want to use
 	FBXSkeleton* skeleton = m_pFbx->getSkeletonByIndex(0);
 	FBXAnimation* animation = m_pFbx->getAnimationByIndex(0);
 
+	//TODO: make 'deltaTime' useful?
 	m_timer = (GLfloat)glfwGetTime(); //currentTime 
 
 	// Evaluate the animation to update bones
@@ -83,18 +85,18 @@ GLvoid FBXModel::Update()
 	{
 		skeleton->m_nodes[uiBone_index]->updateGlobalTransform();
 	}
+	return true;
 }
 
 GLvoid FBXModel::Draw(const Camera& m_pCamState)
 {
-	//RenderFBX(m_pCamState);m_prog
 	FBXAnimationDraw(m_pCamState);
 }
 
-GLvoid FBXModel::Destroy()
+/*GLvoid FBXModel::Destroy()
 {
 
-}
+} */
 
 GLvoid FBXModel::RenderUI()
 {
@@ -209,110 +211,6 @@ GLvoid FBXModel::CleanupOpenGLBuffers(FBXFile* fbx)
 		glDeleteBuffers(1, &glData[2]);
 
 		delete[] glData;
-	}
-}
-
-GLvoid FBXModel::FBXLoader()
-{
-	/// ----------------------------------------------------------
-	/// Create shaders
-	/// ----------------------------------------------------------
-	/// Storing writing out our shader code into char arrays for processign by OpenGL.
-	/// ----------------------------------------------------------
-	const GLchar* vsSource = "#version 410\n \
-							layout(location=0) in vec4 Position; \
-							layout(location=1) in vec4 Normal; \
-							layout(location=2) in vec2 TexCoord; \
-							out vec4 vNormal; \
-							out vec2 vTexCoord; \
-							uniform mat4 ProjectionView; \
-							uniform mat4 WorldTransform; \
-							void main() { vNormal = Normal; vTexCoord = TexCoord; \
-							gl_Position = ProjectionView * WorldTransform * Position; }";
-
-	const GLchar* fsSource = "#version 410\n \
-							in vec4 vNormal; \
-							in vec2 vTexCoord; \
-							out vec4 FragColor; \
-							uniform sampler2D diffuse; \
-							void main() { FragColor = texture(diffuse, vTexCoord); }";
-
-	/// ----------------------------------------------------------
-	/// Compile shaders
-	/// ----------------------------------------------------------
-	//int success = GL_FALSE;
-	GLuint iVertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(iVertexShader, 1, (const GLchar**)&vsSource, 0);
-	glCompileShader(iVertexShader);
-
-	GLuint iFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(iFragmentShader, 1, (const GLchar**)&fsSource, 0);
-	glCompileShader(iFragmentShader);
-
-	m_program_ID = glCreateProgram();
-	glAttachShader(m_program_ID, iVertexShader);
-	glAttachShader(m_program_ID, iFragmentShader);
-	glLinkProgram(m_program_ID);
-
-	/*glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
-	if (success == GL_FALSE)
-	{
-	int infoLogLength = 0;
-	glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &infoLogLength);
-	char* infoLog = new char[infoLogLength];
-
-	glGetProgramInfoLog(m_programID, infoLogLength, 0, infoLog);
-	printf("Error: Failed to link shader program!\n");
-	printf("%s\n", infoLog);
-	delete[] infoLog;
-	}*/
-
-	glDeleteShader(iVertexShader);
-	glDeleteShader(iFragmentShader);
-}
-
-///-----------------------------------------------------------------------------------------------------------
-/// <summary> 
-/// <para>Bind the shader and send across the virtual camera's projection and view matrices combined,</para>
-/// <para>then we loop through the meshes and render them.</para>
-/// <para><param name="cam" type ="Camera&"> P1: A virtual camera.</param></para></summary>
-///-----------------------------------------------------------------------------------------------------------
-GLvoid FBXModel::RenderFBX(const Camera& a_pCamState)
-{
-	glUseProgram(m_program_ID);
-
-	// bind the camera
-	GLuint loc = glGetUniformLocation(m_program_ID, "ProjectionView");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, &a_pCamState.getProjectionView()[0][0]); //m_projectionViewMatrix
-
-	//GLuint id = m_pRenderable->GetTextureByName("soulspear_d").GetId(); //TODO: soulspear
-	//GLuint id = m_pRenderable->GetTextureByPath("./data/models/soulspear/soulspear_diffuse.tga")->GetId();
-	//GLuint id = m_pRenderable->samplers[1].tTexture->GetId();
-	GLuint id = m_pRenderable->samplers.begin()->tTexture->GetId();
-	
-	//const unsigned int id = m_pRender->GetTextureByName("Pyro_D");
-	glBindTexture(GL_TEXTURE_2D, id);
-
-	// Scale the FBX
-	glm::mat4 m4WorldTransform(1);
-	GLfloat fScale = 0.003f;
-	m4WorldTransform = glm::scale(glm::vec3(fScale));
-	id = glGetUniformLocation(m_program_ID, "WorldTransform");
-	glUniformMatrix4fv(id, 1, GL_FALSE, glm::value_ptr(m4WorldTransform));
-
-	loc = glGetUniformLocation(m_program_ID, "diffuse");
-	glUniform1i(loc, 0);
-
-	// bind our vertex array object and draw the mesh
-	for (GLuint i = 0; i < m_pFbx->getMeshCount(); ++i)
-	{
-		FBXMeshNode* mesh = m_pFbx->getMeshByIndex(i);
-		GLuint* glData = (GLuint*)mesh->m_userData;
-
-		glBindVertexArray(glData[0]); //TODO: replace m_VAO with VAO
-		//glBindVertexArray(Geom->GetVAO()); //TODO: replace m_VAO with VAO
-		//unsigned int indexCount = (a_iRows - 1) * (a_iCols - 1) * 6; //TODO: m_iIndexCount = this formula
-		glDrawElements(GL_TRIANGLES, (GLuint)mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
 	}
 }
 
@@ -439,6 +337,12 @@ GLvoid FBXModel::FBXSkeletonRender()
 	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)FBXVertex::IndicesOffset);
 }
 
+///-----------------------------------------------------------------------------------------------------------
+/// <summary> 
+/// <para>Bind the shader and send across the virtual camera's projection and view matrices combined,</para>
+/// <para>then we loop through the meshes and render them.</para>
+/// <para><param name="cam" type ="Camera&"> P1: A virtual camera.</param></para></summary>
+///-----------------------------------------------------------------------------------------------------------
 GLvoid FBXModel::FBXAnimationDraw(const Camera& a_pCamState)
 {
 	glUseProgram(m_program_FBXAnimation_ID);
@@ -464,11 +368,11 @@ GLvoid FBXModel::FBXAnimationDraw(const Camera& a_pCamState)
 	glUniform1f(specular_uniform, 12);
 
 	// Scale the FBX
-	glm::mat4 m4WorldTransform(1);
-	GLfloat fScale = 0.003f;
-	m4WorldTransform = glm::scale(glm::vec3(fScale));
+	//glm::mat4 m4WorldTransform(1);
+	GLfloat fScale = 0.003f; // TODO: the scale will be set for all FBX models
+	m_m4WorldTransform = glm::scale(glm::vec3(fScale));
 	GLuint worldTransform = glGetUniformLocation(m_program_FBXAnimation_ID, "WorldTransform");
-	glUniformMatrix4fv(worldTransform, 1, GL_FALSE, glm::value_ptr(m4WorldTransform));
+	glUniformMatrix4fv(worldTransform, 1, GL_FALSE, glm::value_ptr(m_m4WorldTransform));
 
 	// -----------------------------------------------------
 	// Renders job
