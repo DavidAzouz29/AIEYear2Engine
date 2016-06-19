@@ -2,8 +2,9 @@
 Place for AIE Year 2 tutorial and engine work.
 
 ## Controls:
-//Note: works for Numpad too
-//Ctrl + ...
+Note: works for Numpad too
+Ctrl + ...
+
 | Character | Action 	|
 | --- 		| --- 		|
 |Esc or Alt+F4 		|Quit|
@@ -15,7 +16,7 @@ Place for AIE Year 2 tutorial and engine work.
 |4 		|Travel Camera (moves between points)|
 |5 		|Location Camera (sets camera to distinct points)|
 |F1 	|toggle overlay on/ off|
-| --- 		| --- 		|
+
 |Draw State||
 | --- 		| --- 		|
 |7 		|Dot mode|
@@ -23,6 +24,8 @@ Place for AIE Year 2 tutorial and engine work.
 |9 		|Fill mode|
 |- 		|Previous Draw State|
 |= 		|Next Draw State|
+
+|Movement||
 | --- 		| --- 		|
 |LMB 	||
 |MMB 	|Look around|
@@ -35,15 +38,15 @@ Place for AIE Year 2 tutorial and engine work.
 |Ctrl + A/D |Orbit around origin|
 |Space 	|Reset Camera/ toggle on/ off|
 |P 		|Pause movement (Orbit)|
-| --- 		| --- 		|
+
 
 ## Coding Convention:
 ### Variable Prefixes: 
+|Variable type|Variable name|
 | --- 		| --- 		|
 |float|fSpeed |
 |vector 2, 3, 4's|v3Position|
 |matrices 2, 3, 4's|m4WorldPos |
-| --- 		| --- 		|
 
 ## Known Issues:
 - For Menu items in ImGui - if a collapsing header will not open - try opening the one above first.
