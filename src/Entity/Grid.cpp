@@ -13,10 +13,6 @@
 
 using glm::vec3;
 
-/*Grid::~Grid()
-{
-} */
-
 bool Grid::Create()
 {
 	// Load textures for our terrain
@@ -259,6 +255,7 @@ GLvoid Grid::CreateDrawShader()
 							layout(location=2) in vec4 Normal; \
 							uniform float heightScale; \
 							uniform mat4 ProjectionView; \
+							uniform mat4 WorldTransform; \
 							uniform sampler2D perlin_texture; \
 							out vec4 vNormal; \
 							out vec2 outCoord; \
@@ -267,7 +264,7 @@ GLvoid Grid::CreateDrawShader()
 							vNormal = Normal; \
 							vec4 pos = Position; \
 							pos.y += texture(perlin_texture, outCoord).r * heightScale; \
-							gl_Position = ProjectionView * pos; }";
+							gl_Position = ProjectionView * WorldTransform * pos; }";
 
 	//vec4 P = Position; P.y += tan ( time + Position.x ) * heightScale; \
 
@@ -347,16 +344,13 @@ GLvoid Grid::DrawGeometry(const glm::mat4& a_projectionView)
 	loc = glGetUniformLocation(m_perlinProgramID, "snow_texture");
 	glUniform1i(loc, 3);
 
-	// bind the position //vec3 v3Pos(0, 1, 0); //TODO: m_fAmplitude vs. m_fHeightScale
+	// bind the position //vec3 v3Pos(0, 1, 0); //vec3 v3Pos(cos(glfwGetTime()), 1, sin(glfwGetTime()));
 	// Set the Terrain's centre to our origin
 	// 'times' (*) 0.5f is the same as 'divide' (/) 2 but more efficient 
-	//vec3 v3Pos(0, 1, 0);	//vec3 v3Pos(-m_iGrid * 0.5f, m_fAmplitude, -m_iGrid * 0.5f);
-	m_m4WorldTransform[3] = glm::vec4(-m_iGrid * 0.5f, m_fAmplitude, -m_iGrid * 0.5f, 0);
-	//vec3 v3Pos(cos(glfwGetTime()), 1, sin(glfwGetTime()));
-	loc = glGetUniformLocation(m_perlinProgramID, "Position");
-	//glUniformMatrix4fv(loc, 1, GL_FALSE, &glm::value_ptr(m_m4WorldTransform)[3]);
-	//glUniform3f(loc, v3Pos.x, v3Pos.y, v3Pos.z);
-	glUniform4f(loc, m_m4WorldTransform[3].x, m_m4WorldTransform[3].y, m_m4WorldTransform[3].z, m_m4WorldTransform[3].w);
+	m_m4WorldTransform = glm::translate(glm::vec3(-m_iGrid * 0.5f, -m_fAmplitude, -m_iGrid * 0.5f));
+	loc = glGetUniformLocation(m_perlinProgramID, "WorldTransform");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m_m4WorldTransform));
+	//glUniform4f(loc, m_m4WorldTransform[3].x, m_m4WorldTransform[3].y, m_m4WorldTransform[3].z, m_m4WorldTransform[3].w);
 
 	// bind the Light Dir
 	//vec3 light(1, 1, 1); //TODO:

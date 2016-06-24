@@ -28,7 +28,7 @@ public:
 	GLvoid	setPerspective(GLfloat a_fFovY, GLfloat a_fAspectRatio, GLfloat a_fNear, GLfloat a_fFar);
 
 	GLvoid	setLookAtFrom(const glm::vec3& from, const glm::vec3& to);
-	//GLvoid	setLookAtFrom(const glm::vec4& from, const glm::vec4& to);
+	GLvoid	setLookAtFrom(const glm::vec4& from, const glm::vec4& to);
 
 	const glm::mat4&	getTransform() const		{ return m_transform; }
 	const glm::mat4&	getProjection() const		{ return m_projection; }

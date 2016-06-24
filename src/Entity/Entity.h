@@ -28,6 +28,7 @@
 //#include "MathCollision.h"
 
 #include <gl_core_4_4.h>
+//#include <glm/glm.hpp> //translate
 #include <glm/vec3.hpp>
 //#include <glm/mat4x4.hpp>
 #include <memory>
@@ -65,7 +66,17 @@ public:
 	virtual GLvoid	Destroy()	{};
 	virtual GLvoid	RenderUI() = 0;
 
+	// ----------------------------------------------------------
+	// Getters and Setters
+	// ----------------------------------------------------------
 	const Renderable* GetRenderable() const { return m_pRenderable.get(); }
+	const glm::mat4& GetTransform() const { return m_m4WorldTransform; }
+	const glm::vec4& GetPosition() const { return m_m4WorldTransform[3]; }
+	
+	void SetTransform(const glm::mat4& a_transform) { m_m4WorldTransform = a_transform; }
+	void SetPosition(const glm::vec4& a_position) { m_m4WorldTransform[3] = a_position; }
+	//TODO: void SetPosition(const glm::vec4& a_position) { m_m4WorldTransform[3] = glm::translate(glm::vec3(a_position.xyz())); }
+	// ----------------------------------------------------------
 
 	/// <summary> Function Pointer TODO: what do I do with this?
 	/// <param>P1: Program ID</param>

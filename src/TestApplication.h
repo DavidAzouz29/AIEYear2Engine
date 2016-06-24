@@ -1,6 +1,8 @@
 #pragma once
 
 #include "BaseApplication.h"
+#include "CameraStateMachine.h"
+#include "MathCollision.h" //
 #include "Physics.h"
 
 #include <gl_core_4_4.h>
@@ -9,11 +11,11 @@
 //#include <queue>
 #include <vector>
 
-class CameraStateMachine;
+//class CameraStateMachine;
 class Camera;
 class Entity;
-class MathCollision;
-class Physics;
+//class MathCollision;
+//class Physics;
 class RenderTarget;
 
 /// <summary> 
@@ -35,14 +37,21 @@ public:
 	// Default Constructor with Initializer list
 	//--------------------------------------------------------------------------------------
 	TestApplication() :
+		//m_v4Perspective(glm::pi<GLfloat>() * 0.25f, 16 / 9.0f, 0.1f, 10000.f),
+		//m_pCameraStateMachine(std::make_shared<CameraStateMachine>(m_v4Perspective)),
+		//m_pCamState(m_pCameraStateMachine->GetCurrentCamera()),
 		m_eCurrentDrawState(E_DRAW_STATE_FILL),
 		m_fPrevTime(0),
 		m_v3ClearColor(glm::vec3(0.25f)),
 		m_bDrawGizmoGrid(true),
+		m_isCharacterControlled(false),
 		m_hasSpaceBeenPressed(false),
-		//concurentThreadsSupported(0),
-		chunkLength(0)
-	{} //: m_pCamera(nullptr),
+		concurentThreadsSupported(std::thread::hardware_concurrency()),
+		chunkLength(0),
+		m_pMath(std::make_shared<MathCollision>()),
+		//m_pPhysics(std::make_shared<Physics>(*m_pCamState)),
+		m_pickPosition(glm::vec3(0))
+		{} //: m_pCamera(nullptr),
 	virtual ~TestApplication() = default;
 
 	virtual bool startup();
@@ -81,4 +90,16 @@ private:
 
 	glm::vec3 m_v3ClearColor;
 	bool m_bDrawGizmoGrid;
+	bool m_isCharacterControlled;
+	/// ------------------------------------------------------------
+	/// <summary>
+	/// Camera Perspective
+	/// ------------------------------------------------------------
+	/// <para>P1: FoVY: Field of View Y.</para>
+	/// <para>P2: Aspect Ratio.</para>
+	/// <para>P3: Near: nearest clipping plane to render to.</para>
+	/// <para>P4: Far: furthest clipping plane to render to.</para>
+	/// </summary>
+	/// ------------------------------------------------------------
+	//glm::vec4 m_v4Perspective;
 };

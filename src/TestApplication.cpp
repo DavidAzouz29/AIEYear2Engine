@@ -55,6 +55,7 @@
 #include <iostream>
 #include <mutex> //locking/ unlocking threads
 #include <thread>
+//#include <vld.h> // TODO: Visual Leak Detecter
 
 #define IM_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 
@@ -73,6 +74,7 @@ bool TestApplication::startup()
 	// start the gizmo system that can draw basic shapes
 	Gizmos::create();
 
+#pragma region Camera
 	// create a camera - may need later
 	//m_pCamera = std::make_shared<Camera>(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
 	//m_pCamera->setLookAtFrom(vec3(10, 10, 10), vec3(0));
@@ -89,8 +91,9 @@ bool TestApplication::startup()
 	/// ------------------------------------------------------------
 	vec4 v4Perspective(glm::pi<GLfloat>() * 0.25f, 16 / 9.0f, 0.1f, 10000.f);
 	m_pCameraStateMachine = std::make_shared<CameraStateMachine>(v4Perspective);
-
 	m_pCamState = m_pCameraStateMachine->GetCurrentCamera();
+#pragma endregion
+
 	//////////////////////////////////////////////////////////////////////////
 	// YOUR STARTUP CODE HERE
 	// -----------------------
@@ -101,7 +104,7 @@ bool TestApplication::startup()
 	/// Research Windows IOCP
 	///</summary>
 	// -----------------------
-	concurentThreadsSupported = std::thread::hardware_concurrency();
+	//concurentThreadsSupported = std::thread::hardware_concurrency();
 	std::cout << concurentThreadsSupported << " concurrent threads are supported.\n";
 	// this is to stop chunkLength equalling to 0
 	if (concurentThreadsSupported <= 2 && concurentThreadsSupported > 0)
@@ -158,7 +161,7 @@ bool TestApplication::startup()
 	m_entities.push_back(std::make_shared<ParticleEmitter>(configB));
 	m_entities.push_back(std::make_shared<GPUParticleEmitter>()); //TODO: uncomment to add GPU Particles again
 
-	m_pMath = std::make_shared<MathCollision>();
+	//m_pMath = std::make_shared<MathCollision>();
 	m_pPhysics = std::make_shared<Physics>(*m_pCamState);
 
 	//int i = 0;
@@ -204,7 +207,7 @@ bool TestApplication::startup()
 	// clear the data in vThreads for our 'Update' version of threads
 	vThreads.clear();*/
 	//////////////////////////////////////////////////////////////////////////
-	m_pickPosition = glm::vec3(0);
+	//m_pickPosition = glm::vec3(0);
 
 	check_gl_error();
 
@@ -230,7 +233,7 @@ GLvoid TestApplication::shutdown()
 	destroyWindow();
 }
 
-bool TestApplication::Update(GLfloat deltaTime) 
+bool TestApplication::Update(GLfloat a_deltaTime) 
 {
 	check_gl_error();
 
@@ -243,11 +246,35 @@ bool TestApplication::Update(GLfloat deltaTime)
 
 	// Camera Mode: Static, FlyCamera, Orbit
 #pragma region Camera Mode
-	m_fPrevTime += deltaTime;
+	m_fPrevTime += a_deltaTime;
 	// Allow the character to be moved
-	if (glfwGetKey(m_pWindow, GLFW_KEY_0) || glfwGetKey(m_pWindow, GLFW_KEY_KP_0))
+	if (glfwGetKey(m_pWindow, GLFW_KEY_0) == GLFW_PRESS && !m_hasSpaceBeenPressed 
+		|| glfwGetKey(m_pWindow, GLFW_KEY_KP_0) == GLFW_PRESS && !m_hasSpaceBeenPressed)
 	{
-		//TODO: character controller
+		m_isCharacterControlled = !m_isCharacterControlled; // Toggle movement for the character
+		m_hasSpaceBeenPressed = true;
+	}
+	else if (glfwGetKey(m_pWindow, GLFW_KEY_0) == GLFW_RELEASE && m_hasSpaceBeenPressed
+		|| glfwGetKey(m_pWindow, GLFW_KEY_KP_0) == GLFW_RELEASE && m_hasSpaceBeenPressed)
+	{
+		m_hasSpaceBeenPressed = false;
+	}
+	// Helps prevent the character and camera moving at the same time.
+	if (m_isCharacterControlled)
+	{
+		//Character controller
+		if (!m_pPhysics->UpdatePlayerController(a_deltaTime))
+		{
+			return false;
+		}
+		//TODO: one day - parent the camera to the character controller/ FBX
+		glm::vec4 v4PlayerCameraPos = glm::vec4(0, -8, 20, 0);
+		glm::vec4 v4From = m_entities[2]->GetPosition() - v4PlayerCameraPos;
+		glm::vec4 v4To = m_entities[2]->GetPosition();
+		// Set to static cam to prevent the camera from moving
+		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_STATIC);
+		m_pCameraStateMachine->GetCurrentCamera()->setLookAtFrom(v4From, v4To);
+		m_entities[2]->SetPosition(m_entities[2]->GetPosition() + v4PlayerCameraPos);
 	}
 	// Camera cycling and lerping // slerping/ squad.
 	// Cycles between various Cameras during run time
@@ -297,7 +324,7 @@ bool TestApplication::Update(GLfloat deltaTime)
 #pragma endregion
 
 	// update the camera's movement
-	m_pCameraStateMachine->Update(deltaTime);
+	m_pCameraStateMachine->Update(a_deltaTime);
 	// clear the gizmos out for this frame
 	Gizmos::clear();
 
@@ -312,7 +339,7 @@ bool TestApplication::Update(GLfloat deltaTime)
 			// Only "process" as much data our threads can handle
 			for (int j = low; j < high; j++)
 			{ */
-		if (!pEntity->Update(deltaTime))
+		if (!pEntity->Update(a_deltaTime))
 		{
 			return false;
 		}
@@ -326,7 +353,7 @@ bool TestApplication::Update(GLfloat deltaTime)
 	m_pMath->Update(*m_pCamState);
 
 	//vThreads.push_back(std::thread([&]() {
-	m_pPhysics->Update(deltaTime);// })); //TODO: thread
+	m_pPhysics->Update(a_deltaTime);// })); //TODO: thread
 	/*for (auto &thread : vThreads)
 	{
 		thread.join();
@@ -364,13 +391,17 @@ bool TestApplication::Update(GLfloat deltaTime)
 	// Cycle Draw State
 	if (glfwGetKey(m_pWindow, GLFW_KEY_MINUS) == GLFW_PRESS && !m_hasSpaceBeenPressed)
 	{
-		if (m_eCurrentDrawState < 0)
+		if (m_fPrevTime > 1)
 		{
-			m_eCurrentDrawState = (E_DRAW_STATE)(E_DRAW_STATE_COUNT - 1);
+			if (m_eCurrentDrawState < 0)
+			{
+				m_eCurrentDrawState = (E_DRAW_STATE)(E_DRAW_STATE_COUNT - 1);
+			}
+			//effectively m_eCurrentDrawState--;
+			m_eCurrentDrawState = (E_DRAW_STATE)(m_eCurrentDrawState - 1);
+			m_hasSpaceBeenPressed = true;
+			m_fPrevTime = 0;
 		}
-		//effectively m_eCurrentDrawState--;
-		m_eCurrentDrawState = (E_DRAW_STATE)(m_eCurrentDrawState - 1);
-		m_hasSpaceBeenPressed = true;
 	}
 	else if (glfwGetKey(m_pWindow, GLFW_KEY_MINUS) == GLFW_RELEASE && m_hasSpaceBeenPressed)
 	{
@@ -378,13 +409,17 @@ bool TestApplication::Update(GLfloat deltaTime)
 	}
 	else if (glfwGetKey(m_pWindow, GLFW_KEY_EQUAL) == GLFW_PRESS && !m_hasSpaceBeenPressed) // == GLFW_RELEASE
 	{
-		//effectively m_eCurrentDrawState++;
-		if (m_eCurrentDrawState > E_DRAW_STATE_COUNT)
+		if (m_fPrevTime > 1)
 		{
-			m_eCurrentDrawState = (E_DRAW_STATE)0;
+			if (m_eCurrentDrawState > E_DRAW_STATE_COUNT)
+			{
+				m_eCurrentDrawState = (E_DRAW_STATE)0;
+			}
+			//effectively m_eCurrentDrawState++;
+			m_eCurrentDrawState = (E_DRAW_STATE)(m_eCurrentDrawState + 1);
+			m_hasSpaceBeenPressed = true;
+			m_fPrevTime = 0;
 		}
-		m_eCurrentDrawState = (E_DRAW_STATE)(m_eCurrentDrawState + 1);
-		m_hasSpaceBeenPressed = true;
 	}
 	else if (glfwGetKey(m_pWindow, GLFW_KEY_EQUAL) == GLFW_RELEASE && m_hasSpaceBeenPressed)
 	{
@@ -406,7 +441,7 @@ GLvoid TestApplication::Draw()
 	ImGui_ImplGlfwGL3_NewFrame();
 	//check_gl_error(); //TODO: restore check
 
-	// For the render target
+#pragma region For the render target
 	//glBindFramebuffer(GL_FRAMEBUFFER, m_pRenderTarget.get()->GetFBO());
 	//printf("%d\n", m_pRenderApp->GetSharedPointer());
 	//glViewport(0, 0, 512, 512); // 265 lower quarter of the texture
@@ -429,6 +464,7 @@ GLvoid TestApplication::Draw()
 	//glUseProgram(m_pRenderApp->GetProgramID()); //*/
 	DrawApp();
 	//check_gl_error(); //TODO: restore this for error checking
+#pragma endregion
 
 	//Render ImGui over everything
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Fill
@@ -565,8 +601,9 @@ GLvoid TestApplication::DrawApp()
 	if (ImGui::CollapsingHeader("Test"))
 	{
 		ImGui::ColorEdit3("clear color", glm::value_ptr(m_v3ClearColor));
+		ImGui::Checkbox("Character Controllerable?", &m_isCharacterControlled);
 		ImGui::Checkbox("Should render Gizmo grid", &m_bDrawGizmoGrid);
-		ImGui::Separator();
+		ImGui::Separator(); 
 
 		/* TODO: delete me // Locations in Grid format
 		if (ImGui::TreeNode("Locations"))

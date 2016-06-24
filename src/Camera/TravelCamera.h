@@ -13,7 +13,7 @@ public:
 	TravelCamera(vec4 a_v4Perspective);
 	virtual ~TravelCamera() = default;
 
-	GLvoid Enter();
+	GLvoid Enter() override;
 	GLvoid Update(GLfloat fDeltaTime) override;
 	/// --------------------------------------------------------------------------------------------------
 	/// <summary> Travels via Linear interpolation (Lerp) to designated locations

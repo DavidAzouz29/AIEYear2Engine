@@ -2,6 +2,8 @@
 
 #include "Physics.h"
 #include "Camera\Camera.h"
+#include "ControllerHitReport.h"
+#include "PhysXComponent.h"
 #include "Render.h"
 #include "TestApplication.h"
 
@@ -10,6 +12,7 @@
 #include "Gizmos.h"
 
 #include <assert.h>
+#include <GLFW/glfw3.h>
 #include <glm/ext.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/vec3.hpp>
@@ -46,13 +49,6 @@ using glm::mat4;
 	m_renderer = new Renderer();
 	
     return true;
-}
-
-void Physics::shutdown()
-{
-	delete m_renderer;
-    Gizmos::destroy();
-    Application::shutdown();
 }
 
 bool Physics::update()
@@ -106,24 +102,24 @@ bool Physics::Create()
 
 void Physics::Shutdown()
 {
-	m_physics_scene->release();
-	m_physics_foundation->release(); //TODO" 178: ...pending module ref. Close .. dep mod first
-	m_physics->release();
+	m_pPhysics_scene->release();
+	m_pPhysics_foundation->release(); //TODO" 178: ...pending module ref. Close .. dep mod first
+	m_pPhysics->release();
 	//m_controller_manager->purgeControllers();
 	//delete m_renderer;
 	//Gizmos::destroy();
 	//Application::shutdown();
 }
 
-bool Physics::Update(GLfloat deltaTime)
+bool Physics::Update(GLfloat a_deltaTime)
 {
 	//TODO: make 'deltaTime' useful?
 	float dt = (float)glfwGetTime();
 
 	if (dt > 0)
 	{
-		m_physics_scene->simulate(dt > 0.033f ? 0.033f : dt);
-		while (m_physics_scene->fetchResults() == false);
+		m_pPhysics_scene->simulate(dt > 0.033f ? 0.033f : dt);
+		while (m_pPhysics_scene->fetchResults() == false);
 	}
 
 	if (isRBD)
@@ -142,14 +138,14 @@ bool Physics::Update(GLfloat deltaTime)
 		m_fTimer += dt;
 		if (m_fTimer >= 15.0f)
 		{
-			PxRigidDynamic* new_actor = PxCreateDynamic(*m_physics, box_transform, sphere, *m_physics_material, fDensity);
+			PxRigidDynamic* new_actor = PxCreateDynamic(*m_pPhysics, box_transform, sphere, *m_pPhysics_material, fDensity);
 
 			PxReal muzzleSpeed = -50;
 			// balls velocity
 			vec3 v3Direction(-m_camera.getTransform()[2]);
 			physx::PxVec3 velocity = physx::PxVec3(v3Direction.x, v3Direction.y, v3Direction.z) * muzzleSpeed;
 			new_actor->setLinearVelocity(velocity, true);
-			m_physics_scene->addActor(*new_actor); //TODO: new_box
+			m_pPhysics_scene->addActor(*new_actor); //TODO: new_box
 		}
 		m_fTimer = 0;
 	}
@@ -159,7 +155,7 @@ bool Physics::Update(GLfloat deltaTime)
 
 void Physics::Draw(const Camera& a_camState)
 {
-	renderGizmos(m_physics_scene);
+	renderGizmos(m_pPhysics_scene);
 }
 
 void Renderer::RenderAndClear(mat4 view_proj)
@@ -232,72 +228,24 @@ void Renderer::RenderAndClear(mat4 view_proj)
     //glfwPollEvents();
 }
 
-/// --------------------------------------------------------------------
-/// <summary>
-/// <para><param>P1: format: GL_R32F.</param></para>
-/// <example> </example>
-/// </summary>
-/// --------------------------------------------------------------------
-void AddWidget(PxShape* shape, PxRigidActor* actor, vec4 geo_color)
-{
-    PxTransform full_transform = PxShapeExt::getGlobalPose(*shape, *actor);
-    vec3 actor_position(full_transform.p.x, full_transform.p.y, full_transform.p.z);
-    glm::quat actor_rotation(full_transform.q.w,
-        full_transform.q.x,
-        full_transform.q.y,
-        full_transform.q.z);
-    glm::mat4 rot(actor_rotation);
-
-    mat4 rotate_matrix = glm::rotate(10.f, glm::vec3(7, 7, 7));
-
-    PxGeometryType::Enum geo_type = shape->getGeometryType();
-
-    switch (geo_type)
-    {
-    case (PxGeometryType::eBOX) :
-    {
-        PxBoxGeometry geo;
-        shape->getBoxGeometry(geo);
-        vec3 extents(geo.halfExtents.x, geo.halfExtents.y, geo.halfExtents.z);
-        Gizmos::addAABBFilled(actor_position, extents, geo_color, &rot);
-    } break;
-    case (PxGeometryType::eCAPSULE) :
-    {
-        PxCapsuleGeometry geo;
-        shape->getCapsuleGeometry(geo);
-        Gizmos::addCapsule(actor_position, geo.halfHeight * 2, geo.radius, 16, 16, geo_color, &rot);
-    } break;
-    case (PxGeometryType::eSPHERE) :
-    {
-        PxSphereGeometry geo;
-        shape->getSphereGeometry(geo);
-        Gizmos::addSphereFilled(actor_position, geo.radius, 16, 16, geo_color, &rot);
-    } break;
-    case (PxGeometryType::ePLANE) :
-    {
-
-    } break;
-    }
-}
-
 void Physics::SetupPhysX()
 {
 	m_default_filter_shader = physx::PxDefaultSimulationFilterShader;
 	// Singleton that instatiates the (actual) physics system...
-	m_physics_foundation = PxCreateFoundation(PX_PHYSICS_VERSION, m_default_allocator, m_default_error_callback);
+	m_pPhysics_foundation = &PxGetFoundation();// PxCreateFoundation(PX_PHYSICS_VERSION, m_default_allocator, m_default_error_callback);
 	//... store the pointer in m_physics
-	m_physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_physics_foundation, PxTolerancesScale());
+	m_pPhysics = &PxGetPhysics();// PxCreatePhysics(PX_PHYSICS_VERSION, *m_pPhysics_foundation, PxTolerancesScale());
 
 	// Initialise the PxPhysics extension library
-	PxInitExtensions(*m_physics);
+	PxInitExtensions(*m_pPhysics);
 
 	// Create a physX material.
 	// P1: Static Friction
 	// P2: Dynamic Friction
 	// P3: Restitution (how "bouncy" an object is.
 	// Applied to bodies in our scene and mimic how materials in the real world react.
-	m_physics_material = m_physics->createMaterial(1, 1, 0);
-	m_physics_cooker = PxCreateCooking(PX_PHYSICS_VERSION, *m_physics_foundation, PxCookingParams(PxTolerancesScale()));
+	m_pPhysics_material = m_pPhysics->createMaterial(1, 1, 0);
+	m_pPhysics_cooker = PxCreateCooking(PX_PHYSICS_VERSION, *m_pPhysics_foundation, PxCookingParams(PxTolerancesScale()));
 }
 
 /// --------------------------------------------------------------------
@@ -312,18 +260,18 @@ void Physics::SetupPhysX()
 /// --------------------------------------------------------------------
 PxScene* Physics::CreateDefaultScene()
 {
-	PxSceneDesc scene_desc(m_physics->getTolerancesScale());
+	PxSceneDesc scene_desc(m_pPhysics->getTolerancesScale());
 	scene_desc.gravity = PxVec3(0, -9.807f, 0);
 	scene_desc.filterShader = &PxDefaultSimulationFilterShader; //TODO: myFilterShader;
 	//unsigned int uiThreads = TestApplication::concurentThreadsSupported;
 	scene_desc.cpuDispatcher = PxDefaultCpuDispatcherCreate(2); //was 8 - Note/ TODO: can use GPU or multiple CPU cores.
-	PxScene* result = m_physics->createScene(scene_desc);
+	PxScene* result = m_pPhysics->createScene(scene_desc);
 	return result;
 }
 
 void Physics::SetupIntroductionToPhysX()
 {
-	m_physics_scene = CreateDefaultScene();
+	m_pPhysics_scene = CreateDefaultScene();
 
 	//PxSimulationEventCallback* mycollisionCallBack = new MyCollisionCallback();
 	//m_physics_scene->setSimulationEventCallback(mycollisionCallBack);
@@ -331,29 +279,29 @@ void Physics::SetupIntroductionToPhysX()
 #pragma region Adding Plane And BathTub
 	//add a plane
 	PxTransform pose = PxTransform(PxVec3(0.0f, 0, 0.0f), PxQuat(PxHalfPi * 1.0f, PxVec3(0.0f, 0.0f, 1.0f))); //TOOD: *1.0f?
-	PxRigidStatic* plane = PxCreateStatic(*m_physics, pose, PxPlaneGeometry(), *m_physics_material);
+	PxRigidStatic* plane = PxCreateStatic(*m_pPhysics, pose, PxPlaneGeometry(), *m_pPhysics_material);
 
 	//const PxU32 numShapes = plane->getNbShapes();
 #pragma region Boxes
 	//add it to the physX scene
-	m_physics_scene->addActor(*plane);
+	m_pPhysics_scene->addActor(*plane);
 
 	// add a box
 	float density = 10.0f;
 	PxBoxGeometry box(2, 2, 2);
 	PxTransform transform(PxVec3(0, 5, 0)); //PxTransform transform(PxVec3(5, 5, 5));
-	PxRigidDynamic* dynamicActor = PxCreateDynamic(*m_physics, transform, box, *m_physics_material, density);
+	PxRigidDynamic* dynamicActor = PxCreateDynamic(*m_pPhysics, transform, box, *m_pPhysics_material, density);
 
 	//add it to the physX scene
-	m_physics_scene->addActor(*dynamicActor);
+	m_pPhysics_scene->addActor(*dynamicActor);
 	//////////////////////////
 	
 	//Adding Second Box
 	PxBoxGeometry box3(2, 2, 2);
 	PxTransform transform2(PxVec3(5, 5, 5));
-	PxRigidDynamic* dynamicActor1 = PxCreateDynamic(*m_physics, transform2, box3, *m_physics_material, density);
+	PxRigidDynamic* dynamicActor1 = PxCreateDynamic(*m_pPhysics, transform2, box3, *m_pPhysics_material, density);
 	//add it to the physX scene
-	m_physics_scene->addActor(*dynamicActor1);
+	m_pPhysics_scene->addActor(*dynamicActor1);
 
 #pragma region Filtering/ Boxes
 	/*SetUpFiltering(plane, FilterGroup::eGROUND, FilterGroup::ePLAYER);
@@ -394,29 +342,35 @@ void Physics::SetupIntroductionToPhysX()
 #pragma endregion
 
 #pragma region Player Controller ( Capsule )
-	/*m_myHitReport = new ControllerHitReport();
-	m_controller_manager = PxCreateControllerManager(*m_physics_scene);
+	m_pMyHitReport = std::make_shared<ControllerHitReport>(); //TODO: was 'new'ed
+	m_pController_manager = PxCreateControllerManager(*m_pPhysics_scene);
 
 	PxCapsuleControllerDesc desc;
 	desc.height = 1.6f;
 	desc.radius = 0.4f;
 	desc.position.set(0, 0, 0);
-	desc.material = m_physics_material;
-	desc.reportCallback = m_myHitReport;
+	desc.material = m_pPhysics_material;
+	desc.reportCallback = m_pMyHitReport.get(); // connect it to our collision detection routine
 	desc.density = 10;
+	// Create the layer controller
+	m_pPlayerController = m_pController_manager->createController(desc);
 
-	m_playerController = m_controller_manager->createController(desc);
+	m_pPlayerController->setPosition(PxExtendedVec3(5, 2, 5));
 
-	m_playerController->setPosition(PxExtendedVec3(5, 2, 5));
+	// Set up some variables to control our player with
+	m_characterYvelocity = 0;	// initialize character velocity
+	m_characterRotation = 0;	// and rotation
+	m_playerGravity = -0.5f;	// set up the player gravity
 
-	m_characterYvelocity = 0;
-	m_characterRotation = 0;
-	m_playerGravity = -0.5f;
+	// Initialize the contact normal (what we are in contact with)
+	m_pMyHitReport->ClearPlayerContactNormal(); 
 
+	m_pPhysics_scene->addActor(*m_pPlayerController->getActor()); // so we can draw it's Gizmo
 
-	m_myHitReport->clearPlayerContactNormal();
+	PxCapsuleGeometry capsule(desc.radius, desc.height); //TODO: halfHeight?
+	PxRigidDynamic* capsuleActor = PxCreateDynamic(*m_pPhysics, transform2, capsule, *desc.material, desc.density);
+	m_pPhysics_scene->addActor(*capsuleActor);
 
-	m_physics_scene->addActor(*m_playerController->getActor()); */
 #pragma endregion
 /*
 #pragma region Ragdoll
@@ -483,11 +437,80 @@ void Physics::SetupIntroductionToPhysX()
 
 void Physics::SetupRBDTutorial()
 {
-	m_physics_scene = CreateDefaultScene();
+	m_pPhysics_scene = CreateDefaultScene();
 	//add a plane to the scene
 	PxTransform transform = PxTransform(PxVec3(0, 0, 0), PxQuat((float)PxHalfPi, PxVec3(0, 0, 1)));
-	PxRigidStatic* plane = PxCreateStatic(*m_physics, transform, PxPlaneGeometry(), *m_physics_material);
-	m_physics_scene->addActor(*plane);
+	PxRigidStatic* plane = PxCreateStatic(*m_pPhysics, transform, PxPlaneGeometry(), *m_pPhysics_material);
+	m_pPhysics_scene->addActor(*plane);
+}
+
+bool Physics::UpdatePlayerController(float a_deltaTime)
+{
+	bool isOnGround; // set to true if we are on the groung
+	float fMovementSpeed = 10.0f; // forward and back movement speed
+	float fMovementSpeedSlowDown = fMovementSpeed - 2.0f; // slow down our speed if going uphill
+	float fRotationSpeed = 1.0f; // turn speed
+	float fJumpForce = 25.0f;
+	float fJumpForceMax = fJumpForce;// *2;
+
+	//check if we have a contact normal. 
+	//If 'y' is greater than .3 we assume this is solid ground.
+	// This is a rather primitive way to do this. TODO: Can you do better?
+	// Check if we are currently on the ground.
+	// if we are then raise us above the plane
+	if (m_pMyHitReport->GetPlayerContactNormal().y > 0.3f)
+	{
+		m_characterYvelocity = 0.1f;
+		fJumpForce = fJumpForceMax;
+		isOnGround = true;
+	}
+	else
+	{
+		m_characterYvelocity += m_playerGravity * a_deltaTime;
+		isOnGround = false;
+	}
+	m_pMyHitReport->ClearPlayerContactNormal();
+	const PxVec3 up(0, 1, 0);
+	// scan the keys and set up our intended velocity based on a global transform
+	PxVec3 velocity(0, m_pCharacterYvelocity, 0);
+	m_pWindow = glfwGetCurrentContext();
+	if (glfwGetKey(m_pWindow, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		velocity.x -= fMovementSpeed * a_deltaTime;
+	}
+	if (glfwGetKey(m_pWindow, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		velocity.x += fMovementSpeed * a_deltaTime;
+	}
+	if (glfwGetKey(m_pWindow, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		velocity.z -= fMovementSpeed * a_deltaTime;
+	}
+	if (glfwGetKey(m_pWindow, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		velocity.z += fMovementSpeed * a_deltaTime;
+	}
+	// Jumping
+	if (glfwGetKey(m_pWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
+	{
+		//if (isOnGround) //m_playerGravity
+		velocity.y -= fJumpForce * a_deltaTime;// fMovementSpeed * a_deltaTime;
+		fJumpForceMax -= 1.0f;
+		// TODO: further research asymptotes
+		//float x = velocity.y;
+		// x^2
+		//float fJumpAsymptote = ((x * x) - 3 * x) / ((2 * x) - 2);
+	}
+
+	float fMinDistance = 0.001f;
+	PxControllerFilters filter;
+	// make controls relative to player facing
+	PxQuat rotation(m_characterRotation, up);
+	//PxVec3 velocity(0, m_characterYvelocity, 0); //TODO: what do with this? redef?
+	// move the controller
+	m_pPlayerController->move(rotation.rotate(velocity), fMinDistance, a_deltaTime, filter);
+
+	return true;
 }
 
 void Physics::renderGizmos(PxScene* physics_scene)
@@ -515,7 +538,7 @@ void Physics::renderGizmos(PxScene* physics_scene)
                 ++shape_index)
             {
                 PxShape* curr_shape = shapes[shape_index];
-                AddWidget(curr_shape, rigid_actor, geo_color);
+				m_pPhysXComponent->AddWidget(curr_shape, rigid_actor, geo_color);
             }
 
             delete[]shapes;
@@ -545,7 +568,7 @@ void Physics::renderGizmos(PxScene* physics_scene)
             {
                 PxShape* shape;
                 link->getShapes(&shape, 1, s);
-                AddWidget(shape, link, geo_color);
+				m_pPhysXComponent->AddWidget(shape, link, geo_color);
             }
         }
         delete[] links;

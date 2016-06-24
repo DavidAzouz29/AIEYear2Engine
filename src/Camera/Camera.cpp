@@ -40,17 +40,17 @@ GLvoid Camera::setPerspective(GLfloat a_fFovY, GLfloat a_fAspectRatio, GLfloat a
 
 GLvoid Camera::setLookAtFrom(const glm::vec3& from, const glm::vec3& to)
 {
-	m_view = glm::lookAt(from, to, glm::vec3(0, 1, 0));
+	m_view = glm::lookAt(from, to, m_up);
 	m_transform = glm::inverse(m_view);
 	m_projectionView = m_projection * m_view;
 }
 
-/*void Camera::setLookAtFrom(const glm::vec4& from, const glm::vec4& to)
+GLvoid Camera::setLookAtFrom(const glm::vec4& from, const glm::vec4& to)
 {
-	m_view = glm::lookAt(from.xyz(), to.xyz(), glm::vec4(0, 1, 0, 0));
+	m_view = glm::lookAt(from.xyz(), to.xyz(), m_up);
 	m_transform = glm::inverse(m_view);
 	m_projectionView = m_projection * m_view;
-} */
+}
 
 GLvoid Camera::Enter()
 {
@@ -62,28 +62,29 @@ GLvoid Camera::Enter()
 		m_speed = 10.0f;
 		printf("Speed Needed \n");
 	}
-	else if (m_fRotation != 0.01f)
+	if (m_fRotation != 0.01f)
 	{
 		m_fRotation = 0.01f;
 		printf("Rotation Needed \n");
 	}
-	else if(m_transform != glm::mat4(1))
+	if (m_up != glm::vec3(0, 1, 0))
+	{
+		m_up = glm::vec3(0, 1, 0);
+	}
+	if(m_transform != glm::mat4(1))
 	{
 		m_transform = glm::mat4(1);
 	}
-	else if(m_view != glm::mat4(1))
+	if(m_view != glm::mat4(1))
 	{
-		m_transform = glm::mat4(1);
+		m_view = glm::mat4(1);
 	}
-	else if (m_v3Movement != glm::vec3(0))
+	if (m_v3Movement != glm::vec3(0))
 	{
 		m_v3Movement = glm::vec3(0);
 	}
 	
-	m_up = glm::vec3(0, 1, 0);
-
-	// TODO: delete?
-	setLookAtFrom(glm::vec3(70, 90, 70), glm::vec3(0));
+	setLookAtFrom(glm::vec3(36, 71, 36), glm::vec3(0));
 
 	m_pWindow = glfwGetCurrentContext();
 }
