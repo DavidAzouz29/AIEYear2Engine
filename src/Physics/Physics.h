@@ -15,15 +15,16 @@ using namespace physx;
 
 //class Camera;
 class ControllerHitReport;
+class FBXFile;
 struct GLFWwindow;
 //class PhysXComponent;
 
 class Physics// : public TestApplication
 {
 public:
-	Physics(Camera& a_camState) :
+	Physics() :
 		m_pRenderable(std::make_shared<Renderable>()),
-		m_camera(a_camState),
+		//m_camera(a_camState),
 		isRBD(false), //TODO: causes framerate to tank
 		m_pPhysXComponent(std::make_unique<PhysXComponent>()),
 		m_fTimer(0)
@@ -32,8 +33,9 @@ public:
 	bool Create();
 	//virtual bool Startup();
 	virtual void Shutdown();
-    virtual bool Update(GLfloat a_deltaTime);
+    virtual bool Update(GLfloat a_deltaTime, const Camera& a_camera);
     virtual void Draw(const Camera& a_camState);
+	virtual void RenderUI();
 
 	//Render and Clear
 	//Add Widget moved to PhysXComponent
@@ -48,15 +50,14 @@ public:
 
 	void renderGizmos(PxScene* physics_scene);
 
-	//void attachedRigidBodyConvex(float density, PxMaterial* g_PhysicsMaterial, bool isDynamic);
-	void TerrainCollision(unsigned int _rows, unsigned int _cols, int* _samples, int _heightScalePX, int _size, PxMaterial* g_PhysicsMaterial);
+	void AttachedRigidBodyConvex(float density, PxMaterial* g_PhysicsMaterial, bool isDynamic);
+	void TerrainCollision(unsigned int _rows, unsigned int _cols, int* _samples, int _heightScalePX, int _size);// , PxMaterial* g_PhysicsMaterial);
 
 	const Renderable* GetRenderable() const { return m_pRenderable.get(); }
+	//static PxMaterial* GetPxMat() { return m_pPhysics_material; }
 
     //Renderer* m_renderer;
-    //FlyCamera m_camera;
-	Camera& m_camera;
-    float m_delta_time;
+	//Camera& m_camera;
 
 	bool isRBD; //enable the ball firing tutorial
 
@@ -73,9 +74,9 @@ private:
 	PxDefaultAllocator			m_default_allocator;
 	PxSimulationFilterShader	m_default_filter_shader;
 
-	PxMaterial*		m_pPhysics_material;
-	PxMaterial*		m_pBox_material;
-	PxCooking*		m_pPhysics_cooker;
+	PxMaterial*					m_pPhysics_material;
+	PxMaterial*					m_pBox_material;
+	PxCooking*					m_pPhysics_cooker;
 	PxControllerManager*		m_pController_manager;
 	PxController*				m_pPlayerController;
 	//ControllerHitReport* m_pMyHitReport;
@@ -95,6 +96,14 @@ private:
 	float m_characterRotation;
 	float m_playerGravity;
 
+	//TODO: set all these values somewhere
+	PxExtendedVec3 m_v3PhysicsWorldTransform;
+	//glm::mat4 m_worldTransform; // named differently to identify the physics version
+	PxRigidDynamic* _pXactor;
+	PxRigidStatic* _pXactorS;
+	FBXFile* _FBXModel;
+	int numberIndex;
+	int* indexes;
 };
 
 #endif //CAM_PROJ_H_

@@ -1,15 +1,16 @@
 #define GLM_SWIZZLE
 
 #include "Physics.h"
+#include "BaseApplication.h"
 #include "Camera\Camera.h"
 #include "ControllerHitReport.h"
 #include "PhysXComponent.h"
 #include "Render.h"
-#include "TestApplication.h"
 
+#include "Gizmos.h"
 #include "gl_core_4_4.h"
 #include <GLFW/glfw3.h>
-#include "Gizmos.h"
+#include "imgui.h"
 
 #include <assert.h>
 #include <GLFW/glfw3.h>
@@ -111,7 +112,7 @@ void Physics::Shutdown()
 	//Application::shutdown();
 }
 
-bool Physics::Update(GLfloat a_deltaTime)
+bool Physics::Update(GLfloat a_deltaTime, const Camera& a_camera)
 {
 	//TODO: make 'deltaTime' useful?
 	float dt = (float)glfwGetTime();
@@ -125,9 +126,9 @@ bool Physics::Update(GLfloat a_deltaTime)
 	if (isRBD)
 	{
 		//transform
-		//mat4 camera = m_camera.getTransform();
-		vec3 cam_pos = m_camera.getTransform()[3].xyz();
-		vec3 box_vel = -m_camera.getTransform()[2].xyz() * 20.0f;
+		//mat4 camera = a_camera.getTransform();
+		vec3 cam_pos = a_camera.getTransform()[3].xyz();
+		vec3 box_vel = -a_camera.getTransform()[2].xyz() * 20.0f;
 		PxTransform box_transform(PxVec3(cam_pos.x, cam_pos.y, cam_pos.z));
 
 		// Geometry
@@ -142,7 +143,7 @@ bool Physics::Update(GLfloat a_deltaTime)
 
 			PxReal muzzleSpeed = -50;
 			// balls velocity
-			vec3 v3Direction(-m_camera.getTransform()[2]);
+			vec3 v3Direction(-a_camera.getTransform()[2]);
 			physx::PxVec3 velocity = physx::PxVec3(v3Direction.x, v3Direction.y, v3Direction.z) * muzzleSpeed;
 			new_actor->setLinearVelocity(velocity, true);
 			m_pPhysics_scene->addActor(*new_actor); //TODO: new_box
@@ -156,6 +157,19 @@ bool Physics::Update(GLfloat a_deltaTime)
 void Physics::Draw(const Camera& a_camState)
 {
 	renderGizmos(m_pPhysics_scene);
+}
+
+void Physics::RenderUI()
+{
+	if (ImGui::CollapsingHeader("Physics"))
+	{
+		//ImGui::DragFloat4("World Trans data", m_worldTransform[3].data, 1.1f, -FLT_MAX, FLT_MAX);
+		PxVec3 &pos = PxVec3(physx::toVec3(m_v3PhysicsWorldTransform));
+		//TODO: we're not adjusting the actual position - just viewing
+		glm::vec3 &wPos = glm::vec3(pos.x, pos.y, pos.z);
+		ImGui::DragFloat3("World Trans Physics", glm::value_ptr(wPos), 1.1f, -FLT_MAX, FLT_MAX);
+		ImGui::Separator(); 
+	}
 }
 
 void Renderer::RenderAndClear(mat4 view_proj)
@@ -263,7 +277,7 @@ PxScene* Physics::CreateDefaultScene()
 	PxSceneDesc scene_desc(m_pPhysics->getTolerancesScale());
 	scene_desc.gravity = PxVec3(0, -9.807f, 0);
 	scene_desc.filterShader = &PxDefaultSimulationFilterShader; //TODO: myFilterShader;
-	//unsigned int uiThreads = TestApplication::concurentThreadsSupported;
+	//unsigned int uiThreads = BaseApplication::GetNumOfThreadsAvailable();
 	scene_desc.cpuDispatcher = PxDefaultCpuDispatcherCreate(2); //was 8 - Note/ TODO: can use GPU or multiple CPU cores.
 	PxScene* result = m_pPhysics->createScene(scene_desc);
 	return result;
@@ -289,7 +303,7 @@ void Physics::SetupIntroductionToPhysX()
 	// add a box
 	float density = 10.0f;
 	PxBoxGeometry box(2, 2, 2);
-	PxTransform transform(PxVec3(0, 5, 0)); //PxTransform transform(PxVec3(5, 5, 5));
+	PxTransform transform(PxVec3(7, 5, 7)); //TODO: stop colliding with other entities upon start
 	PxRigidDynamic* dynamicActor = PxCreateDynamic(*m_pPhysics, transform, box, *m_pPhysics_material, density);
 
 	//add it to the physX scene
@@ -298,7 +312,7 @@ void Physics::SetupIntroductionToPhysX()
 	
 	//Adding Second Box
 	PxBoxGeometry box3(2, 2, 2);
-	PxTransform transform2(PxVec3(5, 5, 5));
+	PxTransform transform2(PxVec3(-7, 5, -5));
 	PxRigidDynamic* dynamicActor1 = PxCreateDynamic(*m_pPhysics, transform2, box3, *m_pPhysics_material, density);
 	//add it to the physX scene
 	m_pPhysics_scene->addActor(*dynamicActor1);
@@ -354,8 +368,9 @@ void Physics::SetupIntroductionToPhysX()
 	desc.density = 10;
 	// Create the layer controller
 	m_pPlayerController = m_pController_manager->createController(desc);
-
-	m_pPlayerController->setPosition(PxExtendedVec3(5, 2, 5));
+	m_v3PhysicsWorldTransform = PxExtendedVec3(5, 2, 5);
+	//m_worldTransform = glm::translate(glm::vec3(-m_iGrid * 0.5f, -m_fAmplitude, -m_iGrid * 0.5f));
+	m_pPlayerController->setPosition(m_v3PhysicsWorldTransform);
 
 	// Set up some variables to control our player with
 	m_characterYvelocity = 0;	// initialize character velocity
@@ -574,19 +589,21 @@ void Physics::renderGizmos(PxScene* physics_scene)
         delete[] links;
     }
 }
-/*
-void attachedRigidBodyConvex(float density, PxMaterial* g_PhysicsMaterial, bool isDynamic)
+
+//
+void Physics::AttachedRigidBodyConvex(float density, PxMaterial* g_PhysicsMaterial, bool isDynamic)
 {
 	//need a placeholder box 
-	PxBoxGeometry box = PxBoxGeometry(1, 1, 1);
-	PxTransform transform(*(PxMat44*)(&_worldTransform[0])); //PhysX and GLM matricies are the same internally so we simply cast between them; 
-	if (isDynamic)
+	PxBoxGeometry box = PxBoxGeometry(1, 1, 1); 
+	//PxTransform transform(*(PxMat44*)(&m_worldTransform[0])); //PhysX and GLM matricies are the same internally so we simply cast between them; 
+	PxTransform transform(*(PxMat44*)(&m_v3PhysicsWorldTransform)); //PhysX and GLM matricies are the same internally so we simply cast between them; 
+	if (isDynamic) 
 	{
-		_pXactor = PxCreateDynamic(*g_Physics, transform, box, *g_PhysicsMaterial, density);
+		_pXactor = PxCreateDynamic(*m_pPhysics, transform, box, *g_PhysicsMaterial, density);
 	}
 	else
 	{
-		_pXactor = PxCreateStatic(*g_Physics, transform, box, *g_PhysicsMaterial);
+		_pXactorS = PxCreateStatic(*m_pPhysics, transform, box, *g_PhysicsMaterial);
 		//PxRigidActor* //TODO: 
 	}
 	_pXactor->userData = this; //link the PhysX actor to our FBX model
@@ -623,11 +640,11 @@ void attachedRigidBodyConvex(float density, PxMaterial* g_PhysicsMaterial, bool 
 		convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX;
 		convexDesc.vertexLimit = 128;
 		PxDefaultMemoryOutputStream* buf = new PxDefaultMemoryOutputStream();
-		assert(g_PhysicsCooker->cookConvexMesh(convexDesc, *buf));
+		assert(m_pPhysics_cooker->cookConvexMesh(convexDesc, *buf));
 		PxU8* contents = buf->getData();
 		PxU32 size = buf->getSize();
 		PxDefaultMemoryInputData input(contents, size);
-		PxConvexMesh* convexMesh = g_Physics->createConvexMesh(input);
+		PxConvexMesh* convexMesh = m_pPhysics->createConvexMesh(input);
 		PxTransform pose = PxTransform(PxVec3(0.0f, 0, 0.0f));
 		PxShape* convexShape = _pXactor->createShape(PxConvexMeshGeometry(convexMesh), *g_PhysicsMaterial, pose);
 		//remove the placeholder box we started with 
@@ -637,7 +654,7 @@ void attachedRigidBodyConvex(float density, PxMaterial* g_PhysicsMaterial, bool 
 		_pXactor->detachShape(**shapes); delete(verts);
 		//delete our temporary vert buffer. 
 		//Add it to the scene 
-		g_Physics->addActor(_pXactor);
+		m_pPhysics_scene->addActor(*_pXactor);
 	}
 	else
 	{
@@ -649,16 +666,16 @@ void attachedRigidBodyConvex(float density, PxMaterial* g_PhysicsMaterial, bool 
 		int triCount = numberIndex / 3;
 		meshDesc.triangles.count = triCount;
 		meshDesc.triangles.stride = 3 * sizeof(PxU32);
-		meshDesc.triangles.data = indexes;
+		meshDesc.triangles.data = indexes; //WhaT F
 
 		PxDefaultMemoryOutputStream* buf = new PxDefaultMemoryOutputStream();
-		assert(g_PhysicsCooker->cookTriangleMesh(meshDesc, *buf));
+		assert(m_pPhysics_cooker->cookTriangleMesh(meshDesc, *buf));
 		PxU8* contents = buf->getData();
 		PxU32 size = buf->getSize();
 		PxDefaultMemoryInputData input(contents, size);
-		PxTriangleMesh* triangleMesh = g_Physics->createTriangleMesh(input);
+		PxTriangleMesh* triangleMesh = m_pPhysics->createTriangleMesh(input);
 		PxTransform pose = PxTransform(PxVec3(0.0f, 0, 0.0f));
-		PxShape* convexShape = _pXactor->createShape(PxTriangleMeshGeometry(triangleMesh), *g_PhysicsMaterial, pose);
+		PxShape* convexShape = _pXactorS->createShape(PxTriangleMeshGeometry(triangleMesh), *g_PhysicsMaterial, pose);
 	}
 }
 
@@ -671,9 +688,9 @@ void attachedRigidBodyConvex(float density, PxMaterial* g_PhysicsMaterial, bool 
 ///
 /// Height-map i.e. Terrain
 /// <example> </example>
-/// </summary> //Physics::
+/// </summary> //PxReal
 /// --------------------------------------------------------------------
-void TerrainCollision(unsigned int _rows, unsigned int _cols, int* _samples, int _heightScalePX, int _size, PxMaterial* g_PhysicsMaterial = Physics::m_physics_material)
+void Physics::TerrainCollision(unsigned int _rows, unsigned int _cols, int* _samples, int _heightScalePX, int _size)//, PxMaterial* g_PhysicsMaterial = GetPxMat())
 {
 	PxHeightFieldDesc hfDesc;
 	hfDesc.format = PxHeightFieldFormat::eS16_TM;
@@ -682,10 +699,11 @@ void TerrainCollision(unsigned int _rows, unsigned int _cols, int* _samples, int
 	hfDesc.samples.data = _samples;
 	hfDesc.samples.stride = sizeof(PxHeightFieldSample);
 	hfDesc.thickness = -100.0f;
-	PxHeightField* aHeightField = g_Physics->createHeightField(hfDesc);
+	PxHeightField* aHeightField = m_pPhysics->createHeightField(hfDesc);
 	PxHeightFieldGeometry hfGeom(aHeightField, PxMeshGeometryFlags(), _heightScalePX, _size, _size);
 	PxTransform pose = PxTransform(PxVec3(0.0f, 0, 0.0f));
-	PxShape* heightmap = _pXactor->createShape((PxHeightFieldGeometry)hfGeom, *g_PhysicsMaterial, pose);
+	PxShape* heightmap = _pXactorS->createShape((PxHeightFieldGeometry)hfGeom, *m_pPhysics_material, pose);
 	assert(heightmap);
-} */
+}
 
+//g_Physics

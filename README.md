@@ -44,6 +44,7 @@ Ctrl + ...
 ### Variable Prefixes: 
 |Variable type|Variable name|
 | --- 		| --- 		|
+|Function names|void GetPos()|
 |float|fSpeed |
 |vector 2, 3, 4's|v3Position|
 |matrices 2, 3, 4's|m4WorldPos |

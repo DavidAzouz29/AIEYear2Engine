@@ -1,4 +1,5 @@
 // TODO: clean this header up
+// structs moved to "VertexData.h" and made to be compatible with Mesh.h
 
 #pragma once
 //#ifndef _RENDER_H_
@@ -7,70 +8,28 @@
 #define GLM_SWIZZLE
 
 #include "Entity\Entity.h"
-#include "Mesh.h" //TOOD: needed?
-//#include "VertexData.h"
+//#include "Mesh.h" //TOOD: needed?
+#include "Renderable.h"
 
 #include <glm/glm.hpp>
 
 #include <memory>
 #include <vector>
 
-using glm::vec2;
-using glm::vec3;
-using glm::vec4;
+//using glm::vec2;
+//using glm::vec3;
+//using glm::vec4;
 using glm::mat4;
 
-struct Material
-{
-	int diffuse_texture;
-	int normal_texture;
-	int specular_texture;
-
-	vec3 diffuse_color;
-	vec3 specular_color;
-};
-
-struct SimpleVertex
-{
-	vec3 pos;
-	vec3 normal;
-	vec2 uv;
-};
-
-struct SubMesh
-{
-	Material material;
-
-	unsigned int ibo;
-	unsigned int vao;
-
-	unsigned int* index_data;
-	unsigned int index_count;
-};
-
-struct Meshes
-{
-	unsigned int sub_mesh_count;
-	SubMesh* sub_meshes;
-
-	unsigned int vbo;
-
-	unsigned int vertex_count;
-	SimpleVertex* vertex_data;
-};
-
-struct Scene
-{
-	Meshes* meshes;
-	unsigned int mesh_count;
-};
-
+struct Material; //m_pRenderable->mesh.Create(
+struct Meshes;
+struct Scene;
+struct SubMesh;
 
 Scene LoadSceneFromOBJ(char* dir, char* filename);
 void FreeSceneFromOBJ(Scene* scene);
 
 unsigned int LoadGLTextureBasic(const char * path);
-
 
 Meshes *CreateMeshFromBuffers(SimpleVertex* vertex_data, unsigned int vertex_count, unsigned int *index_data, unsigned int index_count, Material material);
 //NOTE(aidan): This should only be called on meshes created from the

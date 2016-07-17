@@ -26,7 +26,10 @@ using glm::mat4;
 
 // TOOD: FBXModel - give a path or file
 
-FBXModel::FBXModel(const GLchar* szFileName) : m_timer(0)
+FBXModel::FBXModel(const GLchar* szFileName) 
+	: m_timer(0)
+	, m_iModelCount(0)
+	, m_iCurrentModel(-1)
 {
 	//TODO: move to create
 	m_pFbx = std::make_shared<FBXFile>();
@@ -57,6 +60,7 @@ bool FBXModel::Create()
 
 	CreateOpenGLBuffers(m_pFbx.get());
 
+	m_iModelCount++;
 	return true;
 }
 
@@ -93,13 +97,18 @@ GLvoid FBXModel::Draw(const Camera& m_pCamState)
 	FBXAnimationDraw(m_pCamState);
 }
 
-/*GLvoid FBXModel::Destroy()
-{
-
-} */
+/*GLvoid FBXModel::Destroy() {} */
 
 GLvoid FBXModel::RenderUI()
 {
+	// we give each FBX model header an ID to avoid more than one header opening at once
+	// We start from -1 as our current model
+	// if we're not equal to 0... we add one to make it 0...
+	// second time round.. if we're not equal to 1... make it 1
+	// ... else if we're equal to our count (2)... make it 0
+	///m_iCurrentModel != m_iModelCount - m_iCurrentModel ? m_iCurrentModel++ : m_iCurrentModel = 0;
+	//int id = m_iCurrentModel >= m_iModelCount ? m_iCurrentModel = 0 : m_iCurrentModel++;
+	//ImGui::PushID(id); // TODO: find name of model and add to Header - if model in diff folder might be a pain?
 	if (ImGui::CollapsingHeader("FBX Models"))
 	{
 		GLfloat tex_size = 96.0f;
@@ -122,6 +131,8 @@ GLvoid FBXModel::RenderUI()
 
 		ImGui::Separator();
 	}
+	//ImGui::PopID();
+	//m_iCurrentModel++;
 }
 
 // Loads Textures already placed on a FBX //TODO: correct comment?
@@ -170,6 +181,8 @@ GLvoid FBXModel::CreateOpenGLBuffers(FBXFile* a_fbx)
 			mesh->m_indices.size() * sizeof(GLuint),
 			mesh->m_indices.data(), GL_STATIC_DRAW);
 
+		// glEnableVertexAttribArray and glVertexAttribPointer etc...
+		//FBXSkeletonRender(); //TODO: diff	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), (GLvoid*)FBXVertex::TexCoord1Offset);
 		glEnableVertexAttribArray(0); //position
 		glEnableVertexAttribArray(1); //normals
 
@@ -325,7 +338,7 @@ GLvoid FBXModel::FBXSkeletonRender()
 	glEnableVertexAttribArray(0); //position
 	glEnableVertexAttribArray(1); //normals
 	glEnableVertexAttribArray(2); //tangents
-	glEnableVertexAttribArray(3); //textcoords
+	glEnableVertexAttribArray(3); //textcoords Texture on FBX model via coordinates
 	glEnableVertexAttribArray(4); //weights
 	glEnableVertexAttribArray(5); //indices
 
@@ -367,10 +380,14 @@ GLvoid FBXModel::FBXAnimationDraw(const Camera& a_pCamState)
 	GLuint specular_uniform = glGetUniformLocation(m_program_FBXAnimation_ID, "SpecPow");
 	glUniform1f(specular_uniform, 12);
 
-	// Scale the FBX
-	//glm::mat4 m4WorldTransform(1);
-	GLfloat fScale = 0.003f; // TODO: the scale will be set for all FBX models
-	m_m4WorldTransform = glm::scale(glm::vec3(fScale));
+	// Scale only the "Characters" (Pyro) FBX
+	// If our filepath contains the word "characters"...
+	if (m_pRenderable->samplers[0].tTexture->GetPath().find("characters") != std::string::npos)
+	{
+		// ... scale/ shrink the character down
+		GLfloat fScale = 0.003f;
+		m_m4WorldTransform = glm::scale(glm::vec3(fScale));
+	}
 	GLuint worldTransform = glGetUniformLocation(m_program_FBXAnimation_ID, "WorldTransform");
 	glUniformMatrix4fv(worldTransform, 1, GL_FALSE, glm::value_ptr(m_m4WorldTransform));
 
@@ -400,7 +417,7 @@ GLvoid FBXModel::FBXAnimationDraw(const Camera& a_pCamState)
 		if (m_pRenderable->samplers.size() >= 1)
 		{
 			// Normal Texture in slot 1
-			glActiveTexture(GL_TEXTURE1); //TODO: delete me: glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByName("Pyro_N").GetId()); // m_normal);
+			glActiveTexture(GL_TEXTURE1); // m_normal);
 			//glBindTexture(GL_TEXTURE_2D, m_pRenderable->GetTextureByPath("./data/models/characters/Pyro/Pyro_N.tga")->GetId()); // m_normal);
 			// Hacky condition for the Pyro/ characters
 			if (m_pRenderable->samplers.size() <= 3)

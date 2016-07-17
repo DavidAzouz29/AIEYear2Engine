@@ -24,13 +24,13 @@
 /// 
 /// </summary>
 /// ----------------------------------------------------------
-
 #include "Render.h"
 #include "Camera\Camera.h"
-#include "Mesh.h"
+//#include "Mesh.h" //TODO:
+#include "Renderable.h"
 //#include "Texture.h"
 //#include "gl_core_4_4.h"
-//#include "VertexData.h"
+#include "VertexData.h"
 
 //#define STB_IMAGE_IMPLEMENTATION //TODO: delete me
 //#include <stb_image.h>

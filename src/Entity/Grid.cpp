@@ -22,7 +22,10 @@ bool Grid::Create()
 
 	CreateDrawShader();
 
-	GenerateGrid(m_iGrid, m_iGrid);
+	if (!GenerateGrid(m_iGrid, m_iGrid))
+	{
+		return false;
+	}
 	return true;
 }
 
@@ -119,7 +122,7 @@ GLvoid Grid::RenderUI()
 	}
 }
 
-GLvoid Grid::GenerateGrid(const GLuint a_iRows, const GLuint a_iCols)
+bool Grid::GenerateGrid(const GLuint a_iRows, const GLuint a_iCols)
 {
 	/// ----------------------------------------------------------
 #pragma region Grid
@@ -186,7 +189,11 @@ GLvoid Grid::GenerateGrid(const GLuint a_iRows, const GLuint a_iCols)
 		m_pRenderable->mesh.Destroy();
 		isRegenerated = true;
 	}
-	m_pRenderable->mesh.Create(aoVertices, a_iRows * a_iCols, auiIndices, m_pRenderable->mesh.GetIndexCount());
+	// Creates a 'mesh'/ grid from our data
+	if (!m_pRenderable->mesh.Create(aoVertices, a_iRows * a_iCols, auiIndices, m_pRenderable->mesh.GetIndexCount()))
+	{
+		return false;
+	}
 
 #pragma endregion
 	/// ----------------------------------------------------------
@@ -237,9 +244,10 @@ GLvoid Grid::GenerateGrid(const GLuint a_iRows, const GLuint a_iCols)
 
 	//PxHeightField* 
 	// the heightScale is set by amplitude. //TODO: 
-	//m_pPhysics->TerrainCollision(m_iGrid, m_iGrid, (int*)perlin_data, m_fAmplitude, m_iGrid, );
+	//m_pPhysics->TerrainCollision(m_iGrid, m_iGrid, (int*)perlin_data, m_fHeightScale, m_iGrid);
 
 	delete[] aoVertices;
+	return true;
 }
 
 GLvoid Grid::CreateDrawShader()

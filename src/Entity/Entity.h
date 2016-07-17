@@ -20,7 +20,7 @@
 
 #pragma once
 //#include "VertexData.h"
-#include "Camera\Camera.h"
+#include "Camera\Camera.h" // TODO: may be needed in other entities - poor design?
 #include "Helpers.h"
 //#include "Physics.h"
 #include "Renderable.h"
@@ -54,9 +54,11 @@ public:
 	{}
 	virtual ~Entity() = default;
 
+	// ----------------------------------------
 	// Is an abstract class
 	// cannot create instances of this class
 	// = 0 makes it a Pure (virtual) function
+	// ----------------------------------------
 	virtual bool	Create() = 0; //TODO: GLboolean?
 	// not every entity must have an update
 	virtual bool	Update(GLfloat deltaTime) { return true; }
@@ -69,38 +71,44 @@ public:
 	// ----------------------------------------------------------
 	// Getters and Setters
 	// ----------------------------------------------------------
+	// Getters
+	// ----------------------------------------------------------
 	const Renderable* GetRenderable() const { return m_pRenderable.get(); }
 	const glm::mat4& GetTransform() const { return m_m4WorldTransform; }
 	const glm::vec4& GetPosition() const { return m_m4WorldTransform[3]; }
-	
+	// ----------------------------------------------------------
+	// Setters
+	// ----------------------------------------------------------
 	void SetTransform(const glm::mat4& a_transform) { m_m4WorldTransform = a_transform; }
 	void SetPosition(const glm::vec4& a_position) { m_m4WorldTransform[3] = a_position; }
 	//TODO: void SetPosition(const glm::vec4& a_position) { m_m4WorldTransform[3] = glm::translate(glm::vec3(a_position.xyz())); }
 	// ----------------------------------------------------------
 
+	// ----------------------------------------------------------
 	/// <summary> Function Pointer TODO: what do I do with this?
 	/// <param>P1: Program ID</param>
 	/// </summary>
-	/*Entity */ void(*EntityRender)(GLint) = NULL;
+	/*void(*EntityRender)(GLint) = NULL;
+	Entity *EntityRender(GLint a_blah); */
+	// ----------------------------------------------------------
 
 // Protected so that other classes that inherit from
 // Entity can have access to certain member variables.
 protected:
 	// Every entity uses frustum culling.
 	//BoundingShape m_boundShape; //TODO: frustum culling
+	//std::shared_ptr<MathCollision> m_pMath;
 
 	// Each class/ entity contains a randerable component 
 	// which contains a Mesh, ability to render, and a Sampler/ Texture (id)
 	std::shared_ptr<Renderable> m_pRenderable;
 	//std::shared_ptr<Physics> m_pPhysics;
-
-	//std::shared_ptr<MathCollision> m_pMath;
 	/// ----------------------------------------------------------
 	// TODO: Transform class?
 
 	// where our entity is in the world
 	glm::mat4 m_m4WorldTransform;
-private:
+//private:
 	/// ----------------------------------------------------------
 	//GLvoid PlanetCreation();
 	//GLvoid RenderGeometry();

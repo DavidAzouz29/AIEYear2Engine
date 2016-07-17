@@ -46,10 +46,10 @@ public:
 		m_bDrawGizmoGrid(true),
 		m_isCharacterControlled(false),
 		m_hasSpaceBeenPressed(false),
-		concurentThreadsSupported(std::thread::hardware_concurrency()),
+		//concurentThreadsSupported(std::thread::hardware_concurrency()),
 		chunkLength(0),
 		m_pMath(std::make_shared<MathCollision>()),
-		//m_pPhysics(std::make_shared<Physics>(*m_pCamState)),
+		m_pPhysics(std::make_shared<Physics>()),
 		m_pickPosition(glm::vec3(0))
 		{} //: m_pCamera(nullptr),
 	virtual ~TestApplication() = default;
@@ -62,7 +62,6 @@ public:
 	// Items to be drawn to our Render Target.
 	GLvoid DrawApp();
 	//virtual GLvoid RenderUI();
-	//static const GLuint GetNumOfThreads() { return concurentThreadsSupported; }
 
 private:
 	// This should be used for any camera related activites.
@@ -82,8 +81,8 @@ private:
 	// Threading
 	//std::vector<std::thread> vThreads;
 	//std::queue<std::thread> qThreads; //TODO: needed?
-	GLuint concurentThreadsSupported;
-	int chunkLength;
+	//GLuint concurentThreadsSupported; //Moved to Base
+	unsigned int chunkLength;
 	// ----------------------------------------------------------
 	// this is an example position for camera picking
 	glm::vec3	m_pickPosition;

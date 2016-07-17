@@ -13,7 +13,8 @@
 /// Vector Insert http://www.cplusplus.com/reference/vector/vector/insert/
 /// Error checking https://blog.nobel-joergensen.com/2013/01/29/debugging-opengl-using-glgeterror/
 /// Number of Threads available http://en.cppreference.com/w/cpp/thread/thread/hardware_concurrency
-///
+/// Dev guide https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Coding_Style#C.2FC.2B.2B_practices
+/// 
 /// ***EDIT***
 /// - Render Targets Working	- David Azouz 7/03/16
 /// - Camera States implemented	- David Azouz 7/03/16
@@ -29,7 +30,10 @@
 ///
 /// TODO: 
 /// Invoke and cycle camera
-/// change to #include <gl_core_4_4.h, <Gizmos.h, and to GLvoid
+/// change to #include <gl_core_4_4.h, <Gizmos.h, and to void
+/// change all (float)INT_MAX to FLT_MAX
+/// Location camera ++i and replace i+1 with i in sLocation
+/// explicit keyword for Constructors that take one var
 /// </summary>
 /// ----------------------------------------------------------
 #include "TestApplication.h"
@@ -104,17 +108,16 @@ bool TestApplication::startup()
 	/// Research Windows IOCP
 	///</summary>
 	// -----------------------
-	//concurentThreadsSupported = std::thread::hardware_concurrency();
-	std::cout << concurentThreadsSupported << " concurrent threads are supported.\n";
 	// this is to stop chunkLength equalling to 0
-	if (concurentThreadsSupported <= 2 && concurentThreadsSupported > 0)
+	if (GetNumOfThreadsAvailable() == 1) //<= 2 && concurentThreadsSupported > 0
 	{
 		chunkLength = 1;
 	}
-	else if (concurentThreadsSupported > 2)
+	// If we have more than one available thread...
+	else if (GetNumOfThreadsAvailable() > 1)
 	{
-		// We minus one as we are still running our main thread
-		chunkLength = (int)m_entities.size() / (concurentThreadsSupported - 1);
+		// ... Distribute the "weight" in chunks
+		chunkLength = (int)m_entities.size() / GetNumOfThreadsAvailable();
 	}
 	else
 	{
@@ -162,7 +165,7 @@ bool TestApplication::startup()
 	m_entities.push_back(std::make_shared<GPUParticleEmitter>()); //TODO: uncomment to add GPU Particles again
 
 	//m_pMath = std::make_shared<MathCollision>();
-	m_pPhysics = std::make_shared<Physics>(*m_pCamState);
+	//m_pPhysics = std::make_shared<Physics>();
 
 	//int i = 0;
 	// Loops through each entity and calls their respected Create functions.
@@ -274,7 +277,7 @@ bool TestApplication::Update(GLfloat a_deltaTime)
 		// Set to static cam to prevent the camera from moving
 		m_pCameraStateMachine->ChangeState(E_CAMERA_MODE_STATE_STATIC);
 		m_pCameraStateMachine->GetCurrentCamera()->setLookAtFrom(v4From, v4To);
-		m_entities[2]->SetPosition(m_entities[2]->GetPosition() + v4PlayerCameraPos);
+		//m_entities[2]->SetPosition(m_entities[2]->GetPosition() + v4PlayerCameraPos);
 	}
 	// Camera cycling and lerping // slerping/ squad.
 	// Cycles between various Cameras during run time
@@ -353,7 +356,7 @@ bool TestApplication::Update(GLfloat a_deltaTime)
 	m_pMath->Update(*m_pCamState);
 
 	//vThreads.push_back(std::thread([&]() {
-	m_pPhysics->Update(a_deltaTime);// })); //TODO: thread
+	m_pPhysics->Update(a_deltaTime, *m_pCamState);// })); //TODO: thread
 	/*for (auto &thread : vThreads)
 	{
 		thread.join();
@@ -676,6 +679,8 @@ GLvoid TestApplication::DrawApp()
 		pEntity->RenderUI();
 		ImGui::Separator();
 	}
+
+	m_pPhysics->RenderUI();
 
 	ImGui::End();
 #pragma endregion

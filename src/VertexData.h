@@ -1,11 +1,15 @@
 #pragma once
 
+//#include "Mesh.h"
 //#include "glm\glm.hpp"
 //#include <gl_core_4_4.h> //TODO: remove once this header is in Mesh/ Render
 #include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
-//#include "Mesh.h"
+using glm::vec2;
+using glm::vec3;
+using glm::vec4;
 
 /*
 	Vertex definitions.
@@ -48,14 +52,59 @@ struct VertexColourTexture : public Vertex
 
 struct Vertex_PositionColor
 {
-	glm::vec4 position;
-	glm::vec4 color;
+	vec4 position;
+	vec4 color;
 };
 
 struct Vertex_PositionTexCoord
 {
-	glm::vec4 position;
-	glm::vec2 uv;
+	vec4 position;
+	vec2 uv;
+};
+
+struct SimpleVertex
+{
+	vec3 pos;
+	vec3 normal;
+	vec2 uv;
+};
+
+struct Material
+{
+	int diffuse_texture;
+	int normal_texture;
+	int specular_texture;
+
+	vec3 diffuse_color;
+	vec3 specular_color;
+};
+
+struct SubMesh
+{
+	Material material;
+
+	unsigned int ibo;
+	unsigned int vao;
+
+	unsigned int* index_data;
+	unsigned int index_count;
+};
+
+struct Meshes
+{
+	unsigned int sub_mesh_count;
+	SubMesh* sub_meshes;
+
+	unsigned int vbo;
+
+	unsigned int vertex_count;
+	SimpleVertex* vertex_data;
+}; 
+
+struct Scene
+{
+	Meshes* meshes;
+	unsigned int mesh_count;
 };
 
 /*class Geometry

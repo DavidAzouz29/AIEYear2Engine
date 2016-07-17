@@ -8,7 +8,7 @@ class FBXModel : public Entity
 {
 public:
 	//FBXModel() = default;
-	FBXModel(const GLchar* szFileName);
+	explicit FBXModel(const GLchar* szFileName);
 	virtual ~FBXModel();
 
 	bool Create() override;
@@ -35,6 +35,7 @@ private:
 
 	std::shared_ptr<FBXFile> m_pFbx;
 	GLuint m_program_FBXAnimation_ID; // another program ID used for animation
-
+	int m_iModelCount;
+	int m_iCurrentModel;
 };
 

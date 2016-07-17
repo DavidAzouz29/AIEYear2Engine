@@ -28,7 +28,7 @@
     <ClCompile Include="src\Camera\StaticCamera.cpp" />
     <ClCompile Include="src\Entity\Grid.cpp" />
     <ClCompile Include="src\Physics\ParticleFluidEmitter.cpp" />
-    <ClCompile Include="src\Physics.cpp" />
+    <ClCompile Include="src\Physics\Physics.cpp" />
     <ClCompile Include="src\Render.cpp" />
     <ClCompile Include="src\Renderable.cpp" />
     <ClCompile Include="src\RenderTarget.cpp" />
@@ -63,7 +63,7 @@
     <ClInclude Include="src\Camera\StaticCamera.h" />
     <ClInclude Include="src\Entity\Grid.h" />
     <ClInclude Include="src\Physics\ParticleFluidEmitter.h" />
-    <ClInclude Include="src\Physics.h" />
+    <ClInclude Include="src\Physics\Physics.h" />
     <ClInclude Include="src\Render.h" />
     <ClInclude Include="src\Renderable.h" />
     <ClInclude Include="src\RenderableBatch.h" />

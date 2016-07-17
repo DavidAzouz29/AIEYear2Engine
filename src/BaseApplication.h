@@ -17,10 +17,17 @@ public:
 	virtual bool Update(float deltaTime) = 0;
 	virtual GLvoid Draw() = 0;
 
+	// static constexpr ?
+	float GetOpenGLVersion() { return fOpenGLVersion; }
+	unsigned int GetNumOfThreadsAvailable() { return threadsAvailable; }
+
 protected:
 
 	virtual bool createWindow(const char* title, int width, int height);
 	virtual GLvoid destroyWindow();
 
 	GLFWwindow*	m_pWindow;
+
+	float fOpenGLVersion;
+	unsigned int threadsAvailable;
 };

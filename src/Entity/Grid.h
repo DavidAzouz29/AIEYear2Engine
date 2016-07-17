@@ -60,7 +60,7 @@ public:
 	//			a_iRows: a set of rows
 	//			a_iCols: a set of columns
 	// ----------------------------------------------------------
-	GLvoid GenerateGrid(const GLuint a_iRows, const GLuint a_iCols);
+	bool GenerateGrid(const GLuint a_iRows, const GLuint a_iCols);
 	
 	//Shader code (red)
 	GLvoid CreateDrawShader();
