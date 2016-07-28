@@ -461,7 +461,7 @@ void Physics::SetupRBDTutorial()
 
 bool Physics::UpdatePlayerController(float a_deltaTime)
 {
-	bool isOnGround; // set to true if we are on the groung
+	bool isOnGround; // set to true if we are on the ground
 	float fMovementSpeed = 10.0f; // forward and back movement speed
 	float fMovementSpeedSlowDown = fMovementSpeed - 2.0f; // slow down our speed if going uphill
 	float fRotationSpeed = 1.0f; // turn speed
@@ -487,23 +487,23 @@ bool Physics::UpdatePlayerController(float a_deltaTime)
 	m_pMyHitReport->ClearPlayerContactNormal();
 	const PxVec3 up(0, 1, 0);
 	// scan the keys and set up our intended velocity based on a global transform
-	PxVec3 velocity(0, m_pCharacterYvelocity, 0);
+	PxVec3 velocity(0, m_characterYvelocity, 0);
 	m_pWindow = glfwGetCurrentContext();
 	if (glfwGetKey(m_pWindow, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		velocity.x -= fMovementSpeed * a_deltaTime;
+		velocity.z += fMovementSpeed * a_deltaTime;
 	}
 	if (glfwGetKey(m_pWindow, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		velocity.x += fMovementSpeed * a_deltaTime;
+		velocity.z -= fMovementSpeed * a_deltaTime;
 	}
 	if (glfwGetKey(m_pWindow, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		velocity.z -= fMovementSpeed * a_deltaTime;
+		velocity.x += fMovementSpeed * a_deltaTime;
 	}
 	if (glfwGetKey(m_pWindow, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		velocity.z += fMovementSpeed * a_deltaTime;
+		velocity.x -= fMovementSpeed * a_deltaTime;
 	}
 	// Jumping
 	if (glfwGetKey(m_pWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
@@ -522,6 +522,7 @@ bool Physics::UpdatePlayerController(float a_deltaTime)
 	// make controls relative to player facing
 	PxQuat rotation(m_characterRotation, up);
 	//PxVec3 velocity(0, m_characterYvelocity, 0); //TODO: what do with this? redef?
+	m_pPlayerController->setStepOffset(2.0f);
 	// move the controller
 	m_pPlayerController->move(rotation.rotate(velocity), fMinDistance, a_deltaTime, filter);
 

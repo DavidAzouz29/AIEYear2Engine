@@ -14,7 +14,8 @@
 /// Error checking https://blog.nobel-joergensen.com/2013/01/29/debugging-opengl-using-glgeterror/
 /// Number of Threads available http://en.cppreference.com/w/cpp/thread/thread/hardware_concurrency
 /// Dev guide https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Coding_Style#C.2FC.2B.2B_practices
-/// 
+/// PhysX tutorials by Aaron Cox http://aieportal.aie.edu.au/mod/page/view.php?id=45297
+///
 /// ***EDIT***
 /// - Render Targets Working	- David Azouz 7/03/16
 /// - Camera States implemented	- David Azouz 7/03/16
