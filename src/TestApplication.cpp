@@ -15,7 +15,7 @@
 /// Number of Threads available http://en.cppreference.com/w/cpp/thread/thread/hardware_concurrency
 /// Dev guide https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Coding_Style#C.2FC.2B.2B_practices
 /// PhysX tutorials by Aaron Cox http://aieportal.aie.edu.au/mod/page/view.php?id=45297
-///
+/// The vision http://www.wireframeworlds.com/uncharted.html
 /// ***EDIT***
 /// - Render Targets Working	- David Azouz 7/03/16
 /// - Camera States implemented	- David Azouz 7/03/16
@@ -35,6 +35,12 @@
 /// change all (float)INT_MAX to FLT_MAX
 /// Location camera ++i and replace i+1 with i in sLocation
 /// explicit keyword for Constructors that take one var
+/// Add multithreading
+/// Set-up Sampler settings
+/// Player Controller moving with an FBX within
+/// Render Targets
+/// More Physics Tuts implemented
+/// a global like light source
 /// </summary>
 /// ----------------------------------------------------------
 #include "TestApplication.h"

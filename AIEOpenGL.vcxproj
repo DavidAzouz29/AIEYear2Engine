@@ -219,7 +219,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>PhysX3_x86.lib;PhysX3Common_x86.lib;PhysX3Extensionslib;PhysXVisualDebuggerSDK.lib;PhysX3Cooking_x86.lib;PhysX3CharacterKinematic_x86.lib;FBXLoader.lib;opengl32.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>PhysX3_x86.lib;PhysX3Common_x86.lib;PhysX3Extensions.lib;PhysXVisualDebuggerSDK.lib;PhysX3Cooking_x86.lib;PhysX3CharacterKinematic_x86.lib;FBXLoader.lib;opengl32.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)dep\FBXLoader;$(ProjectDir)dep\glm\glm;$(ProjectDir)dep\glfw\include\GLFW;$(ProjectDir)dep\physx\lib\vc14win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

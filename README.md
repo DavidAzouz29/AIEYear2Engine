@@ -1,6 +1,11 @@
 # AIEYear2Engine
 Place for AIE Year 2 tutorial and engine work.
 
+## Getting Started:
+- Assure the correct libs are added from https://drive.google.com/folderview?id=0B1wViLeuTDL8TF9feHl2RThFR0E&usp=sharing
+- .DLL's in the solution directory 
+- Set the "Solution Platforms" to x86 (to the right of "Solution Configurations"" (Debug) and left of "Local Windows Debugger")
+
 ## Controls:
 Note: works for Numpad too
 Ctrl + ...

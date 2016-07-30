@@ -41,7 +41,8 @@ public:
 		m_pfScale(m_fScale),
 		m_puiOctaves(m_uiOctaves),
 		m_pfAmplitude(m_fAmplitude),
-		m_pfPersistence(m_fPersistence)
+		m_pfPersistence(m_fPersistence),
+		v3LightDir(1,1,1.5f)
 	{}
 	~Grid() = default;
 
@@ -87,5 +88,7 @@ private:
 	GLint m_puiOctaves;
 	GLfloat m_pfAmplitude;
 	GLfloat m_pfPersistence;
+
+	glm::vec3 v3LightDir;
 };
 

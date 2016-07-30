@@ -17,9 +17,10 @@ public:
 	virtual bool Update(float deltaTime) = 0;
 	virtual GLvoid Draw() = 0;
 
-	// static constexpr ?
-	float GetOpenGLVersion() { return fOpenGLVersion; }
-	unsigned int GetNumOfThreadsAvailable() { return threadsAvailable; }
+	// TODO: static constexpr ?
+	// returns the Version of OpenGL used as a float
+	float GetOpenGLVersion() const { return fOpenGLVersion; }
+	unsigned int GetNumOfThreadsAvailable() const { return threadsAvailable; }
 
 protected:
 

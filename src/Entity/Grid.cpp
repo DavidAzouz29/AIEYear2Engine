@@ -15,10 +15,11 @@ using glm::vec3;
 
 bool Grid::Create()
 {
-	// Load textures for our terrain
-	m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("./data/textures/dirt.png"));
-	m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("./data/textures/grass.png"));
-	m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("./data/textures/snow.png"));
+	// Load textures for our terrain //grassy 	m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("./data/textures/watery.png"));
+	m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("./data/textures/dirty.png"));
+	m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("./data/textures/sand_tile_dark.png"));
+	m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("./data/textures/sand_tile.png"));
+	//m_pRenderable->samplers.push_back(TextureManager::GetSingleton().LoadTexture("./data/textures/snow.png"));
 
 	CreateDrawShader();
 
@@ -83,9 +84,10 @@ GLvoid Grid::RenderUI()
 		ImGui::DragInt("Octaves", &m_uiOctaves, 0.1f, 0, USHRT_MAX);
 		ImGui::DragFloat("Amplitude", &m_fAmplitude, 0.1f, 0.01f, FLT_MAX);
 		ImGui::DragFloat("Persistence", &m_fPersistence, 0.01f, 0.01f, 1.f);
+		ImGui::DragFloat3("Light Dir", glm::value_ptr(v3LightDir), 0.1f, -5.0f, 4.0f);
 		//ImGui::DragFloat4("Location 2", glm::value_ptr(v4Location2), 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
 		//ImGui::DragFloat4("Location 3", v4Location3.data, 1.1f, -(GLfloat)INT_MAX, (GLfloat)INT_MAX);
-
+		
 		// Regenerates terrain based off values above
 		if (ImGui::Button("Generate Terrain"))
 		{
@@ -361,13 +363,13 @@ GLvoid Grid::DrawGeometry(const glm::mat4& a_projectionView)
 	//glUniform4f(loc, m_m4WorldTransform[3].x, m_m4WorldTransform[3].y, m_m4WorldTransform[3].z, m_m4WorldTransform[3].w);
 
 	// bind the Light Dir
-	//vec3 light(1, 1, 1); //TODO:
-	vec3 light(sin(glfwGetTime()), 1, cos(glfwGetTime()));
+	//vec3 light(1, 1, 1); //To debug: v3LightDir = vec3(1, 1, cos(glfwGetTime()));
+	//v3LightDir.z = cosf((float)glfwGetTime()); //sin(glfwGetTime())
 	loc = glGetUniformLocation(m_perlinProgramID, "LightDir");
-	glUniform3f(loc, light.x, light.y, light.z);
+	glUniform3f(loc, v3LightDir.x, v3LightDir.y, v3LightDir.z);
 
 	// bind the Light Colour
-	vec3 v3Colour(1, sin(glfwGetTime()), 255);
+	vec3 v3Colour(1, sinf((float)glfwGetTime()), 255);
 	//vec3 v3Colour(1, 50, 255); //TODO:
 	//vec3 v3Colour(0, 0, 1);
 	loc = glGetUniformLocation(m_perlinProgramID, "LightColour");

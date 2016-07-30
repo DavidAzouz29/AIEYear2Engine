@@ -17,11 +17,11 @@
 #define MAX_COLS 4
 
 TravelCamera::TravelCamera(glm::vec4 a_v4Perspective) :
-	v4LocationData(15),
+	v4LocationData(-36, 71, 36, 0),
 	v4Location1(10),
-	v4Location2(20, 5, 20, 0),
+	v4Location2(36, 71, 36, 0),
 	v4Location3(v4LocationData),
-	v4Location4(-20, 5, 20, 0),
+	v4Location4(15),
 	m_v4StartLocation(v4Location1),
 	m_v4EndLocation(v4Location2),
 	m_fTimer(0),

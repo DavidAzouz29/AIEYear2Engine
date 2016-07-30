@@ -44,7 +44,7 @@ LocationCamera::LocationCamera(glm::vec4 a_v4Perspective) : m_iIterIndex(0)
 	setPerspective(a_v4Perspective.x, a_v4Perspective.y, a_v4Perspective.z, a_v4Perspective.w);
 	//setLookAtFrom(v4Location1.xyzw(), glm::vec3(0));
 
-	v4LocationData = vec4(15);
+	v4LocationData = vec4(36, 71, 36, 0);
 	v4Location1 = vec4(10);
 	v4Location2 = vec4(20, 5, 20, 0);
 	v4Location3 = vec4(v4LocationData);
