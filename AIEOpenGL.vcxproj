@@ -155,7 +155,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)dep/glm;$(SolutionDir)dep/glfw-3.1.2/include;$(SolutionDir)dep/stb-master;$(SolutionDir)dep/imgui;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(SolutionDir)dep/glfw-3.1.2/src/$(Configuration);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <LibraryPath>$(SolutionDir)dep/glfw-3.1.2/src/$(Configuration);$(SolutionDir)dep/physx/lib/vc14win32;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <TargetName>$(ProjectName)_d</TargetName>
   </PropertyGroup>
@@ -178,7 +178,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)dep\FBXLoader;$(ProjectDir)dep\glfw\include;$(ProjectDir)dep\glm;$(ProjectDir)dep\imgui-master;$(ProjectDir)dep\lodepng;$(ProjectDir)dep\physx\include;$(ProjectDir)dep\physx\lib\vc14win32;$(ProjectDir)dep\stb;$(ProjectDir)src\;$(ProjectDir)src\Camera;$(ProjectDir)src\Entity;$(ProjectDir)src\Physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dep\FBXLoader;$(ProjectDir)dep\glfw\include\;$(ProjectDir)dep\glm;$(ProjectDir)dep\imgui-master;$(ProjectDir)dep\lodepng;$(ProjectDir)dep\physx\include;$(ProjectDir)dep\physx\lib\vc14win32;$(ProjectDir)dep\stb;$(ProjectDir)src\;$(ProjectDir)src\Camera;$(ProjectDir)src\Entity;$(ProjectDir)src\Physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
